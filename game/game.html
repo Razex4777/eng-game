@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>English Mastery Battle</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H90E46NFQT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-H90E46NFQT');
+    </script>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    
+    <!-- Questions Database -->
+    <script src="../questions-part1.js" defer></script>
+    <script src="../questions-part2.js" defer></script>
+    <script src="../questions-part3.js" defer></script>
+    <script src="../questions.js" defer></script>
+    
+    <!-- Questions Initialization -->
+    <script>
+        window.GAME_QUESTIONS_LOADED = false;
+        window.GAME_INIT_ATTEMPTS = 0;
+        window.MAX_INIT_ATTEMPTS = 10;
+        
+        window.safeInitializeQuestions = function() {
+            window.GAME_INIT_ATTEMPTS++;
+            
+            console.log(`\n🎮 [INIT ATTEMPT ${window.GAME_INIT_ATTEMPTS}/${window.MAX_INIT_ATTEMPTS}]`);
+            
+            const checks = {
+                'questionsPart1': typeof questionsPart1 !== 'undefined',
+                'questionsPart2': typeof questionsPart2 !== 'undefined',
+                'questionsPart3': typeof questionsPart3 !== 'undefined',
+                'questionsData': typeof questionsData !== 'undefined',
+                'initializeQuestionsDatabase': typeof initializeQuestionsDatabase !== 'undefined',
+                'getStageQuestions': typeof getStageQuestions !== 'undefined'
+            };
+            
+            let allLoaded = true;
+            for (let [key, value] of Object.entries(checks)) {
+                console.log(`   ${value ? '✅' : '❌'} ${key}`);
+                if (!value) allLoaded = false;
+            }
+            
+            if (!allLoaded) return false;
+            
+            try {
+                console.log('\n🚀 Initializing questions database...');
+                initializeQuestionsDatabase();
+                
+                const totalStages = Object.keys(questionsData).length;
+                console.log(`✅ SUCCESS: Initialized ${totalStages} stages`);
+                
+                if (totalStages === 0) {
+                    throw new Error('questionsData is empty!');
+                }
+                
+                const stage1Questions = getStageQuestions(1);
+                console.log(`✅ Stage 1: ${stage1Questions.length} questions`);
+                
+                window.GAME_QUESTIONS_LOADED = true;
+                console.log('\n🎉 QUESTIONS DATABASE READY!\n');
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                window.GAME_QUESTIONS_LOADED = false;
+                return false;
+            }
+        };
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', window.safeInitializeQuestions);
+        } else {
+            window.safeInitializeQuestions();
+        }
+        
+        window.addEventListener('load', function() {
+            if (!window.GAME_QUESTIONS_LOADED) {
+                console.log('🔄 Window loaded - attempting initialization...');
+                window.safeInitializeQuestions();
+            }
+        });
+    </script>
+    
+    <!-- Game Styles -->
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body class="h-screen w-screen light-mode">
+    <!-- Fullscreen Button -->
+    <button id="fullscreen-btn" class="fullscreen-btn pulse" onclick="toggleFullScreen()" title="ملء الشاشة / Fullscreen" style="top: 20px; right: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+    </button>
+
+    <!-- Background Effects -->
+    <div id="bubbles-container" class="fixed inset-0 z-0 overflow-hidden pointer-events-none"></div>
+    <div id="particles-container" class="fixed inset-0 z-0 overflow-hidden pointer-events-none"></div>
+
+    <!-- Main Game Container -->
+    <div class="relative z-10 w-full max-w-md h-full mx-auto flex flex-col justify-between p-4">
+        <!-- Top HUD -->
+        <div class="flex justify-between items-center pt-2 gap-2 z-40">
+            <div class="flex gap-2 items-center">
+                <button id="btn-pause" class="control-btn">⏸️</button>
+                <button id="btn-darkmode" class="control-btn">🌙</button>
+            </div>
+
+            <div class="flex-1 mx-2">
+                <div class="flex justify-between text-[10px] uppercase tracking-widest mb-1 px-1" style="font-weight: 900; color: #000000;">
+                    <span style="font-weight: 900;">Start</span>
+                    <span style="font-weight: 900;">Goal</span>
+                </div>
+                <div class="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden border-2 border-white dark:border-slate-600 shadow-inner">
+                    <div id="progress-fill" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-end gap-1">
+                <div class="flex items-center gap-0.5 text-base" id="lives-display"></div>
+                <div class="flex items-center gap-2 bg-white/90 dark:bg-slate-800 px-3 py-1 rounded-xl border-2 border-slate-100 dark:border-slate-600 shadow-sm">
+                    <span class="text-[10px] uppercase tracking-wider xp-label">XP</span>
+                    <span id="score-display" class="text-lg font-black score-number">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area" class="flex-1 relative mt-4 flex flex-col items-center" style="background: transparent;">
+            
+            <!-- Combo/Fire removed as requested -->
+            <div id="combo-container" class="hidden"></div>
+
+            <div id="falling-question" class="absolute w-11/12 max-w-sm rounded-3xl p-6 text-center z-20 hidden" style="top: -200px; background: white; border: 4px solid #e5e7eb; box-shadow: 0 12px 0 #cbd5e1;">
+                <div id="golden-badge" class="golden-badge hidden">
+                    ✨ GOLDEN QUESTION ✨
+                </div>
+                <div id="repeat-badge" class="repeat-badge hidden">
+                    <span id="repeat-count">0</span>
+                </div>
+                <h3 id="q-text" class="text-2xl font-black leading-tight"></h3>
+            </div>
+        </div>
+
+        <!-- Streak Timer -->
+        <div id="streak-timer" class="streak-timer">
+            <div id="streak-circle" class="streak-circle level-2">
+                <div class="streak-multiplier" id="streak-multiplier">2X</div>
+                <div class="streak-label">STREAK</div>
+            </div>
+            <div class="streak-timer-bar">
+                <div id="streak-timer-fill" class="streak-timer-fill"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Controls & Options -->
+        <div class="w-full pb-8 z-30">
+            <div class="flex justify-center gap-6 mb-4">
+                <button id="btn-freeze" class="powerup-btn text-blue-500">
+                    ❄️
+                    <span class="badge-count" id="count-freeze">2</span>
+                </button>
+                <button id="btn-bomb" class="powerup-btn text-red-500">
+                    💣
+                    <span class="badge-count" id="count-bomb">1</span>
+                </button>
+            </div>
+            <div class="absolute inset-x-0 bottom-0 h-56 z-20" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255, 255, 255, 0.3);"></div>
+            <div id="options-grid" class="grid grid-cols-2 gap-2.5 h-48 relative z-30"></div>
+        </div>
+    </div>
+
+    <!-- How to Play Screen -->
+    <div id="howtoplay-screen" class="hidden fixed inset-0 z-50 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-6 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md shadow-2xl my-8">
+            <h2 class="text-3xl font-black text-center mb-6 text-indigo-600 dark:text-indigo-400 ar-text">كيف تلعب؟ 🎮</h2>
+            <div class="space-y-4 text-right ar-text">
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">❓</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">الأسئلة تسقط من الأعلى</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">اختر الإجابة الصحيحة قبل أن تختفي!</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">⭐</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">الأسئلة الذهبية = 20 نقطة</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">الأسئلة العادية = 10 نقاط</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">🔥</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">Streak: أجب في الأعلى!</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">ضاعف نقاطك حتى ×5 عند الإجابة السريعة!</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">❄️</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">التجميد: توقيف 5 ثواني</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">لديك 2 استخدام</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">💣</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">القنبلة: حذف إجابتين</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">لديك 1 استخدام</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">❤️</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">3 أرواح فقط!</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">أي خطأ يفقدك روح</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-3xl">🔢</div>
+                    <div>
+                        <p class="font-black text-lg text-gray-900 dark:text-white">الرقم أسفل السؤال = التكرار الوزاري</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">مثال: 12x يعني تكرر 12 مرة في الامتحانات!</p>
+                    </div>
+                </div>
+            </div>
+            <button id="btn-start-game" class="w-full mt-8 text-2xl font-black px-8 py-4 rounded-2xl bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-xl hover:scale-105 transition-transform duration-300 ar-text">
+                ابدأ اللعب! 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- Pause Overlay -->
+    <div id="pause-overlay" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-6">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full">
+            <h2 class="text-4xl font-black text-[#5B5FED] dark:text-[#7B7FFF] mb-2">PAUSED</h2>
+            <p class="text-gray-500 dark:text-gray-400 font-bold mb-8">Take a deep breath!</p>
+            <div class="flex flex-col gap-4">
+                <button id="btn-resume" class="w-full text-white font-black text-xl py-4 rounded-2xl active:shadow-none active:translate-y-[6px] transition-all" style="background: #5B5FED; box-shadow: 0 6px 0 #4347C7;">
+                    RESUME ▶️
+                </button>
+                <button id="btn-mute" class="w-full text-white font-black text-xl py-4 rounded-2xl active:shadow-none active:translate-y-[6px] transition-all" style="background: #F5A623; box-shadow: 0 6px 0 #D68910;">
+                    <span id="sound-status">MUTE SOUND 🔊</span>
+                </button>
+                <button onclick="window.location.href='../index/index.html'" class="w-full font-black text-xl py-4 rounded-2xl active:shadow-none active:translate-y-[6px] transition-all" style="background: #E8E8E8; color: #6B6B6B; box-shadow: 0 6px 0 #BEBEBE;">
+                    EXIT 🚪
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Center -->
+    <div id="feedback-center" class="hidden fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-6">
+        <div id="feedback-box" class="pointer-events-auto">
+            <div id="feedback-emoji" class="text-7xl mb-4">✓</div>
+            <div id="feedback-message" class="text-2xl font-black leading-tight whitespace-pre-line"></div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="results-screen">
+        <div class="results-container">
+            <h2 class="text-3xl font-black text-center mb-6 ar-text">النتائج 🎯</h2>
+            
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="text-center p-4 bg-blue-100 dark:bg-blue-900 rounded-xl">
+                    <div class="text-3xl font-black text-blue-600 dark:text-blue-300" id="total-questions">0</div>
+                    <div class="text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">مجموع الأسئلة</div>
+                </div>
+                <div class="text-center p-4 bg-green-100 dark:bg-green-900 rounded-xl">
+                    <div class="text-3xl font-black text-green-600 dark:text-green-300" id="correct-answers">0</div>
+                    <div class="text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">إجابات صحيحة</div>
+                </div>
+                <div class="text-center p-4 bg-red-100 dark:bg-red-900 rounded-xl">
+                    <div class="text-3xl font-black text-red-600 dark:text-red-300" id="wrong-answers">0</div>
+                    <div class="text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">إجابات خاطئة</div>
+                </div>
+            </div>
+
+            <div class="text-center p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl mb-6">
+                <div class="text-white text-lg font-bold mb-2 ar-text">نقاطك النهائية</div>
+                <div class="text-white text-5xl font-black" id="final-score">0</div>
+            </div>
+
+            <div id="errors-container" class="max-h-64 overflow-y-auto mb-6">
+                <h3 class="text-xl font-black mb-4 ar-text">مراجعة الأخطاء 📝</h3>
+                <div id="errors-list"></div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="btn-play-again" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white font-black text-lg py-4 rounded-2xl shadow-lg ar-text">
+                    العب مرة أخرى 🎮
+                </button>
+                <button id="btn-main-menu" class="w-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-lg py-4 rounded-2xl shadow-lg ar-text">
+                    القائمة الرئيسية 🏠
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Scripts (order matters!) -->
+    <script src="js/game-config.js"></script>
+    <script src="js/game-state.js"></script>
+    <script src="js/game-audio.js"></script>
+    <script src="js/game-ui.js"></script>
+    <script src="js/game-core.js"></script>
+    <script src="js/game-controls.js"></script>
+    <script src="js/game-init.js"></script>
+</body>
+</html>
