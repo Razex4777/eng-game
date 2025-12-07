@@ -549,10 +549,11 @@
                 if (existingUser && existingUser.phone && existingUser.full_name) {
                     // Existing user with complete profile
                     sessionStorage.removeItem('authRedirectAttempt');
-                    sessionStorage.removeItem('loginRedirectCount');
+                    sessionStorage.setItem('loginRedirectCount', (sessionStorage.getItem('loginRedirectCount') ? parseInt(sessionStorage.getItem('loginRedirectCount')) + 1 : 1).toString());
+                    console.log('✅ Profile COMPLETE! Redirecting... (attempt ' + (sessionStorage.getItem('loginRedirectCount') ? parseInt(sessionStorage.getItem('loginRedirectCount')) + 1 : 1) + ')');
                     
-                    console.log('✅ Profile COMPLETE! Redirecting...');
-                    window.location.href = '/index/index.html';
+                    // Try absolute path with trailing slash for Vercel
+                    window.location.replace('/index/');
                     return;
                 } else if (existingUser) {
                     // User exists but incomplete profile
