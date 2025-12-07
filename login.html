@@ -549,18 +549,10 @@
                 if (existingUser && existingUser.phone && existingUser.full_name) {
                     // Existing user with complete profile
                     sessionStorage.removeItem('authRedirectAttempt');
+                    sessionStorage.removeItem('loginRedirectCount');
                     
-                    // Prevent redirect loop - count redirects instead of time
-                    const redirectCount = parseInt(sessionStorage.getItem('loginRedirectCount') || '0');
-                    if (redirectCount >= 2) {
-                        console.log('⚠️ Redirect loop detected - staying on login');
-                        sessionStorage.removeItem('loginRedirectCount');
-                        return;
-                    }
-                    
-                    sessionStorage.setItem('loginRedirectCount', (redirectCount + 1).toString());
-                    console.log('✅ Profile COMPLETE! Redirecting... (attempt ' + (redirectCount + 1) + ')');
-                    window.location.href = 'index/index.html';
+                    console.log('✅ Profile COMPLETE! Redirecting...');
+                    window.location.href = '/index/index.html';
                     return;
                 } else if (existingUser) {
                     // User exists but incomplete profile
