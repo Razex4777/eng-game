@@ -560,7 +560,7 @@
                     
                     sessionStorage.setItem('loginRedirectCount', (redirectCount + 1).toString());
                     console.log('✅ Profile COMPLETE! Redirecting... (attempt ' + (redirectCount + 1) + ')');
-                    window.location.href = '/index/';
+                    window.location.href = 'index/index.html';
                     return;
                 } else if (existingUser) {
                     // User exists but incomplete profile
@@ -759,7 +759,7 @@
                 showStep('success');
                 
                 setTimeout(() => {
-                    window.location.href = '/index/';
+                    window.location.href = 'index/index.html';
                 }, 1500);
 
             } catch (error) {
@@ -798,7 +798,7 @@
                 showStep('success');
                 
                 setTimeout(() => {
-                    window.location.href = '/index/';
+                    window.location.href = 'index/index.html';
                 }, 1500);
 
             } catch (error) {
