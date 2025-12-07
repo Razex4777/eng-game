@@ -44,8 +44,9 @@ async function checkSupabaseAuth() {
             return false;
         }
         
-        // Clear redirect attempt flag on success
+        // Clear redirect attempt flags on success
         sessionStorage.removeItem('authRedirectAttempt');
+        sessionStorage.removeItem('loginRedirectCount');
         
         // Check if profile is complete (must have phone AND full_name)
         if (!userData.phone || !userData.full_name) {

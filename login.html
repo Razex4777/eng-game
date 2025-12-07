@@ -490,10 +490,14 @@
             }
 
             // Listen for auth changes (for OAuth redirect)
+            let alreadyChecked = session ? true : false; // Skip if already checked on load
+            
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 console.log('🔔 Auth event:', event, session?.user?.email);
                 
-                if (event === 'SIGNED_IN' && session) {
+                // Only process SIGNED_IN if we haven't already checked
+                if (event === 'SIGNED_IN' && session && !alreadyChecked) {
+                    alreadyChecked = true;
                     currentUser = session.user;
                     await checkUserRegistration(currentUser, true);
                 }
@@ -541,19 +545,18 @@
 
                 if (existingUser && existingUser.phone && existingUser.full_name) {
                     // Existing user with complete profile
-                    sessionStorage.removeItem('lastRedirectTime');
                     sessionStorage.removeItem('authRedirectAttempt');
                     
-                    // Prevent redirect loop
-                    const lastRedirect = sessionStorage.getItem('lastSuccessRedirect');
-                    const now = Date.now();
-                    if (lastRedirect && (now - parseInt(lastRedirect)) < 3000) {
+                    // Prevent redirect loop - count redirects instead of time
+                    const redirectCount = parseInt(sessionStorage.getItem('loginRedirectCount') || '0');
+                    if (redirectCount >= 2) {
                         console.log('⚠️ Redirect loop detected - staying on login');
+                        sessionStorage.removeItem('loginRedirectCount');
                         return;
                     }
                     
-                    sessionStorage.setItem('lastSuccessRedirect', now.toString());
-                    console.log('✅ Profile COMPLETE! Redirecting...');
+                    sessionStorage.setItem('loginRedirectCount', (redirectCount + 1).toString());
+                    console.log('✅ Profile COMPLETE! Redirecting... (attempt ' + (redirectCount + 1) + ')');
                     window.location.href = '/index/index.html';
                     return;
                 } else if (existingUser) {
