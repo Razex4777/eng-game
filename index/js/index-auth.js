@@ -32,14 +32,25 @@ async function checkSupabaseAuth() {
         
         if (error || !userData) {
             console.log("❌ User not found in database - needs to complete registration");
-            window.location.href = '../login.html?incomplete=true';
+            // Prevent redirect loop - only redirect if not already redirected
+            if (!sessionStorage.getItem('authRedirectAttempt')) {
+                sessionStorage.setItem('authRedirectAttempt', 'true');
+                window.location.href = '/login.html?from=index';
+            } else {
+                console.log("⚠️ Already tried redirecting - showing guest mode");
+                sessionStorage.removeItem('authRedirectAttempt');
+                guestLogin(); // Fall back to guest mode
+            }
             return false;
         }
+        
+        // Clear redirect attempt flag on success
+        sessionStorage.removeItem('authRedirectAttempt');
         
         // Check if profile is complete (must have phone AND full_name)
         if (!userData.phone || !userData.full_name) {
             console.log("❌ Profile incomplete - missing phone or name");
-            window.location.href = '../login.html?incomplete=true';
+            window.location.href = '/login.html?from=index';
             return false;
         }
         
