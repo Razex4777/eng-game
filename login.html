@@ -835,15 +835,23 @@
                     email: userData.email,
                     full_name: userData.fullName,
                     avatar_url: userData.picture || null,
-                    last_login: new Date().toISOString(),
-                    gender: userData.gender || null,
-                    age: userData.age || null,
-                    region: userData.region || null
+                    last_login: new Date().toISOString()
                 };
                 
                 // Only add phone if it exists
                 if (userData.phone) {
                     updateData.phone = userData.phone;
+                }
+                
+                // Only add demographics if they exist (to avoid column errors)
+                if (userData.gender) {
+                    updateData.gender = userData.gender;
+                }
+                if (userData.age) {
+                    updateData.age = userData.age;
+                }
+                if (userData.region) {
+                    updateData.region = userData.region;
                 }
                 
                 // Add timeout protection
@@ -862,8 +870,40 @@
                 const { data, error } = await Promise.race([upsertPromise, timeoutPromise]);
 
                 if (error) {
-                    console.error('❌ Upsert error:', error);
-                    throw error;
+                    console.error('❌ Upsert error details:', error);
+                    console.error('❌ Error message:', error.message);
+                    console.error('❌ Error details:', error.details);
+                    console.error('❌ Error hint:', error.hint);
+                    // If demographics columns don't exist, try saving without them
+                    if (error.message && error.message.includes('column')) {
+                        console.log('🔄 Column error - trying to save without demographics...');
+                        const basicUpdateData = {
+                            auth_id: userData.authId,
+                            email: userData.email,
+                            full_name: userData.fullName,
+                            avatar_url: userData.picture || null,
+                            last_login: new Date().toISOString()
+                        };
+                        if (userData.phone) {
+                            basicUpdateData.phone = userData.phone;
+                        }
+                        
+                        const { data: retryData, error: retryError } = await supabaseClient
+                            .from('users')
+                            .upsert(basicUpdateData, {
+                                onConflict: 'auth_id'
+                            })
+                            .select()
+                            .single();
+                            
+                        if (retryError) {
+                            console.error('❌ Retry also failed:', retryError);
+                            throw retryError;
+                        }
+                        console.log('✅ Saved without demographics:', retryData);
+                    } else {
+                        throw error;
+                    }
                 }
 
                 console.log('✅ User saved:', data);
