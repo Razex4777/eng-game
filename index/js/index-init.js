@@ -3,10 +3,13 @@
 // English Mastery Battle
 // ====================================
 
+console.log('📄 index-init.js loaded successfully');
+
 // ====================================
-// DOM CONTENT LOADED
+// INITIALIZATION FUNCTION
 // ====================================
-document.addEventListener('DOMContentLoaded', async () => {
+async function initializeIndex() {
+    console.log('🚀 initializeIndex() called');
     // Load dark mode preference first
     loadDarkModePreference();
     
@@ -70,4 +73,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('🎮 About to call renderLevels()...');
     renderLevels();
     console.log('✅ renderLevels() completed');
-});
+}
+
+// ====================================
+// DOM CONTENT LOADED WITH FALLBACK
+// ====================================
+console.log('📋 Checking document ready state:', document.readyState);
+
+if (document.readyState === 'loading') {
+    console.log('⏳ DOM still loading, adding event listener...');
+    document.addEventListener('DOMContentLoaded', initializeIndex);
+} else {
+    console.log('✅ DOM already loaded, initializing immediately...');
+    initializeIndex();
+}
