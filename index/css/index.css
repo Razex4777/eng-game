@@ -19,41 +19,6 @@ body {
     user-select: none; 
 }
 
-/* ================= Fullscreen Toggle ================= */
-/* Desktop only - mobile uses inline button in top bar */
-.fullscreen-toggle {
-    position: fixed;
-    bottom: 100px; /* Above feedback button */
-    left: 30px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    color: #5B5FED;
-    display: none; /* Hidden on mobile, shown on desktop */
-}
-
-.fullscreen-toggle svg {
-    width: 24px;
-    height: 24px;
-}
-
-.fullscreen-toggle:hover { 
-    transform: scale(1.1); 
-    background: white; 
-}
-
-/* Show on desktop */
-@media (min-width: 640px) {
-    .fullscreen-toggle {
-        display: flex;
-    }
-}
-
 /* ================= Feedback Button ================= */
 .feedback-btn { 
     position: fixed; 
