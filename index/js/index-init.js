@@ -33,18 +33,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Check Supabase auth
+    console.log('🔐 About to call checkSupabaseAuth()...');
     const isLoggedIn = await checkSupabaseAuth();
+    console.log('🔐 checkSupabaseAuth() returned:', isLoggedIn);
     
     if (!isLoggedIn) {
+        console.log('❌ Not logged in, redirecting to login...');
         sessionStorage.setItem('lastRedirectTime', now.toString());
         window.location.href = '../login.html?from=index';
         return;
     }
     
+    console.log('✅ Auth successful, proceeding with level setup...');
+    
     // Clear redirect flag on successful auth
     sessionStorage.removeItem('lastRedirectTime');
     
     // Restore level data from localStorage
+    console.log('📦 Restoring level data from localStorage...');
     state.levels.forEach(level => {
         const savedStars = localStorage.getItem(`level_${level.id}_stars`);
         const completed = localStorage.getItem(`level_${level.id}_completed`);
@@ -61,5 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.levels[0].status = 'unlocked';
     }
     
+    console.log('🎮 About to call renderLevels()...');
     renderLevels();
+    console.log('✅ renderLevels() completed');
 });
