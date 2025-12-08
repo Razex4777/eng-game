@@ -28,3 +28,7 @@ npm-debug.log*
 
 # Development files
 *.md.bak
+
+mostaql_summery/
+docs/
+backup/
