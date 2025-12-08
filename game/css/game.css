@@ -38,12 +38,12 @@ body.dark-mode {
    ==================================== */
 .fullscreen-btn {
     position: fixed;
-    top: 80px; /* Moved down to avoid overlap with HUD */
-    right: 20px; /* Right side to not conflict with pause button */
-    z-index: 9999;
+    bottom: 220px; /* Above the options grid */
+    left: 12px; /* Left side */
+    z-index: 100;
     background: rgba(255, 255, 255, 0.95);
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 2px solid #3b82f6;
     display: flex;
@@ -773,12 +773,13 @@ body.dark-mode .explanation-box {
     .fullscreen-btn {
         width: 32px !important;
         height: 32px !important;
-        top: 70px !important;
+        bottom: 200px !important;
+        left: 8px !important;
     }
     
     .fullscreen-btn svg {
-        width: 18px !important;
-        height: 18px !important;
+        width: 16px !important;
+        height: 16px !important;
     }
     
     /* Streak circle smaller */

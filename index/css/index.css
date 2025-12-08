@@ -22,8 +22,8 @@ body {
 /* ================= Fullscreen Toggle ================= */
 .fullscreen-toggle {
     position: fixed;
-    top: 10px;
-    left: 10px;
+    bottom: 80px; /* Above feedback button */
+    left: 16px;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.9);
     border: 2px solid #cbd5e1;
@@ -79,8 +79,8 @@ body {
 /* Larger on desktop */
 @media (min-width: 640px) {
     .fullscreen-toggle {
-        top: 20px;
-        left: 20px;
+        bottom: 100px; /* Above feedback button */
+        left: 30px;
         padding: 10px;
         border-radius: 12px;
     }
