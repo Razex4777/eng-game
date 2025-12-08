@@ -263,8 +263,8 @@
         </div>
     </div>
 
-    <!-- Pause Overlay -->
-    <div id="pause-overlay" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-6">
+    <!-- Pause Overlay (z-[200] to be above everything) -->
+    <div id="pause-overlay" class="hidden fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full">
             <h2 class="text-4xl font-black text-[#5B5FED] dark:text-[#7B7FFF] mb-2">PAUSED</h2>
             <p class="text-gray-500 dark:text-gray-400 font-bold mb-8">Take a deep breath!</p>
@@ -338,10 +338,10 @@
     <!-- Game Scripts (order matters!) -->
     <script src="/game/js/game-config.js"></script>
     <script src="/game/js/game-state.js"></script>
-    <script src="/game/js/game-audio.js"></script>
-    <script src="/game/js/game-ui.js"></script>
-    <script src="/game/js/game-core.js"></script>
-    <script src="/game/js/game-controls.js"></script>
-    <script src="/game/js/game-init.js"></script>
+    <script src="/game/js/game-audio.js?v=1.0.2"></script>
+    <script src="/game/js/game-ui.js?v=1.0.2"></script>
+    <script src="/game/js/game-core.js?v=1.0.2"></script>
+    <script src="/game/js/game-controls.js?v=1.0.3"></script>
+    <script src="/game/js/game-init.js?v=1.0.2"></script>
 </body>
 </html>

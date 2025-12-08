@@ -11,19 +11,33 @@ function togglePause() {
     state.paused = !state.paused;
     const overlay = document.getElementById('pause-overlay');
     const fallingQuestion = document.getElementById('falling-question');
+    const optionsGrid = document.getElementById('options-grid');
+    const streakTimer = document.getElementById('streak-timer');
     
     if (state.paused) {
         overlay.classList.remove('hidden');
         overlay.classList.add('flex');
-        // Hide falling question when paused to prevent z-index overlap
-        if (fallingQuestion) fallingQuestion.style.visibility = 'hidden';
+        // FORCE hide falling question and options when paused
+        if (fallingQuestion) {
+            fallingQuestion.style.display = 'none';
+            fallingQuestion.style.visibility = 'hidden';
+            fallingQuestion.style.opacity = '0';
+        }
+        if (optionsGrid) optionsGrid.style.display = 'none';
+        if (streakTimer) streakTimer.style.display = 'none';
         if (state.animFrame) cancelAnimationFrame(state.animFrame);
         if (state.streak.timer) clearInterval(state.streak.timer);
     } else {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
-        // Show falling question when resumed
-        if (fallingQuestion) fallingQuestion.style.visibility = 'visible';
+        // Show falling question and options when resumed
+        if (fallingQuestion) {
+            fallingQuestion.style.display = 'block';
+            fallingQuestion.style.visibility = 'visible';
+            fallingQuestion.style.opacity = '1';
+        }
+        if (optionsGrid) optionsGrid.style.display = 'grid';
+        if (streakTimer) streakTimer.style.display = 'flex';
         if (state.streak.active) {
             state.streak.startTime = Date.now() - (state.streak.maxTime - state.streak.timeLeft);
             runStreakTimer();
