@@ -117,6 +117,12 @@ async function startGame() {
     // Shuffle questions for variety
     state.questions = state.questions.sort(() => Math.random() - 0.5);
     
+    // DEMO MODE: Limit to 5 questions only for level 0
+    if (state.levelId === 0 || state.levelId === '0') {
+        state.questions = state.questions.slice(0, 5);
+        console.log('🎯 DEMO MODE: Limited to 5 questions');
+    }
+    
     console.log(`   🌟 Golden questions: ${state.questions.filter(q => q.golden).length}`);
 
     updateHUD();
