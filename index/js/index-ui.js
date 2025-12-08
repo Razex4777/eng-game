@@ -269,11 +269,12 @@ function createLevelCard(level) {
     }
 
     card.id = `level-${level.id}`;
-    card.className = `relative w-56 sm:w-64 h-72 sm:h-80 flex flex-col items-center shrink-0 rounded-[2.5rem] sm:rounded-[3rem] border-[6px] sm:border-[8px] transition-all duration-300 transform ${bgClass} ${borderClass} ${shadowClass} ${isLocked ? 'card-locked' : ''}`;
+    // Mobile-first: smaller cards on mobile, larger on desktop
+    card.className = `relative w-40 sm:w-56 md:w-64 h-52 sm:h-72 md:h-80 flex flex-col items-center shrink-0 rounded-[1.5rem] sm:rounded-[2.5rem] md:rounded-[3rem] border-4 sm:border-[6px] md:border-[8px] transition-all duration-300 transform ${bgClass} ${borderClass} ${shadowClass} ${isLocked ? 'card-locked' : ''}`;
     
     // Glossy effect
     const glossy = document.createElement('div');
-    glossy.className = `absolute top-4 left-1/2 -translate-x-1/2 w-4/5 h-1/4 rounded-t-[2rem] pointer-events-none bg-gradient-to-b from-white/30 to-transparent`;
+    glossy.className = `absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 w-4/5 h-1/4 rounded-t-[1rem] sm:rounded-t-[2rem] pointer-events-none bg-gradient-to-b from-white/30 to-transparent`;
     card.appendChild(glossy);
     
     // Middle section with level number
@@ -281,32 +282,34 @@ function createLevelCard(level) {
     middleSection.className = 'flex-1 flex items-center justify-center w-full relative';
     const numberText = document.createElement('span');
     // Show "Demo" for level 0, otherwise show the level number
+    // Mobile-first: smaller text on mobile
     if (level.id === 0) {
-        numberText.className = `font-black text-[3rem] text-white/90 drop-shadow-md`;
+        numberText.className = `font-black text-[1.75rem] sm:text-[2.5rem] md:text-[3rem] text-white/90 drop-shadow-md`;
         numberText.textContent = 'Demo';
     } else {
-        numberText.className = `font-black text-[8rem] text-white/90 drop-shadow-md`;
+        numberText.className = `font-black text-[4rem] sm:text-[6rem] md:text-[8rem] text-white/90 drop-shadow-md`;
         numberText.textContent = level.id;
     }
     numberText.style.fontFamily = "'Nunito', sans-serif";
     middleSection.appendChild(numberText);
     
-    // Lock icon for locked levels
+    // Lock icon for locked levels (smaller on mobile)
     if (isLocked) {
-        middleSection.innerHTML += `<div class="absolute inset-0 flex items-center justify-center z-20"><span class="text-7xl opacity-60">🔒</span></div>`;
+        middleSection.innerHTML += `<div class="absolute inset-0 flex items-center justify-center z-20"><span class="text-4xl sm:text-5xl md:text-7xl opacity-60">🔒</span></div>`;
     }
     card.appendChild(middleSection);
     
-    // Stars section
+    // Stars section (smaller on mobile)
     const starsSection = document.createElement('div');
-    starsSection.className = `w-full mt-auto rounded-b-[2.5rem] flex items-end justify-between px-6 pb-6`;
+    starsSection.className = `w-full mt-auto rounded-b-[1.5rem] sm:rounded-b-[2.5rem] flex items-end justify-between px-3 sm:px-6 pb-3 sm:pb-6`;
     for (let i = 0; i < 3; i++) {
         const isFilled = i < level.stars;
         const fill = isFilled ? "#fbbf24" : "rgba(0,0,0,0.2)";
         const stroke = isFilled ? "#f59e0b" : "rgba(255,255,255,0.4)";
         
+        // Smaller stars on mobile
         starsSection.innerHTML += `
-            <svg width="45" height="45" viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="2">
+            <svg class="w-7 h-7 sm:w-10 sm:h-10 md:w-[45px] md:h-[45px]" viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="2">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>`;
     }

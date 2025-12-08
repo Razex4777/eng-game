@@ -209,66 +209,66 @@
         </div>
     </div>
 
-    <!-- How to Play Screen -->
-    <div id="howtoplay-screen" class="hidden fixed inset-0 z-50 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-6 overflow-y-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md shadow-2xl my-8 relative">
+    <!-- How to Play Screen (Mobile-first) -->
+    <div id="howtoplay-screen" class="hidden fixed inset-0 z-50 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-8 max-w-md w-full shadow-2xl my-4 sm:my-8 relative">
             <!-- Exit Button -->
-            <button onclick="window.location.href='/index'" class="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-black text-xl shadow-lg transition-all hover:scale-110" title="خروج">
+            <button onclick="window.location.href='/index'" class="absolute top-2 right-2 sm:top-4 sm:right-4 bg-red-500 hover:bg-red-600 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-base sm:text-xl shadow-lg transition-all hover:scale-110" title="خروج">
                 ✕
             </button>
-            <h2 class="text-3xl font-black text-center mb-6 text-indigo-600 dark:text-indigo-400 ar-text">كيف تلعب؟ 🎮</h2>
-            <div class="space-y-4 text-right ar-text">
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">❓</div>
+            <h2 class="text-xl sm:text-3xl font-black text-center mb-4 sm:mb-6 text-indigo-600 dark:text-indigo-400 ar-text">كيف تلعب؟ 🎮</h2>
+            <div class="space-y-2.5 sm:space-y-4 text-right ar-text">
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">❓</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">الأسئلة تسقط من الأعلى</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">اختر الإجابة الصحيحة قبل أن تختفي!</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">الأسئلة تسقط من الأعلى</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">اختر الإجابة الصحيحة قبل أن تختفي!</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">⭐</div>
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">⭐</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">الأسئلة الذهبية = 20 نقطة</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">الأسئلة العادية = 10 نقاط</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">الأسئلة الذهبية = 20 نقطة</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">الأسئلة العادية = 10 نقاط</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">🔥</div>
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">🔥</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">Streak: أجب في الأعلى!</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">ضاعف نقاطك حتى ×5 عند الإجابة السريعة!</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">Streak: أجب في الأعلى!</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">ضاعف نقاطك حتى ×5 عند الإجابة السريعة!</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">❄️</div>
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">❄️</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">التجميد: توقيف 5 ثواني</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">لديك 2 استخدام</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">التجميد: توقيف 5 ثواني</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">لديك 2 استخدام</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">💣</div>
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">💣</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">القنبلة: حذف إجابتين</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">لديك 1 استخدام</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">القنبلة: حذف إجابتين</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">لديك 1 استخدام</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">❤️</div>
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">❤️</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">3 أرواح فقط!</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">أي خطأ يفقدك روح</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">3 أرواح فقط!</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">أي خطأ يفقدك روح</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <div class="text-3xl">🔢</div>
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <div class="text-xl sm:text-3xl">🔢</div>
                     <div>
-                        <p class="font-black text-lg text-gray-900 dark:text-white">الرقم أسفل السؤال = التكرار الوزاري</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 font-bold">مثال: 12x يعني تكرر 12 مرة في الامتحانات!</p>
+                        <p class="font-black text-sm sm:text-lg text-gray-900 dark:text-white">الرقم أسفل السؤال = التكرار الوزاري</p>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-bold">يعني تكرر 12 مرة في الامتحانات!</p>
                     </div>
                 </div>
             </div>
-            <button id="btn-start-game" class="w-full mt-8 text-2xl font-black px-8 py-4 rounded-2xl bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-xl hover:scale-105 transition-transform duration-300 ar-text">
+            <button id="btn-start-game" class="w-full mt-5 sm:mt-8 text-lg sm:text-2xl font-black px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-xl hover:scale-105 transition-transform duration-300 ar-text">
                 ابدأ اللعب! 🚀
             </button>
         </div>

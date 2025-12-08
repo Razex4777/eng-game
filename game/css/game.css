@@ -706,87 +706,126 @@ body.dark-mode .explanation-box {
 }
 
 /* ====================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN (Mobile-First)
    ==================================== */
+
+/* Base mobile styles (< 640px) */
 @media (max-width: 640px) {
     #falling-question {
-        width: 90% !important;
-        padding: 1.25rem !important;
-        font-size: 1rem !important;
+        width: 88% !important;
+        max-width: 320px !important;
+        padding: 0.875rem !important;
+        border-radius: 1rem !important;
+        border-width: 3px !important;
     }
 
     #q-text {
-        font-size: 1.25rem !important;
+        font-size: 1rem !important;
+        line-height: 1.4 !important;
     }
 
     .option-btn {
-        padding: 0.65rem 0.4rem !important;
-        font-size: 0.95rem !important;
-        letter-spacing: 1px !important;
+        padding: 0.5rem 0.3rem !important;
+        font-size: 0.8rem !important;
+        letter-spacing: 0.5px !important;
+        border-radius: 0.75rem !important;
+        min-height: 44px !important;
     }
 
     .powerup-btn {
-        width: 44px !important;
-        height: 44px !important;
-        font-size: 22px !important;
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
     }
 
     .badge-count {
-        width: 20px !important;
-        height: 20px !important;
-        font-size: 11px !important;
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 9px !important;
     }
 
     .control-btn {
-        width: 44px !important;
-        height: 44px !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 14px !important;
     }
 
     .fire-sprite {
-        font-size: 60px !important;
+        font-size: 50px !important;
     }
 
     .combo-text {
-        font-size: 1.5rem !important;
-        margin-top: -20px !important;
+        font-size: 1.25rem !important;
+        margin-top: -16px !important;
     }
 
     .golden-badge {
-        font-size: 0.6rem !important;
-        padding: 0.25rem 0.5rem !important;
+        font-size: 0.5rem !important;
+        padding: 0.2rem 0.4rem !important;
     }
 
     .repeat-badge {
-        width: 35px !important;
-        height: 35px !important;
-        font-size: 0.85rem !important;
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.7rem !important;
+    }
+    
+    .fullscreen-btn {
+        width: 32px !important;
+        height: 32px !important;
+        top: 70px !important;
+    }
+    
+    .fullscreen-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
+    /* Streak circle smaller */
+    .streak-circle {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .streak-multiplier {
+        font-size: 0.75rem !important;
     }
 }
 
+/* Extra small screens (< 380px) */
 @media (max-width: 380px) {
     #falling-question {
-        padding: 1rem !important;
+        width: 92% !important;
+        padding: 0.75rem !important;
     }
 
     #q-text {
-        font-size: 1.1rem !important;
+        font-size: 0.9rem !important;
     }
 
     .option-btn {
-        padding: 0.6rem 0.35rem !important;
-        font-size: 0.85rem !important;
-        letter-spacing: 0.5px !important;
+        padding: 0.4rem 0.25rem !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0 !important;
+        min-height: 40px !important;
     }
 
     .powerup-btn {
-        width: 40px !important;
-        height: 40px !important;
-        font-size: 20px !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
     }
 
     .control-btn {
-        width: 40px !important;
-        height: 40px !important;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+    }
+    
+    .badge-count {
+        width: 14px !important;
+        height: 14px !important;
+        font-size: 8px !important;
     }
 }
 
