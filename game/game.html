@@ -290,45 +290,45 @@
         </div>
     </div>
 
-    <!-- Results Screen -->
+    <!-- Results Screen (Mobile-first) -->
     <div id="results-screen" class="results-screen">
         <div class="results-container">
             <!-- Dynamic Header (Updated by JS) -->
-            <div id="results-header" class="text-center mb-6">
-                <div class="text-4xl mb-2">🎯</div>
-                <h2 class="text-2xl font-black text-indigo-600 ar-text">النتائج</h2>
+            <div id="results-header" class="text-center mb-3 sm:mb-6">
+                <div class="text-2xl sm:text-4xl mb-1 sm:mb-2">🎯</div>
+                <h2 class="text-lg sm:text-2xl font-black text-indigo-600 ar-text">النتائج</h2>
             </div>
             
-            <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="text-center p-4 bg-blue-100 dark:bg-blue-900 rounded-xl">
-                    <div class="text-3xl font-black text-blue-600 dark:text-blue-300" id="total-questions">0</div>
-                    <div class="text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">مجموع الأسئلة</div>
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-6">
+                <div class="text-center p-2 sm:p-4 bg-blue-100 dark:bg-blue-900 rounded-lg sm:rounded-xl">
+                    <div class="text-xl sm:text-3xl font-black text-blue-600 dark:text-blue-300" id="total-questions">0</div>
+                    <div class="text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">مجموع الأسئلة</div>
                 </div>
-                <div class="text-center p-4 bg-green-100 dark:bg-green-900 rounded-xl">
-                    <div class="text-3xl font-black text-green-600 dark:text-green-300" id="correct-answers">0</div>
-                    <div class="text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">إجابات صحيحة</div>
+                <div class="text-center p-2 sm:p-4 bg-green-100 dark:bg-green-900 rounded-lg sm:rounded-xl">
+                    <div class="text-xl sm:text-3xl font-black text-green-600 dark:text-green-300" id="correct-answers">0</div>
+                    <div class="text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">إجابات صحيحة</div>
                 </div>
-                <div class="text-center p-4 bg-red-100 dark:bg-red-900 rounded-xl">
-                    <div class="text-3xl font-black text-red-600 dark:text-red-300" id="wrong-answers">0</div>
-                    <div class="text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">إجابات خاطئة</div>
+                <div class="text-center p-2 sm:p-4 bg-red-100 dark:bg-red-900 rounded-lg sm:rounded-xl">
+                    <div class="text-xl sm:text-3xl font-black text-red-600 dark:text-red-300" id="wrong-answers">0</div>
+                    <div class="text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 ar-text">إجابات خاطئة</div>
                 </div>
             </div>
 
-            <div class="text-center p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl mb-6">
-                <div class="text-white text-lg font-bold mb-2 ar-text">نقاطك النهائية</div>
-                <div class="text-white text-5xl font-black" id="final-score">0</div>
+            <div class="text-center p-3 sm:p-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl mb-3 sm:mb-6">
+                <div class="text-white text-sm sm:text-lg font-bold mb-1 sm:mb-2 ar-text">نقاطك النهائية</div>
+                <div class="text-white text-3xl sm:text-5xl font-black" id="final-score">0</div>
             </div>
 
-            <div id="errors-container" class="max-h-64 overflow-y-auto mb-6">
-                <h3 class="text-xl font-black mb-4 ar-text">مراجعة الأخطاء 📝</h3>
+            <div id="errors-container" class="max-h-48 sm:max-h-64 overflow-y-auto mb-3 sm:mb-6">
+                <h3 class="text-base sm:text-xl font-black mb-2 sm:mb-4 ar-text">مراجعة الأخطاء 📝</h3>
                 <div id="errors-list"></div>
             </div>
 
-            <div class="flex flex-col gap-3">
-                <button id="btn-play-again" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white font-black text-lg py-4 rounded-2xl shadow-lg ar-text">
+            <div class="flex flex-col gap-2 sm:gap-3">
+                <button id="btn-play-again" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white font-black text-sm sm:text-lg py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg ar-text">
                     العب مرة أخرى 🎮
                 </button>
-                <button id="btn-main-menu" class="w-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-lg py-4 rounded-2xl shadow-lg ar-text">
+                <button id="btn-main-menu" class="w-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-sm sm:text-lg py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg ar-text">
                     القائمة الرئيسية 🏠
                 </button>
             </div>

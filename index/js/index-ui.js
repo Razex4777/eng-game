@@ -9,18 +9,21 @@
 function toggleDarkMode() {
     const body = document.body;
     const icon = document.getElementById('darkmode-icon');
+    const iconLeft = document.getElementById('darkmode-icon-left');
     const bgContainer = document.getElementById('bg-container');
     
     body.classList.toggle('dark');
     
     if (body.classList.contains('dark')) {
-        icon.textContent = '☀️';
+        if (icon) icon.textContent = '☀️';
+        if (iconLeft) iconLeft.textContent = '☀️';
         if (bgContainer) {
             bgContainer.className = 'fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 -z-10';
         }
         localStorage.setItem('indexDarkMode', 'true');
     } else {
-        icon.textContent = '🌙';
+        if (icon) icon.textContent = '🌙';
+        if (iconLeft) iconLeft.textContent = '🌙';
         if (bgContainer) {
             bgContainer.className = 'fixed inset-0 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 -z-10';
         }
@@ -32,11 +35,13 @@ function loadDarkModePreference() {
     const isDark = localStorage.getItem('indexDarkMode') === 'true';
     const body = document.body;
     const icon = document.getElementById('darkmode-icon');
+    const iconLeft = document.getElementById('darkmode-icon-left');
     const bgContainer = document.getElementById('bg-container');
     
     if (isDark) {
         body.classList.add('dark');
         if (icon) icon.textContent = '☀️';
+        if (iconLeft) iconLeft.textContent = '☀️';
         if (bgContainer) {
             bgContainer.className = 'fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 -z-10';
         }

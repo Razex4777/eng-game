@@ -19,30 +19,61 @@ body {
     user-select: none; 
 }
 
-/* ================= Fullscreen Toggle ================= */
-.fullscreen-toggle {
-    position: fixed;
-    bottom: 80px; /* Above feedback button */
-    left: 16px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.9);
+/* ================= Control Buttons (Left Side) ================= */
+.control-btn-index {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
     border: 2px solid #cbd5e1;
     border-radius: 10px;
-    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all 0.3s;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     color: #5B5FED;
 }
 
-.fullscreen-toggle svg {
+.control-btn-index svg {
     width: 18px;
     height: 18px;
+    color: #64748b;
 }
 
-.fullscreen-toggle:hover { 
-    transform: scale(1.1); 
-    background: white; 
+.control-btn-index:hover { 
+    transform: scale(1.05); 
+    background: white;
+    border-color: #5B5FED;
+}
+
+/* Dark mode styles for control buttons */
+body.dark .control-btn-index {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: #475569;
+}
+
+body.dark .control-btn-index svg {
+    color: #94a3b8;
+}
+
+body.dark .control-btn-index:hover {
+    background: #334155;
+    border-color: #7B7FFF;
+}
+
+/* Larger on desktop */
+@media (min-width: 640px) {
+    .control-btn-index {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+    
+    .control-btn-index svg {
+        width: 22px;
+        height: 22px;
+    }
 }
 
 /* ================= Feedback Button ================= */
@@ -78,18 +109,6 @@ body {
 
 /* Larger on desktop */
 @media (min-width: 640px) {
-    .fullscreen-toggle {
-        bottom: 100px; /* Above feedback button */
-        left: 30px;
-        padding: 10px;
-        border-radius: 12px;
-    }
-    
-    .fullscreen-toggle svg {
-        width: 24px;
-        height: 24px;
-    }
-    
     .feedback-btn {
         bottom: 30px;
         left: 30px;

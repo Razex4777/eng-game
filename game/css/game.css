@@ -38,12 +38,12 @@ body.dark-mode {
    ==================================== */
 .fullscreen-btn {
     position: fixed;
-    bottom: 220px; /* Above the options grid */
-    left: 12px; /* Left side */
+    bottom: 240px; /* Above the options grid */
+    right: 12px; /* Right side, away from pause/dark mode buttons */
     z-index: 100;
     background: rgba(255, 255, 255, 0.95);
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 2px solid #3b82f6;
     display: flex;
@@ -771,15 +771,15 @@ body.dark-mode .explanation-box {
     }
     
     .fullscreen-btn {
-        width: 32px !important;
-        height: 32px !important;
-        bottom: 200px !important;
-        left: 8px !important;
+        width: 28px !important;
+        height: 28px !important;
+        bottom: 220px !important;
+        right: 8px !important;
     }
     
     .fullscreen-btn svg {
-        width: 16px !important;
-        height: 16px !important;
+        width: 14px !important;
+        height: 14px !important;
     }
     
     /* Streak circle smaller */
