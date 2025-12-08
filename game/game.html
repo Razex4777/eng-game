@@ -111,7 +111,7 @@
     </script>
     
     <!-- Game Styles -->
-    <link rel="stylesheet" href="/game/css/game.css">
+    <link rel="stylesheet" href="/game/css/game.css?v=1.0.2">
 </head>
 <body class="h-screen w-screen light-mode overflow-hidden">
     <!-- Falling Question (Moved to Body for Z-Index/Positioning) -->
@@ -125,8 +125,8 @@
         <h3 id="q-text" class="text-2xl font-black leading-tight"></h3>
     </div>
 
-    <!-- Fullscreen Button (Positioned via CSS to avoid overlap) -->
-    <button id="fullscreen-btn" class="fullscreen-btn pulse" onclick="toggleFullScreen()" title="ملء الشاشة / Fullscreen">
+    <!-- Fullscreen Button (Inline style to force position below HUD) -->
+    <button id="fullscreen-btn" class="fullscreen-btn pulse" onclick="toggleFullScreen()" title="ملء الشاشة / Fullscreen" style="position: fixed; top: 100px; left: 10px; z-index: 100;">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
         </svg>
