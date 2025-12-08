@@ -10,14 +10,20 @@ function togglePause() {
     if (!state.playing || state.waiting) return;
     state.paused = !state.paused;
     const overlay = document.getElementById('pause-overlay');
+    const fallingQuestion = document.getElementById('falling-question');
+    
     if (state.paused) {
         overlay.classList.remove('hidden');
         overlay.classList.add('flex');
+        // Hide falling question when paused to prevent z-index overlap
+        if (fallingQuestion) fallingQuestion.style.visibility = 'hidden';
         if (state.animFrame) cancelAnimationFrame(state.animFrame);
         if (state.streak.timer) clearInterval(state.streak.timer);
     } else {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
+        // Show falling question when resumed
+        if (fallingQuestion) fallingQuestion.style.visibility = 'visible';
         if (state.streak.active) {
             state.streak.startTime = Date.now() - (state.streak.maxTime - state.streak.timeLeft);
             runStreakTimer();
