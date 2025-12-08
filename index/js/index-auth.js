@@ -49,7 +49,7 @@ async function checkSupabaseAuth() {
         // Check if profile is complete (must have phone AND full_name)
         if (!userData.phone || !userData.full_name) {
             console.log("❌ Profile incomplete - missing phone or name");
-            window.location.href = 'https://example.com/login.html?incomplete=true';
+            window.location.href = '/login.html?incomplete=true';
             return false;
         }
         
