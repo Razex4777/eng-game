@@ -3,6 +3,9 @@
   "public": true,
   "cleanUrls": false,
   "trailingSlash": false,
+  "buildCommand": null,
+  "outputDirectory": null,
+  "installCommand": null,
   
   "headers": [
     {
