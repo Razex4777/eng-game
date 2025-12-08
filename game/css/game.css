@@ -38,14 +38,14 @@ body.dark-mode {
    ==================================== */
 .fullscreen-btn {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 80px; /* Moved down to avoid overlap with HUD */
+    right: 20px; /* Right side to not conflict with pause button */
     z-index: 9999;
     background: rgba(255, 255, 255, 0.95);
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 3px solid #3b82f6;
+    border: 2px solid #3b82f6;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -457,6 +457,7 @@ body.dark-mode .repeat-badge {
     transform: translateX(-50%);
     width: 91.666667%; /* w-11/12 */
     max-width: 24rem; /* max-w-sm */
+    z-index: 60; /* Above progress bar (z-40) but below fullscreen btn (z-9999) */
 }
 
 /* ====================================
