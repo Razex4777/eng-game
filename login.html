@@ -848,7 +848,9 @@
                     updateData.gender = userData.gender;
                 }
                 if (userData.age) {
-                    updateData.age = userData.age;
+                    // Convert age range to number (take the lower bound) to match INTEGER column
+                    const ageNumber = parseInt(userData.age.split('-')[0]);
+                    updateData.age = ageNumber;
                 }
                 if (userData.region) {
                     updateData.region = userData.region;
