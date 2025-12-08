@@ -38,8 +38,8 @@ body.dark-mode {
    ==================================== */
 .fullscreen-btn {
     position: fixed;
-    top: 56px; /* Below the HUD buttons (pause/dark mode) */
-    left: 12px; /* Same side as HUD buttons */
+    top: 90px; /* Well below the HUD buttons (pause/dark mode) */
+    left: 16px; /* Same side as HUD buttons */
     z-index: 100;
     background: rgba(255, 255, 255, 0.95);
     width: 36px;
@@ -773,8 +773,8 @@ body.dark-mode .explanation-box {
     .fullscreen-btn {
         width: 28px !important;
         height: 28px !important;
-        top: 48px !important; /* Below HUD buttons on mobile */
-        left: 8px !important;
+        top: 70px !important; /* Well below HUD buttons on mobile */
+        left: 10px !important;
         bottom: auto !important;
         right: auto !important;
     }
