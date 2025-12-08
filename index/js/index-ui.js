@@ -215,12 +215,20 @@ function toggleFullScreen() {
 // LEVEL RENDERING
 // ====================================
 function renderLevels() {
+    console.log('🎮 renderLevels called');
+    console.log('📊 state.levels:', state.levels);
+    
     const container = document.getElementById('levels-grid');
+    if (!container) {
+        console.error('❌ levels-grid container not found!');
+        return;
+    }
     container.innerHTML = '';
     
     // Reverse order: stages from 30 to 1
     // Stage 1 appears at bottom
     for (let i = state.levels.length - 1; i >= 0; i--) {
+        console.log(`🏗️ Creating level card for index ${i}, level:`, state.levels[i]);
         const card = createLevelCard(state.levels[i]);
         container.appendChild(card);
     }
