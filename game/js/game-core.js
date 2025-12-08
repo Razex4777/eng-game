@@ -579,7 +579,10 @@ function stopStreak() {
     state.streak.multiplier = 1;
     state.streak.timeLeft = 0;
     const timerEl = document.getElementById('streak-timer');
-    if (timerEl) timerEl.classList.remove('show');
+    if (timerEl) {
+        timerEl.classList.remove('show');
+        timerEl.style.display = 'none';
+    }
 }
 
 // ====================================
