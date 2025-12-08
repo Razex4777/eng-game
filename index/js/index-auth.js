@@ -141,8 +141,11 @@ function guestLogin(skipAnimation = false) {
     console.log(`   📍 Can play: Level 0 (Demo) only`);
     console.log(`   ❌ Will save progress: NO (guest user)`);
     
-    document.getElementById('user-type-display').innerText = "زائر (Demo)";
-    document.getElementById('user-info').classList.remove('hidden');
+    const userTypeEl = document.getElementById('user-type-display');
+    const userInfoEl = document.getElementById('user-info');
+    
+    if (userTypeEl) userTypeEl.innerText = "زائر (Demo)";
+    if (userInfoEl) userInfoEl.classList.remove('hidden');
     
     // Lock all stages except Demo (stage 0)
     state.levels.forEach((level, index) => {

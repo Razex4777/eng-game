@@ -31,7 +31,15 @@ function togglePause() {
 // ====================================
 function toggleDarkMode() {
     state.dark = !state.dark;
-    document.body.className = state.dark ? "h-screen w-screen dark-mode" : "h-screen w-screen light-mode";
+    
+    if (state.dark) {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode', 'dark');
+    } else {
+        document.body.classList.remove('dark-mode', 'dark');
+        document.body.classList.add('light-mode');
+    }
+    
     document.getElementById('btn-darkmode').innerHTML = state.dark ? "☀️" : "🌙";
     
     localStorage.setItem('theme', state.dark ? 'dark' : 'light');

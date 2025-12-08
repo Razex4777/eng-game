@@ -322,6 +322,27 @@
             justify-content: center;
             gap: 8px;
         }
+
+        /* Back Button */
+        .btn-back {
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s;
+            width: fit-content;
+        }
+        
+        .btn-back:hover {
+            color: #333;
+            transform: translateX(4px);
+        }
     </style>
 </head>
 <body>
@@ -370,6 +391,7 @@
 
         <!-- Step 2: Phone Number -->
         <div class="step" id="step-2">
+            <button class="btn-back" onclick="showStep(1)">← رجوع</button>
             <h2 class="step-title">رقم الهاتف 📱</h2>
             <p class="step-subtitle">سيساعدنا بالتواصل معك في حال حصول مشكلة</p>
             
@@ -399,6 +421,7 @@
 
         <!-- Step 3: Demographics -->
         <div class="step" id="step-3">
+            <button class="btn-back" onclick="showStep(2)">← رجوع</button>
             <h2 class="step-title">معلومات إضافية 📊</h2>
             <p class="step-subtitle">ساعدنا نعرفك أكثر!</p>
             
@@ -465,6 +488,7 @@
 
         <!-- Step 4: Full Name -->
         <div class="step" id="step-4">
+            <button class="btn-back" onclick="showStep(3)">← رجوع</button>
             <h2 class="step-title">اسمك الكامل ✏️</h2>
             <p class="step-subtitle">كيف تحب أن نناديك؟</p>
             

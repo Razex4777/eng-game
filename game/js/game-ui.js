@@ -242,7 +242,7 @@ function updateStreakTimerBar() {
 // ====================================
 // RESULTS SCREEN
 // ====================================
-function showResultsScreen() {
+function showResultsScreen(failed = false) {
     const resultsScreen = document.getElementById('results-screen');
     const totalQuestions = state.correctAnswers.length + state.wrongAnswers.length;
     
@@ -251,10 +251,26 @@ function showResultsScreen() {
     document.getElementById('wrong-answers').innerText = state.wrongAnswers.length;
     document.getElementById('final-score').innerText = state.score;
     
+    // Hide the falling question
+    const qEl = document.getElementById('falling-question');
+    if (qEl) qEl.classList.add('hidden');
+    
     const errorsList = document.getElementById('errors-list');
     errorsList.innerHTML = '';
     
-    if (state.wrongAnswers.length === 0) {
+    // Show Game Over or Success header
+    const headerEl = document.getElementById('results-header');
+    if (headerEl) {
+        if (failed) {
+            headerEl.innerHTML = '<div class="text-4xl mb-2">💔</div><h2 class="text-2xl font-black text-red-600 ar-text">خسرت المرحلة!</h2><p class="text-slate-500 ar-text">حاول مرة أخرى</p>';
+        } else if (state.wrongAnswers.length === 0) {
+            headerEl.innerHTML = '<div class="text-4xl mb-2">🏆</div><h2 class="text-2xl font-black text-green-600 ar-text">ممتاز!</h2><p class="text-slate-500 ar-text">أداء رائع!</p>';
+        } else {
+            headerEl.innerHTML = '<div class="text-4xl mb-2">⭐</div><h2 class="text-2xl font-black text-indigo-600 ar-text">أحسنت!</h2><p class="text-slate-500 ar-text">أنهيت المرحلة</p>';
+        }
+    }
+    
+    if (state.wrongAnswers.length === 0 && !failed) {
         errorsList.innerHTML = '<div class="text-center p-4"><p class="text-2xl font-black ar-text">🎉 مبروك! لا توجد أخطاء!</p></div>';
     } else {
         state.wrongAnswers.forEach((answer, index) => {

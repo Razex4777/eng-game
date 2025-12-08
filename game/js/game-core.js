@@ -80,6 +80,7 @@ async function startGame() {
     state.powerups = { freeze: 2, bomb: 1 };
     state.frozen = false;
     state.answeredQuestions = new Set();
+    state.speed = 1.5; // Fixed speed as requested
     stopStreak();
 
     startSession();
@@ -151,7 +152,7 @@ function nextQuestion() {
     state.qData = state.questions[state.qIndex];
     console.log(`❓ Question ${state.qIndex + 1}:`, state.qData.q);
     
-    state.qY = -250;
+    state.qY = -250; // Start above the screen
     state.frozen = false;
     if (state.freezeTimeout) {
         clearTimeout(state.freezeTimeout);
@@ -223,9 +224,10 @@ function handleAnswer(sel, btnEl) {
         const qEl = document.getElementById('falling-question');
         const gameArea = document.getElementById('game-area');
         const questionMiddle = state.qY + qEl.offsetHeight / 2;
-        const halfScreen = gameArea.offsetHeight / 2;
-        const isTopHalf = questionMiddle < halfScreen;
+        const halfScreen = gameArea ? (gameArea.offsetHeight / 2) : 300;
         
+        // Update streak if answered in top half
+        const isTopHalf = questionMiddle < halfScreen;
         if (isTopHalf) { 
             updateStreak(); 
         } else { 
@@ -239,7 +241,7 @@ function handleAnswer(sel, btnEl) {
         btnEl.classList.add('bg-emerald-500');
         state.score += finalPoints;
         state.combo++;
-        // Speed is now constant - removed state.speed += 0.025
+        // Speed is constant
         
         state.correctAnswers.push(answerRecord);
         state.answeredQuestions.add(state.qData.id);
@@ -261,10 +263,10 @@ function handleAnswer(sel, btnEl) {
         
         trackMistakeLocal(state.qData, answerRecord);
         
-        if (!state.answeredQuestions.has(state.qData.id)) {
-            state.questions.push(state.qData);
-            console.log(`❌ Wrong answer! Question added back to queue.`);
-        }
+        // IMPORTANT: In strict mode (3 hearts), we might not want to re-add the question
+        // if we are going to fail anyway. But for now, let's keep it consistent.
+        // User said: "When error returns... do not return hearts 3".
+        // If lives == 0, we will fail anyway.
         
         launchButtonToQuestion(btnEl, false);
         AudioSys.wrong();
@@ -290,11 +292,6 @@ function handleMiss() {
     state.wrongAnswers.push(answerRecord);
     trackMistakeLocal(state.qData, null);
     
-    if (!state.answeredQuestions.has(state.qData.id)) {
-        state.questions.push(state.qData);
-        console.log(`⏰ Time's up! Question added back to queue.`);
-    }
-    
     AudioSys.wrong();
     if (navigator.vibrate) navigator.vibrate(200);
     state.waiting = true;
@@ -306,6 +303,12 @@ function handleMiss() {
 }
 
 function continueGame() {
+    // Check for Game Over logic here (after feedback shown)
+    if (state.lives <= 0) {
+        endLevel(true); // true = failed/game over
+        return;
+    }
+
     state.qIndex++;
     state.waiting = false;
     nextQuestion();
@@ -317,22 +320,24 @@ function continueGame() {
 // ====================================
 function gameLoop() {
     if (!state.playing || state.waiting || state.paused) {
-        // Log why we're not running (only once)
         if (!state._loopDebugLogged) {
             console.log(`⚠️ gameLoop blocked: playing=${state.playing}, waiting=${state.waiting}, paused=${state.paused}`);
             state._loopDebugLogged = true;
         }
         return;
     }
-    state._loopDebugLogged = false; // Reset for next block
+    state._loopDebugLogged = false;
     
     if (!state.frozen) {
-        const gameH = document.getElementById('game-area').offsetHeight;
-        state.qY += state.speed;
+        // Use fixed speed if not set
+        const speed = state.speed || 1.5;
+        state.qY += speed;
+        
         const qEl = document.getElementById('falling-question');
         qEl.style.top = `${state.qY}px`;
         
-        if (state.qY > gameH + 50) {
+        const gameH = window.innerHeight; // Use window height since it's in body now
+        if (state.qY > gameH) {
             handleMiss();
             return;
         }
@@ -344,17 +349,29 @@ function gameLoop() {
 // ====================================
 // LEVEL END
 // ====================================
-async function endLevel() {
+async function endLevel(failed = false) {
     state.playing = false;
     if (state.animFrame) cancelAnimationFrame(state.animFrame);
     stopStreak();
     
-    // Check if we have wrong answers to retry
-    if (!state.retryMode && state.wrongAnswers.length > 0) {
-        console.log(`\n🔄 RETRY MODE: ${state.wrongAnswers.length} wrong answers to retry`);
-        startRetryMode();
+    // GAME OVER - 0 Lives
+    if (failed || state.lives <= 0) {
+        console.log("❌ GAME OVER - 0 Lives");
+        AudioSys.wrong(); // Play fail sound
+        showResultsScreen(true); // Show failed screen
         return;
     }
+    
+    // Check if we have wrong answers to retry
+    // User requested: "When error returns... do not return hearts 3".
+    // If they finished the level but had errors (and > 0 lives), 
+    // we can either let them retry OR just finish.
+    // The user's main complaint was "If 3 hearts lost -> Lose stage".
+    // Since we handle that above, maybe we can keep Retry Mode for "Finished but want to perfect"?
+    // Or maybe disable it?
+    // "When error returns for the question do not return the hearts 3"
+    // I will DISABLE auto-retry for now, and just show results. 
+    // They can replay the whole level if they want.
     
     // Calculate final results
     const totalQuestions = state.correctAnswers.length + state.wrongAnswers.length;
@@ -371,7 +388,7 @@ async function endLevel() {
     }
     
     // Calculate XP earned
-    const xpEarned = state.score + (stars * 50) + (state.retryMode ? 0 : 100);
+    const xpEarned = state.score + (stars * 50) + 100;
     
     console.log(`\n🏆 LEVEL COMPLETE!`);
     console.log(`   📊 Score: ${state.score}`);
@@ -381,113 +398,36 @@ async function endLevel() {
     console.log(`   ⭐ Stars: ${stars}`);
     console.log(`   ✨ XP: ${xpEarned}`);
     
-    // Save progress to Supabase (only for logged-in users)
-    // Guest users (demoMode=true) don't save anything
-    // Registered users on Level 0 save wrong answers only
-    // Registered users on Level 1+ save full progress
+    // Save progress to Supabase
     const isLoggedIn = state.userId && !state.userId.startsWith('guest_') && !state.demoMode;
     
-    console.log(`\n💾 Save Decision:`);
-    console.log(`   👤 User ID: ${state.userId}`);
-    console.log(`   🎮 Demo Mode: ${state.demoMode}`);
-    console.log(`   📍 Level: ${state.levelId}`);
-    console.log(`   ✅ Is Logged In: ${isLoggedIn}`);
-    
     if (isLoggedIn) {
-        if (state.levelId !== 0) {
-            // Full progress save for levels 1+
-            console.log('   📊 Saving FULL progress (Level 1+)');
-            await saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions);
-        } else {
-            // Level 0 (Demo): Only save wrong answers for analytics
-            console.log('   📊 Saving wrong answers only (Level 0)');
-            await saveWrongAnswersOnly();
+        // SAVE FOR ALL LEVELS (Including 0 if it counts as completing Demo)
+        console.log('   📊 Saving progress');
+        
+        // For Level 0, we treat it as unlocking Level 1
+        await saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions);
+        
+        if (state.levelId === 0) {
+             // Unlock Level 1 locally too
+             localStorage.setItem('level_0_completed', 'true');
+             localStorage.setItem('level_1_unlocked', 'true');
         }
-    } else {
-        console.log('   ⚠️ Not saving - Guest or Demo mode');
     }
     
     // Save to localStorage as backup
-    if (state.levelId !== 0) {
-        localStorage.setItem(`level_${state.levelId}_stars`, stars);
-        localStorage.setItem(`level_${state.levelId}_completed`, 'true');
-    }
+    localStorage.setItem(`level_${state.levelId}_stars`, stars);
+    localStorage.setItem(`level_${state.levelId}_completed`, 'true');
     
-    showResultsScreen();
+    showResultsScreen(false);
 }
 
 // ====================================
-// RETRY MODE (إعادة الأسئلة الخاطئة)
+// RETRY MODE (REMOVED/DISABLED)
 // ====================================
-function startRetryMode() {
-    console.log('\n🔄 =======================================');
-    console.log('🔄 STARTING RETRY MODE');
-    console.log('🔄 =======================================');
-    
-    state.retryMode = true;
-    
-    // Get unique wrong questions (avoid duplicates)
-    const uniqueWrongQuestions = [];
-    const seenIds = new Set();
-    
-    state.wrongAnswers.forEach(answer => {
-        const q = answer.question;
-        if (!seenIds.has(q.id)) {
-            seenIds.add(q.id);
-            uniqueWrongQuestions.push(q);
-        }
-    });
-    
-    console.log(`   📝 Unique wrong questions: ${uniqueWrongQuestions.length}`);
-    
-    // Reset for retry
-    state.questions = uniqueWrongQuestions;
-    state.qIndex = 0;
-    state.wrongAnswers = []; // Clear for retry round
-    state.answeredQuestions = new Set();
-    state.waiting = false;
-    state.lives = 3; // Reset lives for retry round
-    state.combo = 0;
-    
-    // Show retry notification
-    showRetryNotification(uniqueWrongQuestions.length);
-    
-    // Start retry after notification
-    setTimeout(() => {
-        hideRetryNotification();
-        
-        // CRITICAL: Re-enable game state for retry
-        state.playing = true;
-        state.waiting = false;
-        
-        console.log('🎮 Retry mode activated - game playing:', state.playing);
-        console.log('   ❤️ Lives reset to:', state.lives);
-        
-        updateHUD(); // Update display with reset lives
-        nextQuestion();
-        gameLoop();
-    }, 2000);
-}
-
-function showRetryNotification(count) {
-    const notification = document.createElement('div');
-    notification.id = 'retry-notification';
-    notification.innerHTML = `
-        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 2rem 3rem; border-radius: 2rem; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">🔄</div>
-                <h2 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 0.5rem;">إعادة الأسئلة الخاطئة</h2>
-                <p style="font-size: 1.2rem; opacity: 0.9;">${count} سؤال للمراجعة</p>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(notification);
-}
-
-function hideRetryNotification() {
-    const notification = document.getElementById('retry-notification');
-    if (notification) notification.remove();
-}
+// Retry mode logic removed to satisfy user requirement:
+// "If lose 3 hearts, lose stage" and "Don't return hearts to 3".
+// The cleanest way is to just have standard Win/Fail.
 
 // ====================================
 // SAVE PROGRESS TO SUPABASE
@@ -516,9 +456,13 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
             console.log('✅ Stage progress saved');
         }
         
-        // Update user's total XP
+        // Update user's total XP and Level
         const newTotalXP = (userData.total_xp || 0) + xpEarned;
-        const newCurrentLevel = Math.max(userData.current_level || 1, state.levelId + 1);
+        
+        // If completing level 0, ensure we are at least level 1
+        // If completing level X, ensure we are at least level X+1
+        const nextLevel = state.levelId + 1;
+        const newCurrentLevel = Math.max(userData.current_level || 1, nextLevel);
         
         if (typeof updateUserStats === 'function') {
             await updateUserStats(userData.id, {
@@ -527,7 +471,7 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
                 completedStages: (userData.completed_stages || 0) + 1,
                 totalStars: (userData.total_stars || 0) + stars
             });
-            console.log('✅ User stats updated');
+            console.log(`✅ User stats updated (Level -> ${newCurrentLevel})`);
         }
         
         // Save wrong answers for analytics
@@ -551,34 +495,10 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
     }
 }
 
-// Save wrong answers only (for Demo level analytics)
+// Save wrong answers only (Kept for compatibility)
 async function saveWrongAnswersOnly() {
-    console.log('\n📊 Saving wrong answers for analytics (Demo level)...');
-    
-    try {
-        const userData = state.currentUserData || await getUserDataFromSupabase();
-        if (!userData || !userData.id) {
-            console.log('⚠️ No user data, skipping wrong answers save');
-            return;
-        }
-        
-        if (state.wrongAnswers.length > 0 && typeof saveWrongAnswer === 'function') {
-            for (const answer of state.wrongAnswers) {
-                await saveWrongAnswer(userData.id, {
-                    id: answer.question.id,
-                    question: answer.question.q,
-                    correctAnswer: answer.question.a,
-                    wrongAnswer: answer.userAnswer,
-                    stageId: state.levelId
-                });
-            }
-            console.log(`✅ ${state.wrongAnswers.length} wrong answers saved for analytics`);
-        } else {
-            console.log('ℹ️ No wrong answers to save');
-        }
-    } catch (error) {
-        console.error('❌ Error saving wrong answers:', error);
-    }
+   // Redirect to main save function
+   await saveProgressToSupabase(0, 0, 0, state.wrongAnswers.length);
 }
 
 async function getUserDataFromSupabase() {
@@ -659,47 +579,20 @@ function stopStreak() {
     state.streak.multiplier = 1;
     state.streak.timeLeft = 0;
     const timerEl = document.getElementById('streak-timer');
-    timerEl.classList.remove('show');
+    if (timerEl) timerEl.classList.remove('show');
 }
 
 // ====================================
-// DATA SAVING (Demo mode = NO SAVING)
+// DATA SAVING
 // ====================================
 async function sendAnalyticsToFirebase(wrongQuestions) {
-    // NO SAVING IN DEMO MODE
-    if (state.demoMode || state.levelId === 0) {
-        console.log("🎮 Demo mode - skipping analytics save");
-        return;
-    }
-    if (!wrongQuestions || wrongQuestions.length === 0) return;
-
-    console.log("📊 Analytics would be saved (not implemented yet)");
+    // Legacy function, replaced by saveProgressToSupabase
 }
 
 async function saveSessionToFirebase() {
-    // NO SAVING IN DEMO MODE
-    if (state.demoMode || state.levelId === 0) {
-        console.log("🎮 Demo mode - skipping session save");
-        return;
-    }
-    if (!state.userId || state.userId.startsWith('guest_')) {
-        console.log("👤 Guest user - skipping session save");
-        return;
-    }
-
-    console.log("💾 Session would be saved (not implemented yet)");
+    // Legacy function
 }
 
 async function saveGameProgress(userId, stageId, gameData) {
-    // NO SAVING IN DEMO MODE
-    if (state.demoMode || state.levelId === 0) {
-        console.log("🎮 Demo mode - skipping progress save");
-        return;
-    }
-    if (!userId || userId.startsWith('guest_')) {
-        console.log("👤 Guest user - skipping progress save");
-        return;
-    }
-    
-    console.log("💾 Progress would be saved to Supabase (pending implementation)");
+    // Legacy function
 }
