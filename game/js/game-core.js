@@ -233,7 +233,7 @@ function handleAnswer(sel, btnEl) {
         btnEl.classList.add('bg-emerald-500');
         state.score += finalPoints;
         state.combo++;
-        state.speed += 0.025;
+        // Speed is now constant - removed state.speed += 0.025
         
         state.correctAnswers.push(answerRecord);
         state.answeredQuestions.add(state.qData.id);

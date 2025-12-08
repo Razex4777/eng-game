@@ -4,6 +4,46 @@
 // ====================================
 
 // ====================================
+// DARK MODE TOGGLE
+// ====================================
+function toggleDarkMode() {
+    const body = document.body;
+    const icon = document.getElementById('darkmode-icon');
+    const bgContainer = document.getElementById('bg-container');
+    
+    body.classList.toggle('dark');
+    
+    if (body.classList.contains('dark')) {
+        icon.textContent = '☀️';
+        if (bgContainer) {
+            bgContainer.className = 'fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 -z-10';
+        }
+        localStorage.setItem('indexDarkMode', 'true');
+    } else {
+        icon.textContent = '🌙';
+        if (bgContainer) {
+            bgContainer.className = 'fixed inset-0 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 -z-10';
+        }
+        localStorage.setItem('indexDarkMode', 'false');
+    }
+}
+
+function loadDarkModePreference() {
+    const isDark = localStorage.getItem('indexDarkMode') === 'true';
+    const body = document.body;
+    const icon = document.getElementById('darkmode-icon');
+    const bgContainer = document.getElementById('bg-container');
+    
+    if (isDark) {
+        body.classList.add('dark');
+        if (icon) icon.textContent = '☀️';
+        if (bgContainer) {
+            bgContainer.className = 'fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 -z-10';
+        }
+    }
+}
+
+// ====================================
 // CUSTOM TOAST/POPUP
 // ====================================
 function showSuccessPopup(message, emoji = '✅') {
@@ -204,9 +244,15 @@ function createLevelCard(level) {
     const middleSection = document.createElement('div');
     middleSection.className = 'flex-1 flex items-center justify-center w-full relative';
     const numberText = document.createElement('span');
-    numberText.className = `font-black text-[8rem] text-white/90 drop-shadow-md`;
+    // Show "Demo" for level 0, otherwise show the level number
+    if (level.id === 0) {
+        numberText.className = `font-black text-[3rem] text-white/90 drop-shadow-md`;
+        numberText.textContent = 'Demo';
+    } else {
+        numberText.className = `font-black text-[8rem] text-white/90 drop-shadow-md`;
+        numberText.textContent = level.id;
+    }
     numberText.style.fontFamily = "'Nunito', sans-serif";
-    numberText.textContent = level.id;
     middleSection.appendChild(numberText);
     
     // Lock icon for locked levels

@@ -7,6 +7,9 @@
 // DOM CONTENT LOADED
 // ====================================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Load dark mode preference first
+    loadDarkModePreference();
+    
     // Initialize Supabase
     supabaseClient = initSupabase();
     
