@@ -147,6 +147,9 @@ function guestLogin(skipAnimation = false) {
     if (userTypeEl) userTypeEl.innerText = "زائر (Demo)";
     if (userInfoEl) userInfoEl.classList.remove('hidden');
     
+    // Update profile card with demo info
+    updateProfileCard(null);
+    
     // Lock all stages except Demo (stage 0)
     state.levels.forEach((level, index) => {
         if (index === 0) {

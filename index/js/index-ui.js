@@ -52,14 +52,25 @@ function toggleProfileCard() {
 }
 
 function updateProfileCard(userData) {
-    if (!userData) return;
-    
     const nameEl = document.getElementById('profile-name');
     const emailEl = document.getElementById('profile-email');
     const avatarEl = document.getElementById('profile-avatar');
     const xpEl = document.getElementById('profile-xp');
     const levelEl = document.getElementById('profile-level');
     const starsEl = document.getElementById('profile-stars');
+    
+    // Check if guest/demo mode
+    if (state.isGuest || !userData) {
+        if (nameEl) nameEl.textContent = '🎮 وضع التجربة';
+        if (emailEl) emailEl.textContent = 'سجّل دخولك لحفظ تقدمك!';
+        if (avatarEl) {
+            avatarEl.src = 'https://ui-avatars.com/api/?name=Demo&background=8b5cf6&color=fff&bold=true';
+        }
+        if (xpEl) xpEl.textContent = '0';
+        if (levelEl) levelEl.textContent = 'Demo';
+        if (starsEl) starsEl.textContent = '0';
+        return;
+    }
     
     if (nameEl) nameEl.textContent = userData.full_name || 'مستخدم';
     if (emailEl) emailEl.textContent = userData.email || '';
