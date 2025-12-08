@@ -35,7 +35,7 @@ async function checkSupabaseAuth() {
             // Prevent redirect loop - only redirect if not already redirected
             if (!sessionStorage.getItem('authRedirectAttempt')) {
                 sessionStorage.setItem('authRedirectAttempt', 'true');
-                window.location.href = 'https://example.com/login.html?incomplete=true';
+                window.location.href = '/login.html?incomplete=true';
             } else {
                 console.log("⚠️ Already tried redirecting - showing guest mode");
                 sessionStorage.removeItem('authRedirectAttempt');
@@ -79,6 +79,9 @@ async function checkSupabaseAuth() {
         // Update XP display
         const xpDisplay = document.getElementById('total-xp-display');
         if (xpDisplay) xpDisplay.textContent = userData.total_xp || 0;
+        
+        // Update profile card
+        updateProfileCard(userData);
         
         // Load progress from Supabase
         await loadUserProgressSupabase(userData.id);

@@ -44,6 +44,34 @@ function loadDarkModePreference() {
 }
 
 // ====================================
+// PROFILE CARD
+// ====================================
+function toggleProfileCard() {
+    const card = document.getElementById('profile-card');
+    card.classList.toggle('hidden');
+}
+
+function updateProfileCard(userData) {
+    if (!userData) return;
+    
+    const nameEl = document.getElementById('profile-name');
+    const emailEl = document.getElementById('profile-email');
+    const avatarEl = document.getElementById('profile-avatar');
+    const xpEl = document.getElementById('profile-xp');
+    const levelEl = document.getElementById('profile-level');
+    const starsEl = document.getElementById('profile-stars');
+    
+    if (nameEl) nameEl.textContent = userData.full_name || 'مستخدم';
+    if (emailEl) emailEl.textContent = userData.email || '';
+    if (avatarEl) {
+        avatarEl.src = userData.avatar_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userData.full_name || 'U') + '&background=6366f1&color=fff';
+    }
+    if (xpEl) xpEl.textContent = userData.total_xp || 0;
+    if (levelEl) levelEl.textContent = userData.current_level || 1;
+    if (starsEl) starsEl.textContent = userData.total_stars || 0;
+}
+
+// ====================================
 // CUSTOM TOAST/POPUP
 // ====================================
 function showSuccessPopup(message, emoji = '✅') {
@@ -233,7 +261,7 @@ function createLevelCard(level) {
     }
 
     card.id = `level-${level.id}`;
-    card.className = `relative w-64 h-80 flex flex-col items-center shrink-0 rounded-[3rem] border-[8px] transition-all duration-300 transform mb-8 ${bgClass} ${borderClass} ${shadowClass} ${isLocked ? 'card-locked' : ''}`;
+    card.className = `relative w-56 sm:w-64 h-72 sm:h-80 flex flex-col items-center shrink-0 rounded-[2.5rem] sm:rounded-[3rem] border-[6px] sm:border-[8px] transition-all duration-300 transform ${bgClass} ${borderClass} ${shadowClass} ${isLocked ? 'card-locked' : ''}`;
     
     // Glossy effect
     const glossy = document.createElement('div');

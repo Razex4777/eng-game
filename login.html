@@ -336,6 +336,7 @@
             <div class="step-dot active" id="dot-1"></div>
             <div class="step-dot" id="dot-2"></div>
             <div class="step-dot" id="dot-3"></div>
+            <div class="step-dot" id="dot-4"></div>
         </div>
 
         <!-- Step 1: Google Sign In -->
@@ -396,12 +397,78 @@
             </button>
         </div>
 
-        <!-- Step 3: Full Name -->
+        <!-- Step 3: Demographics -->
         <div class="step" id="step-3">
+            <h2 class="step-title">معلومات إضافية 📊</h2>
+            <p class="step-subtitle">ساعدنا نعرفك أكثر!</p>
+            
+            <div class="error-message" id="error-step3"></div>
+            
+            <div class="input-group">
+                <label>الجنس</label>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" id="gender-male" class="gender-btn" onclick="selectGender('male')" style="flex: 1; padding: 14px; border: 2px solid #ddd; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s;">
+                        👨 ذكر
+                    </button>
+                    <button type="button" id="gender-female" class="gender-btn" onclick="selectGender('female')" style="flex: 1; padding: 14px; border: 2px solid #ddd; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s;">
+                        👩 أنثى
+                    </button>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>العمر</label>
+                <div class="input-wrapper">
+                    <select id="age-input" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; background: white; cursor: pointer;">
+                        <option value="">اختر عمرك</option>
+                        <option value="12-15">12-15 سنة</option>
+                        <option value="16-18">16-18 سنة</option>
+                        <option value="19-22">19-22 سنة</option>
+                        <option value="23-30">23-30 سنة</option>
+                        <option value="31+">31+ سنة</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>المحافظة</label>
+                <div class="input-wrapper">
+                    <select id="region-input" style="width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; background: white; cursor: pointer;">
+                        <option value="">اختر محافظتك</option>
+                        <option value="بغداد">بغداد</option>
+                        <option value="البصرة">البصرة</option>
+                        <option value="نينوى">نينوى</option>
+                        <option value="أربيل">أربيل</option>
+                        <option value="النجف">النجف</option>
+                        <option value="كربلاء">كربلاء</option>
+                        <option value="ذي قار">ذي قار</option>
+                        <option value="الأنبار">الأنبار</option>
+                        <option value="ديالى">ديالى</option>
+                        <option value="كركوك">كركوك</option>
+                        <option value="صلاح الدين">صلاح الدين</option>
+                        <option value="بابل">بابل</option>
+                        <option value="واسط">واسط</option>
+                        <option value="ميسان">ميسان</option>
+                        <option value="المثنى">المثنى</option>
+                        <option value="القادسية">القادسية</option>
+                        <option value="دهوك">دهوك</option>
+                        <option value="السليمانية">السليمانية</option>
+                        <option value="أخرى">أخرى</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="handleDemographicsSubmit()">
+                التالي ←
+            </button>
+        </div>
+
+        <!-- Step 4: Full Name -->
+        <div class="step" id="step-4">
             <h2 class="step-title">اسمك الكامل ✏️</h2>
             <p class="step-subtitle">كيف تحب أن نناديك؟</p>
             
-            <div class="error-message" id="error-step3"></div>
+            <div class="error-message" id="error-step4"></div>
             
             <div class="input-group">
                 <label>الاسم الكامل</label>
@@ -420,7 +487,7 @@
             </button>
         </div>
 
-        <!-- Step 4: Success -->
+        <!-- Step 5: Success -->
         <div class="step" id="step-success">
             <div class="success-icon">
                 <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
@@ -682,18 +749,65 @@
 
             userData.phone = '07' + phone;
             showStep(3);
+        }
+
+        // ====================================
+        // STEP 3: DEMOGRAPHICS
+        // ====================================
+        function selectGender(gender) {
+            userData.gender = gender;
+            const maleBtn = document.getElementById('gender-male');
+            const femaleBtn = document.getElementById('gender-female');
+            
+            if (gender === 'male') {
+                maleBtn.style.background = '#4CAF50';
+                maleBtn.style.color = 'white';
+                maleBtn.style.borderColor = '#4CAF50';
+                femaleBtn.style.background = 'white';
+                femaleBtn.style.color = '#333';
+                femaleBtn.style.borderColor = '#ddd';
+            } else {
+                femaleBtn.style.background = '#E91E63';
+                femaleBtn.style.color = 'white';
+                femaleBtn.style.borderColor = '#E91E63';
+                maleBtn.style.background = 'white';
+                maleBtn.style.color = '#333';
+                maleBtn.style.borderColor = '#ddd';
+            }
+        }
+        
+        function handleDemographicsSubmit() {
+            const age = document.getElementById('age-input').value;
+            const region = document.getElementById('region-input').value;
+            
+            if (!userData.gender) {
+                showError('error-step3', 'الرجاء اختيار الجنس');
+                return;
+            }
+            if (!age) {
+                showError('error-step3', 'الرجاء اختيار العمر');
+                return;
+            }
+            if (!region) {
+                showError('error-step3', 'الرجاء اختيار المحافظة');
+                return;
+            }
+            
+            userData.age = age;
+            userData.region = region;
+            showStep(4);
             document.getElementById('name-input').focus();
         }
 
         // ====================================
-        // STEP 3: FULL NAME & FINISH
+        // STEP 4: FULL NAME & FINISH
         // ====================================
         async function handleFinish() {
             const nameInput = document.getElementById('name-input');
             const fullName = nameInput.value.trim();
 
             if (fullName.length < 3) {
-                showError('error-step3', 'الرجاء إدخال اسمك الكامل (3 أحرف على الأقل)');
+                showError('error-step4', 'الرجاء إدخال اسمك الكامل (3 أحرف على الأقل)');
                 nameInput.focus();
                 return;
             }
@@ -709,16 +823,22 @@
                     auth_id: userData.authId,
                     email: userData.email,
                     phone: userData.phone || 'NOT SET',
-                    full_name: userData.fullName
+                    full_name: userData.fullName,
+                    gender: userData.gender,
+                    age: userData.age,
+                    region: userData.region
                 });
                 
-                // Save user to database with avatar
+                // Save user to database with avatar and demographics
                 const updateData = {
                     auth_id: userData.authId,
                     email: userData.email,
                     full_name: userData.fullName,
                     avatar_url: userData.picture || null,
-                    last_login: new Date().toISOString()
+                    last_login: new Date().toISOString(),
+                    gender: userData.gender || null,
+                    age: userData.age || null,
+                    region: userData.region || null
                 };
                 
                 // Only add phone if it exists
