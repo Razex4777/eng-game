@@ -553,7 +553,7 @@
                     console.log('✅ Profile COMPLETE! Redirecting... (attempt ' + (sessionStorage.getItem('loginRedirectCount') ? parseInt(sessionStorage.getItem('loginRedirectCount')) + 1 : 1) + ')');
                     
                     // Try absolute path with trailing slash for Vercel
-                    window.location.replace('/index/');
+                    window.location.replace('/index');
                     return;
                 } else if (existingUser) {
                     // User exists but incomplete profile
@@ -752,7 +752,7 @@
                 showStep('success');
                 
                 setTimeout(() => {
-                    window.location.href = 'index/index.html';
+                    window.location.href = '/index';
                 }, 1500);
 
             } catch (error) {
@@ -791,7 +791,7 @@
                 showStep('success');
                 
                 setTimeout(() => {
-                    window.location.href = 'index/index.html';
+                    window.location.href = '/index';
                 }, 1500);
 
             } catch (error) {
@@ -840,3 +840,4 @@
     </script>
 </body>
 </html>
+

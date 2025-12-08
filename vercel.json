@@ -1,8 +1,8 @@
 {
   "version": 2,
   "public": true,
-  "cleanUrls": true,
-  "trailingSlash": true,
+  "cleanUrls": false,
+  "trailingSlash": false,
   
   "headers": [
     {
@@ -22,7 +22,10 @@
     }
   ],
   
-  "redirects": [
-    { "source": "/", "destination": "/login.html", "permanent": false }
+  "rewrites": [
+    { "source": "/", "destination": "/login.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/index", "destination": "/index/index.html" },
+    { "source": "/game", "destination": "/game/game.html" }
   ]
 }
