@@ -54,6 +54,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (!authOk) return;
     console.log('✅ Supabase initialized');
     
+    // Load game settings from Supabase (including speed)
+    await loadGameSettings();
+    
     // Show how to play screen
     document.getElementById('howtoplay-screen').classList.remove('hidden');
     console.log('✅ How to play screen shown');
@@ -91,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Results screen buttons
     document.getElementById('btn-play-again').onclick = playAgain;
     document.getElementById('btn-main-menu').onclick = goToMainMenu;
+    document.getElementById('btn-next-level').onclick = goToNextLevel;
 
     // Fullscreen events
     document.addEventListener('fullscreenchange', updateFullscreenIcon);

@@ -330,14 +330,25 @@ function gameLoop() {
     
     if (!state.frozen) {
         // Use fixed speed if not set
-        const speed = state.speed || 1.5;
+        const speed = state.speed || 0.8;
         state.qY += speed;
         
         const qEl = document.getElementById('falling-question');
         qEl.style.top = `${state.qY}px`;
         
-        const gameH = window.innerHeight; // Use window height since it's in body now
-        if (state.qY > gameH) {
+        // Get the answer buttons area position (fail line)
+        const optionsGrid = document.getElementById('options-grid');
+        const qElHeight = qEl ? qEl.offsetHeight : 150;
+        
+        // Calculate fail line: when bottom of question reaches top of buttons
+        let failLine = window.innerHeight; // Default fallback
+        if (optionsGrid) {
+            const optionsRect = optionsGrid.getBoundingClientRect();
+            failLine = optionsRect.top - qElHeight; // Question bottom reaches buttons top
+        }
+        
+        // Check if question reached the fail line (buttons area)
+        if (state.qY >= failLine) {
             handleMiss();
             return;
         }

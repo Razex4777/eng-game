@@ -21,7 +21,7 @@ let state = {
     qIndex: 0,
     qData: null,
     qY: -200,
-    speed: 0.3,
+    speed: 0.8,  // السرعة الافتراضية - أبطأ (يمكن تغييرها من Supabase)
     powerups: { freeze: 2, bomb: 1 },
     frozen: false,
     freezeTimeout: null,
@@ -131,4 +131,41 @@ async function initializeSupabaseGame() {
     
     console.log("✅ Supabase game initialized - User authenticated");
     return true;
+}
+
+// ====================================
+// LOAD GAME SETTINGS FROM SUPABASE
+// ====================================
+async function loadGameSettings() {
+    try {
+        if (!supabaseClient) {
+            console.log("⚠️ Supabase not initialized, using default settings");
+            return;
+        }
+        
+        const { data: settings, error } = await supabaseClient
+            .from('game_settings')
+            .select('setting_key, setting_value');
+        
+        if (error) {
+            console.log("⚠️ Could not load game settings:", error.message);
+            return;
+        }
+        
+        if (settings && settings.length > 0) {
+            settings.forEach(setting => {
+                if (setting.setting_key === 'game_speed') {
+                    const speed = parseFloat(setting.setting_value);
+                    if (!isNaN(speed) && speed > 0) {
+                        state.speed = speed;
+                        console.log(`⚙️ Game speed loaded from Supabase: ${speed}`);
+                    }
+                }
+            });
+        }
+        
+        console.log(`⚙️ Current game speed: ${state.speed}`);
+    } catch (error) {
+        console.log("⚠️ Error loading game settings:", error);
+    }
 }

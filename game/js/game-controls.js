@@ -223,3 +223,20 @@ function playAgain() {
     document.getElementById('results-screen').classList.remove('show');
     startGame();
 }
+
+// ====================================
+// GO TO NEXT LEVEL
+// ====================================
+function goToNextLevel() {
+    if (state.levelId === null || state.levelId >= 30) {
+        // If no level or last level, go to main menu
+        goToMainMenu();
+        return;
+    }
+    
+    const nextLevelId = state.levelId + 1;
+    console.log(`➡️ Going to next level: ${nextLevelId}`);
+    
+    // Navigate to next level
+    window.location.href = `game.html?level=${nextLevelId}`;
+}

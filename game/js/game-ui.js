@@ -251,6 +251,21 @@ function showResultsScreen(failed = false) {
     document.getElementById('wrong-answers').innerText = state.wrongAnswers.length;
     document.getElementById('final-score').innerText = state.score;
     
+    // Show/hide Next Level button based on success and level
+    const nextLevelBtn = document.getElementById('btn-next-level');
+    if (nextLevelBtn) {
+        // Show next level button only if:
+        // 1. Player didn't fail (still has lives)
+        // 2. Current level is not the last level (30)
+        // 3. Player is not in demo mode or is logged in
+        const canShowNextLevel = !failed && state.levelId !== null && state.levelId < 30;
+        if (canShowNextLevel) {
+            nextLevelBtn.classList.remove('hidden');
+        } else {
+            nextLevelBtn.classList.add('hidden');
+        }
+    }
+    
     // Hide the falling question
     const qEl = document.getElementById('falling-question');
     if (qEl) qEl.classList.add('hidden');
