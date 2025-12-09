@@ -347,19 +347,19 @@ function gameLoop() {
         qEl.style.top = `${state.qY}px`;
         
         // Fail line: when TOP of question reaches TOP of answer buttons
-        // Question loses when its top edge touches the buttons area
+        // Use getBoundingClientRect for accurate position comparison
         const optionsGrid = document.getElementById('options-grid');
-        let failLine = window.innerHeight; // Default fallback
         
-        if (optionsGrid) {
+        if (optionsGrid && qEl) {
+            const questionRect = qEl.getBoundingClientRect();
             const optionsRect = optionsGrid.getBoundingClientRect();
-            failLine = optionsRect.top; // Top of buttons area
-        }
-        
-        // Check if TOP of question reached the buttons
-        if (state.qY >= failLine) {
-            handleMiss();
-            return;
+            
+            // Question loses when its TOP edge reaches the TOP of buttons
+            if (questionRect.top >= optionsRect.top) {
+                console.log(`❌ FAIL: Question top (${Math.round(questionRect.top)}) reached buttons top (${Math.round(optionsRect.top)})`);
+                handleMiss();
+                return;
+            }
         }
     }
     
