@@ -329,8 +329,16 @@ function gameLoop() {
     state._loopDebugLogged = false;
     
     if (!state.frozen) {
-        // Use fixed speed if not set
+        // Use speed from state (loaded from Supabase or default)
         const speed = state.speed || 0.8;
+        
+        // Debug: Log speed every 100 frames
+        if (!state._speedLogCounter) state._speedLogCounter = 0;
+        state._speedLogCounter++;
+        if (state._speedLogCounter === 1 || state._speedLogCounter % 100 === 0) {
+            console.log(`🚀 SPEED: ${speed} | qY: ${Math.round(state.qY)}`);
+        }
+        
         state.qY += speed;
         
         const qEl = document.getElementById('falling-question');

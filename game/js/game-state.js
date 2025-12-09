@@ -100,6 +100,10 @@ async function initializeSupabaseGame() {
         console.log(`📍 Level from URL: ${state.levelId}`);
     }
     
+    // Initialize Supabase client first (needed for settings even in guest mode)
+    supabaseClient = initSupabase();
+    console.log("🔌 Supabase client initialized:", supabaseClient ? "✅" : "❌");
+    
     // Guest mode - allow demo only
     if (isGuestSession || isGuestUrl) {
         console.log("🎮 Demo Mode - Playing as guest");
