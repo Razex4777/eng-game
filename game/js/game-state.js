@@ -168,14 +168,14 @@ async function loadGameSettings() {
                     const speed = parseFloat(setting.setting_value);
                     console.log(`📊 Raw speed value: "${setting.setting_value}" → parsed: ${speed}`);
                     
-                    // Validate speed is reasonable (0.3 to 3.0)
-                    if (!isNaN(speed) && speed >= 0.3 && speed <= 3.0) {
+                    // Validate speed is reasonable (0.1 to 5.0) - allowing very slow for testing
+                    if (!isNaN(speed) && speed >= 0.1 && speed <= 5.0) {
                         state.speed = speed;
                         console.log(`✅ Game speed set to: ${speed}`);
-                    } else if (!isNaN(speed) && speed > 0 && speed < 0.3) {
+                    } else if (!isNaN(speed) && speed > 0 && speed < 0.1) {
                         // If too slow, use minimum
-                        state.speed = 0.3;
-                        console.log(`⚠️ Speed ${speed} too slow, using minimum: 0.3`);
+                        state.speed = 0.1;
+                        console.log(`⚠️ Speed ${speed} too slow, using minimum: 0.1`);
                     } else if (!isNaN(speed) && speed > 3.0) {
                         // If too fast, use maximum
                         state.speed = 3.0;

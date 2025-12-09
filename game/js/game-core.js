@@ -117,8 +117,8 @@ async function startGame() {
         golden: (q.golden === 1) || (q.repeat >= 5)
     }));
     
-    // Shuffle questions for variety
-    state.questions = state.questions.sort(() => Math.random() - 0.5);
+    // Questions are kept in order (as defined in the file)
+    // Only the answer options are shuffled, not the questions themselves
     
     // DEMO MODE: Limit to 5 questions only for level 0
     if (state.levelId === 0 || state.levelId === '0') {
@@ -346,18 +346,11 @@ function gameLoop() {
         const qEl = document.getElementById('falling-question');
         qEl.style.top = `${state.qY}px`;
         
-        // Get the answer buttons area position (fail line)
-        const optionsGrid = document.getElementById('options-grid');
-        const qElHeight = qEl ? qEl.offsetHeight : 150;
+        // Fail line: when question goes completely below the screen (under the buttons)
+        // This allows the question to pass through the buttons area
+        const failLine = window.innerHeight + 50; // Below the screen
         
-        // Calculate fail line: when bottom of question reaches top of buttons
-        let failLine = window.innerHeight; // Default fallback
-        if (optionsGrid) {
-            const optionsRect = optionsGrid.getBoundingClientRect();
-            failLine = optionsRect.top - qElHeight; // Question bottom reaches buttons top
-        }
-        
-        // Check if question reached the fail line (buttons area)
+        // Check if question went completely off screen
         if (state.qY >= failLine) {
             handleMiss();
             return;
