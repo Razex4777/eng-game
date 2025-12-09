@@ -457,7 +457,7 @@ body.dark-mode .repeat-badge {
     transform: translateX(-50%);
     width: 91.666667%; /* w-11/12 */
     max-width: 24rem; /* max-w-sm */
-    z-index: 25; /* Below options grid (z-30) and pause overlay (z-50) */
+    z-index: 5; /* BEHIND options grid (z-30) - question falls behind buttons */
 }
 
 /* ====================================
