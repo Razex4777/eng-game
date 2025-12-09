@@ -346,11 +346,17 @@ function gameLoop() {
         const qEl = document.getElementById('falling-question');
         qEl.style.top = `${state.qY}px`;
         
-        // Fail line: when question goes completely below the screen (under the buttons)
-        // This allows the question to pass through the buttons area
-        const failLine = window.innerHeight + 50; // Below the screen
+        // Fail line: when TOP of question reaches TOP of answer buttons
+        // Question loses when its top edge touches the buttons area
+        const optionsGrid = document.getElementById('options-grid');
+        let failLine = window.innerHeight; // Default fallback
         
-        // Check if question went completely off screen
+        if (optionsGrid) {
+            const optionsRect = optionsGrid.getBoundingClientRect();
+            failLine = optionsRect.top; // Top of buttons area
+        }
+        
+        // Check if TOP of question reached the buttons
         if (state.qY >= failLine) {
             handleMiss();
             return;
