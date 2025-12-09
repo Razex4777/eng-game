@@ -80,7 +80,9 @@ async function startGame() {
     state.powerups = { freeze: 2, bomb: 1 };
     state.frozen = false;
     state.answeredQuestions = new Set();
-    state.speed = 1.5; // Fixed speed as requested
+    // DON'T reset speed here - it's loaded from Supabase in loadGameSettings()
+    // state.speed is already set correctly before startGame() is called
+    console.log(`⚙️ Using speed from settings: ${state.speed}`);
     stopStreak();
 
     startSession();
