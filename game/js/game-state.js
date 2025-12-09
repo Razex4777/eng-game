@@ -138,8 +138,11 @@ async function initializeSupabaseGame() {
 // ====================================
 async function loadGameSettings() {
     try {
+        console.log("🔄 Loading game settings from Supabase...");
+        
         if (!supabaseClient) {
             console.log("⚠️ Supabase not initialized, using default settings");
+            console.log(`⚙️ Default speed: ${state.speed}`);
             return;
         }
         
@@ -149,23 +152,42 @@ async function loadGameSettings() {
         
         if (error) {
             console.log("⚠️ Could not load game settings:", error.message);
+            console.log(`⚙️ Using default speed: ${state.speed}`);
             return;
         }
+        
+        console.log("📦 Settings from Supabase:", settings);
         
         if (settings && settings.length > 0) {
             settings.forEach(setting => {
                 if (setting.setting_key === 'game_speed') {
                     const speed = parseFloat(setting.setting_value);
-                    if (!isNaN(speed) && speed > 0) {
+                    console.log(`📊 Raw speed value: "${setting.setting_value}" → parsed: ${speed}`);
+                    
+                    // Validate speed is reasonable (0.3 to 3.0)
+                    if (!isNaN(speed) && speed >= 0.3 && speed <= 3.0) {
                         state.speed = speed;
-                        console.log(`⚙️ Game speed loaded from Supabase: ${speed}`);
+                        console.log(`✅ Game speed set to: ${speed}`);
+                    } else if (!isNaN(speed) && speed > 0 && speed < 0.3) {
+                        // If too slow, use minimum
+                        state.speed = 0.3;
+                        console.log(`⚠️ Speed ${speed} too slow, using minimum: 0.3`);
+                    } else if (!isNaN(speed) && speed > 3.0) {
+                        // If too fast, use maximum
+                        state.speed = 3.0;
+                        console.log(`⚠️ Speed ${speed} too fast, using maximum: 3.0`);
+                    } else {
+                        console.log(`⚠️ Invalid speed value, using default: ${state.speed}`);
                     }
                 }
             });
+        } else {
+            console.log("⚠️ No settings found in Supabase");
         }
         
-        console.log(`⚙️ Current game speed: ${state.speed}`);
+        console.log(`🎮 FINAL GAME SPEED: ${state.speed}`);
     } catch (error) {
         console.log("⚠️ Error loading game settings:", error);
+        console.log(`⚙️ Using default speed: ${state.speed}`);
     }
 }
