@@ -209,35 +209,51 @@ const DEMO_QUESTIONS = [
 ];
 
 // ====================================
-// ENCOURAGEMENT MESSAGES
+// ENCOURAGEMENT MESSAGES (Loaded from Supabase)
 // ====================================
-const ENCOURAGEMENT_MESSAGES = {
-    correct: [
-        "🚀 شكلك مخلص المنهج قبل الأستاذ!",
-        "✨ عاشت ايدك!",
-        "🔥 بطل!",
-        "⚡ انت شكاكي!",
-        "💯 ممتاز!",
-        "🌟 رائع جداً!"
-    ],
-    streak: [
-        "🔥 عفية عليك!",
-        "👏 سويت ذا الوبرا بالامتحان!\nهيج استمر!",
-        "🌟 انت الأول بالصف!",
-        "💪 ما تنوقف!"
-    ],
-    wrong: [
-        "🤣 بعدك بالسادس لو حوّلوك ابتدائي؟",
-        "💔 راح تبقى الإجابة بذاكرتك\nكصدمة عاطفية!",
-        "🙄 السؤال يگلك:\nأرجوك بعد لا تجاوبني!",
-        "😅 همزين مو بالوزاري!",
-        "😬 آخ... طارت الدرجة!",
-        "🧐 جاوبت من جيبك؟\nلأن الكتاب مابي هيچ شي!",
-        "🤦‍♂️ لو تخلي إيدك على عينك\nچان جاوبت صح!",
-        "😭 من جاوبت، الجملة چانت تبچي\nوتصيح: مو هيچ الحل!",
-        "⚡️ بهاي السرعة جاوبت...\nشكلك مستغني عن الدرجة!"
-    ]
+let ENCOURAGEMENT_MESSAGES = {
+    correct: ["✅ صحيح!"],
+    streak: ["🔥 ممتاز!"],
+    wrong: ["❌ خطأ!"]
 };
+
+// Load messages from Supabase
+async function loadEncouragementMessages() {
+    try {
+        if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+            console.log("⚠️ Supabase not available, using default messages");
+            return;
+        }
+        
+        const { data, error } = await supabaseClient
+            .from('encouragement_messages')
+            .select('type, message')
+            .eq('is_active', true);
+        
+        if (error) {
+            console.error("❌ Error loading messages:", error);
+            return;
+        }
+        
+        if (data && data.length > 0) {
+            // Reset and populate from database
+            ENCOURAGEMENT_MESSAGES = { correct: [], streak: [], wrong: [] };
+            
+            data.forEach(row => {
+                if (ENCOURAGEMENT_MESSAGES[row.type]) {
+                    ENCOURAGEMENT_MESSAGES[row.type].push(row.message);
+                }
+            });
+            
+            console.log("✅ Encouragement messages loaded from Supabase:");
+            console.log(`   📗 Correct: ${ENCOURAGEMENT_MESSAGES.correct.length}`);
+            console.log(`   🔥 Streak: ${ENCOURAGEMENT_MESSAGES.streak.length}`);
+            console.log(`   📕 Wrong: ${ENCOURAGEMENT_MESSAGES.wrong.length}`);
+        }
+    } catch (err) {
+        console.error("❌ Failed to load messages:", err);
+    }
+}
 
 function getRandomMessage(type) {
     const messages = ENCOURAGEMENT_MESSAGES[type];

@@ -57,6 +57,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load game settings from Supabase (including speed)
     await loadGameSettings();
     
+    // Load encouragement messages from Supabase
+    if (typeof loadEncouragementMessages === 'function') {
+        await loadEncouragementMessages();
+    }
+    
     // Show how to play screen
     document.getElementById('howtoplay-screen').classList.remove('hidden');
     console.log('✅ How to play screen shown');
