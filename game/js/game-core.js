@@ -4,62 +4,78 @@
 // ====================================
 
 // ====================================
-// QUESTION FETCHING
+// QUESTION FETCHING FROM SUPABASE
 // ====================================
-function loadQuestionsForLevel(levelId) {
-    console.log(`\n📚 Loading questions for Level ${levelId}...`);
+async function loadQuestionsForLevel(levelId) {
+    console.log(`\n📚 Loading questions for Level ${levelId} from Supabase...`);
     
-    // Demo mode only if explicitly set (guest user)
-    // Level 0 uses demo questions but registered users still save analytics
-    if (state.demoMode) {
-        console.log("🎮 Guest Demo mode - using demo questions");
-        return DEMO_QUESTIONS;
-    }
-    
-    // Level 0 for registered users - still use demo questions but allow analytics
-    if (levelId === 0) {
-        console.log("🎮 Level 0 (Demo questions) - User is registered, analytics enabled");
-        return DEMO_QUESTIONS;
-    }
-    
-    // Check if questions database is initialized
-    if (typeof questionsData === 'undefined' || Object.keys(questionsData).length === 0) {
-        console.log("⚠️ Questions database not initialized, trying to initialize...");
-        if (typeof initializeQuestionsDatabase === 'function') {
-            initializeQuestionsDatabase();
+    try {
+        // Try to load from Supabase first
+        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+            const { data, error } = await supabaseClient
+                .from('questions')
+                .select('*')
+                .eq('stage_id', levelId)
+                .eq('is_active', true)
+                .order('question_order', { ascending: true });
+            
+            if (!error && data && data.length > 0) {
+                // Transform Supabase data to game format
+                const questions = data.map(q => ({
+                    id: q.question_id,
+                    q: q.question_text,
+                    options: [q.option_a, q.option_b, q.option_c, q.option_d],
+                    a: q.correct_answer,
+                    repeat: q.repeat_count || 1,
+                    golden: q.is_golden ? 1 : 0,
+                    explanation: q.explanation || ''
+                }));
+                
+                console.log(`✅ Loaded ${questions.length} questions from Supabase for Stage ${levelId}`);
+                const goldenCount = questions.filter(q => q.golden === 1).length;
+                console.log(`   📊 Golden questions: ${goldenCount}`);
+                console.log(`   📊 First question: "${questions[0].q.substring(0, 50)}..."`);
+                
+                return questions;
+            }
+            
+            if (error) {
+                console.error("❌ Supabase error:", error);
+            }
         }
+    } catch (err) {
+        console.error("❌ Failed to load from Supabase:", err);
     }
     
-    // Try to get questions for this level
+    // Fallback to local files if Supabase fails
+    console.log("⚠️ Falling back to local question files...");
+    return loadQuestionsFromLocalFiles(levelId);
+}
+
+// Fallback function for local files
+function loadQuestionsFromLocalFiles(levelId) {
+    // Demo mode
+    if (state.demoMode || levelId === 0) {
+        console.log("🎮 Using demo questions");
+        return DEMO_QUESTIONS;
+    }
+    
+    // Try local questionsData
     if (typeof getStageQuestions === 'function') {
         const questions = getStageQuestions(levelId);
         if (questions && questions.length > 0) {
-            console.log(`✅ Loaded ${questions.length} questions for Stage ${levelId}`);
-            
-            // Log some stats
-            const goldenCount = questions.filter(q => q.golden === 1 || q.repeat >= 5).length;
-            console.log(`   📊 Golden questions: ${goldenCount}`);
-            console.log(`   📊 Sample: "${questions[0].q.substring(0, 50)}..."`);
-            
+            console.log(`✅ Loaded ${questions.length} questions from local files`);
             return questions;
         }
     }
     
-    // Check questionsData directly
-    const stageKey = `stage${levelId}`;
-    if (typeof questionsData !== 'undefined' && questionsData[stageKey]) {
-        const questions = questionsData[stageKey];
-        console.log(`✅ Direct load: ${questions.length} questions for ${stageKey}`);
-        return questions;
-    }
-    
-    // Fallback to demo questions
-    console.log("⚠️ No questions found for this level, using demo questions");
+    // Final fallback
+    console.log("⚠️ No questions found, using demo questions");
     return DEMO_QUESTIONS;
 }
 
 async function fetchQuestionsFromFirebase() {
-    return loadQuestionsForLevel(state.levelId);
+    return await loadQuestionsForLevel(state.levelId);
 }
 
 // ====================================
