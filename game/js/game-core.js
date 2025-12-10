@@ -479,10 +479,21 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
         // Update user's total XP and Level
         const newTotalXP = (userData.total_xp || 0) + xpEarned;
         
-        // If completing level 0, ensure we are at least level 1
-        // If completing level X, ensure we are at least level X+1
-        const nextLevel = state.levelId + 1;
-        const newCurrentLevel = Math.max(userData.current_level || 1, nextLevel);
+        // Only unlock the NEXT level if completing the current highest level
+        // This prevents skipping levels (e.g., completing level 5 when level 4 is not done)
+        const currentUserLevel = userData.current_level || 1;
+        const completedLevel = state.levelId;
+        
+        // Only advance current_level if completing the level that matches current_level
+        // OR if completing level 0 (demo) to unlock level 1
+        let newCurrentLevel = currentUserLevel;
+        if (completedLevel === 0 && currentUserLevel < 1) {
+            newCurrentLevel = 1; // Demo completed, unlock level 1
+        } else if (completedLevel === currentUserLevel - 1 || completedLevel === currentUserLevel) {
+            // Completing the expected level, advance to next
+            newCurrentLevel = completedLevel + 1;
+        }
+        // If completing a level that's not the current one, don't change current_level
         
         if (typeof updateUserStats === 'function') {
             await updateUserStats(userData.id, {
