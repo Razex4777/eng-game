@@ -264,19 +264,25 @@ function createLevelCard(level) {
         borderClass = "border-slate-400"; 
         shadowClass = "";
     } else {
-        if (level.status === 'completed') {
+        // Color based on stars earned:
+        // 3 stars = Green (perfect)
+        // 2 stars = Yellow/Orange (good)
+        // 1 star = Blue (passed)
+        // 0 stars = Purple/Indigo (unlocked but not played or failed)
+        if (level.stars >= 3) {
             bgClass = "bg-green-500"; 
             borderClass = "border-green-400";
+        } else if (level.stars === 2) {
+            bgClass = "bg-yellow-500"; 
+            borderClass = "border-yellow-400";
+        } else if (level.stars === 1) {
+            bgClass = "bg-blue-500"; 
+            borderClass = "border-blue-400";
         } else {
             bgClass = "bg-indigo-500"; 
             borderClass = "border-indigo-400";
         }
         shadowClass = "hover:scale-105 cursor-pointer shadow-xl";
-    }
-    
-    if (level.id === 1 && !isLocked) {
-        bgClass = "bg-gradient-to-b from-blue-500 to-indigo-600";
-        shadowClass += " shadow-blue-300/50";
     }
 
     card.id = `level-${level.id}`;
