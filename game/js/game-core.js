@@ -154,7 +154,7 @@ function nextQuestion() {
     state.qData = state.questions[state.qIndex];
     console.log(`❓ Question ${state.qIndex + 1}:`, state.qData.q);
     
-    state.qY = -250; // Start above the screen
+    state.qY = -120; // Start just above the visible area (closer for faster appearance)
     state.frozen = false;
     if (state.freezeTimeout) {
         clearTimeout(state.freezeTimeout);
