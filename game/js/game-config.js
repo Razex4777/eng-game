@@ -6,7 +6,7 @@
 // ====================================
 // SUPABASE CONFIGURATION
 // ====================================
-let supabaseClient = null;
+// supabaseClient is declared in /js/supabase-config.js
 let currentSupabaseUser = null;
 
 // Stub for Firebase (to prevent errors - will be removed after full migration)

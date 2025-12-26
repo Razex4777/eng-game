@@ -6,7 +6,7 @@
 // ====================================
 // SUPABASE REFERENCE
 // ====================================
-let supabaseClient;
+// supabaseClient is declared in /js/supabase-config.js
 let currentUserData = null;
 
 // ====================================
