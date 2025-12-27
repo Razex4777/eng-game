@@ -167,18 +167,23 @@ async function submitFeedback() {
     if (!text.trim()) return;
 
     const btn = document.querySelector('#feedback-modal button:last-child');
+    const originalText = btn.innerHTML;
     btn.innerHTML = "جاري الإرسال...";
     btn.disabled = true;
 
     try {
-        if (sb_client && currentUserData) {
-            await sb_client.from('suggestions').insert({
-                user_id: currentUserData.id,
-                user_email: currentUserData.email,
-                user_name: currentUserData.full_name,
-                content: text
-            });
+        if (!sb_client || !currentUserData) {
+            throw new Error("User not authenticated or client missing");
         }
+
+        const { error } = await sb_client.from('suggestions').insert({
+            user_id: currentUserData.id,
+            user_email: currentUserData.email,
+            user_name: currentUserData.full_name,
+            content: text
+        });
+
+        if (error) throw error;
 
         document.getElementById('feedback-text').value = "";
         closeFeedbackModal();
@@ -186,9 +191,11 @@ async function submitFeedback() {
     } catch (error) {
         console.error("❌ Submit feedback failed:", error);
         closeFeedbackModal();
-        showSuccessPopup("شكراً لك! تم استلام اقتراحك 💚", "🎉");
+        // Show error popup (reusing success popup style but with error message/color if possible, or just standard alert for now)
+        // Since we don't have a specific error popup, we'll use a modified message
+        showSuccessPopup("عذراً، حدث خطأ أثناء الإرسال ❌", "⚠️");
     } finally {
-        btn.innerHTML = "إرسال الاقتراح 🚀";
+        btn.innerHTML = originalText;
         btn.disabled = false;
     }
 }

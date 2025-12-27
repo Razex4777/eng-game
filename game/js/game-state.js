@@ -129,6 +129,7 @@ async function initializeSupabaseGame() {
         sessionStorage.setItem('redirectAfterLogin', window.location.href);
 
         // Redirect to login
+        alert("عذراً، يجب تسجيل الدخول للعب هذه المرحلة. سيتم تحويلك لصفحة الدخول.");
         window.location.href = '../login.html?from=game';
         return false;
     }
