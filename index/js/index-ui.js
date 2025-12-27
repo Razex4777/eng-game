@@ -10,9 +10,9 @@ function toggleDarkMode() {
     const body = document.body;
     const icon = document.getElementById('darkmode-icon');
     const bgContainer = document.getElementById('bg-container');
-    
+
     body.classList.toggle('dark');
-    
+
     if (body.classList.contains('dark')) {
         icon.textContent = '☀️';
         if (bgContainer) {
@@ -33,7 +33,7 @@ function loadDarkModePreference() {
     const body = document.body;
     const icon = document.getElementById('darkmode-icon');
     const bgContainer = document.getElementById('bg-container');
-    
+
     if (isDark) {
         body.classList.add('dark');
         if (icon) icon.textContent = '☀️';
@@ -58,7 +58,7 @@ function updateProfileCard(userData) {
     const xpEl = document.getElementById('profile-xp');
     const levelEl = document.getElementById('profile-level');
     const starsEl = document.getElementById('profile-stars');
-    
+
     // Check if guest/demo mode
     if (state.isGuest || !userData) {
         if (nameEl) nameEl.textContent = '🎮 وضع التجربة';
@@ -71,7 +71,7 @@ function updateProfileCard(userData) {
         if (starsEl) starsEl.textContent = '0';
         return;
     }
-    
+
     if (nameEl) nameEl.textContent = userData.full_name || 'مستخدم';
     if (emailEl) emailEl.textContent = userData.email || '';
     if (avatarEl) {
@@ -89,7 +89,7 @@ function showSuccessPopup(message, emoji = '✅') {
     // Remove any existing popup
     const existing = document.getElementById('success-popup');
     if (existing) existing.remove();
-    
+
     const popup = document.createElement('div');
     popup.id = 'success-popup';
     popup.innerHTML = `
@@ -140,7 +140,7 @@ function showSuccessPopup(message, emoji = '✅') {
         </style>
     `;
     document.body.appendChild(popup);
-    
+
     // Auto-close after 4 seconds
     setTimeout(() => {
         if (popup.parentNode) {
@@ -154,32 +154,32 @@ function showSuccessPopup(message, emoji = '✅') {
 // ====================================
 // FEEDBACK MODAL
 // ====================================
-function openFeedbackModal() { 
-    document.getElementById('feedback-modal').classList.remove('hidden'); 
+function openFeedbackModal() {
+    document.getElementById('feedback-modal').classList.remove('hidden');
 }
 
-function closeFeedbackModal() { 
-    document.getElementById('feedback-modal').classList.add('hidden'); 
+function closeFeedbackModal() {
+    document.getElementById('feedback-modal').classList.add('hidden');
 }
 
 async function submitFeedback() {
-    const text = document.getElementById('feedback-text').value; 
+    const text = document.getElementById('feedback-text').value;
     if (!text.trim()) return;
-    
-    const btn = document.querySelector('#feedback-modal button:last-child'); 
-    btn.innerHTML = "جاري الإرسال..."; 
+
+    const btn = document.querySelector('#feedback-modal button:last-child');
+    btn.innerHTML = "جاري الإرسال...";
     btn.disabled = true;
-    
+
     try {
-        if (supabaseClient && currentUserData) {
-            await supabaseClient.from('suggestions').insert({
+        if (sb_client && currentUserData) {
+            await sb_client.from('suggestions').insert({
                 user_id: currentUserData.id,
                 user_email: currentUserData.email,
                 user_name: currentUserData.full_name,
                 content: text
             });
         }
-        
+
         document.getElementById('feedback-text').value = "";
         closeFeedbackModal();
         showSuccessPopup("شكراً لك! تم استلام اقتراحك 💚", "🎉");
@@ -188,7 +188,7 @@ async function submitFeedback() {
         closeFeedbackModal();
         showSuccessPopup("شكراً لك! تم استلام اقتراحك 💚", "🎉");
     } finally {
-        btn.innerHTML = "إرسال الاقتراح 🚀"; 
+        btn.innerHTML = "إرسال الاقتراح 🚀";
         btn.disabled = false;
     }
 }
@@ -198,7 +198,7 @@ async function submitFeedback() {
 // ====================================
 function toggleFullScreen() {
     const element = document.documentElement;
-    
+
     if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
         if (element.requestFullscreen) {
             element.requestFullscreen();
@@ -228,14 +228,14 @@ function toggleFullScreen() {
 function renderLevels() {
     console.log('🎮 renderLevels called');
     console.log('📊 state.levels:', state.levels);
-    
+
     const container = document.getElementById('levels-grid');
     if (!container) {
         console.error('❌ levels-grid container not found!');
         return;
     }
     container.innerHTML = '';
-    
+
     // Reverse order: stages from 30 to 1
     // Stage 1 appears at bottom
     for (let i = state.levels.length - 1; i >= 0; i--) {
@@ -243,7 +243,7 @@ function renderLevels() {
         const card = createLevelCard(state.levels[i]);
         container.appendChild(card);
     }
-    
+
     // Auto-scroll to bottom (Stage 1)
     setTimeout(() => {
         window.scrollTo({
@@ -256,12 +256,12 @@ function renderLevels() {
 function createLevelCard(level) {
     const card = document.createElement('div');
     let isLocked = level.status === "locked";
-    
+
     let bgClass, borderClass, shadowClass;
-    
+
     if (isLocked) {
-        bgClass = "bg-slate-300"; 
-        borderClass = "border-slate-400"; 
+        bgClass = "bg-slate-300";
+        borderClass = "border-slate-400";
         shadowClass = "";
     } else {
         // Color based on stars earned:
@@ -270,16 +270,16 @@ function createLevelCard(level) {
         // 1 star = Blue (passed)
         // 0 stars = Purple/Indigo (unlocked but not played or failed)
         if (level.stars >= 3) {
-            bgClass = "bg-green-500"; 
+            bgClass = "bg-green-500";
             borderClass = "border-green-400";
         } else if (level.stars === 2) {
-            bgClass = "bg-yellow-500"; 
+            bgClass = "bg-yellow-500";
             borderClass = "border-yellow-400";
         } else if (level.stars === 1) {
-            bgClass = "bg-blue-500"; 
+            bgClass = "bg-blue-500";
             borderClass = "border-blue-400";
         } else {
-            bgClass = "bg-indigo-500"; 
+            bgClass = "bg-indigo-500";
             borderClass = "border-indigo-400";
         }
         shadowClass = "hover:scale-105 cursor-pointer shadow-xl";
@@ -288,12 +288,12 @@ function createLevelCard(level) {
     card.id = `level-${level.id}`;
     // Mobile-first: smaller cards on mobile, larger on desktop
     card.className = `relative w-40 sm:w-56 md:w-64 h-52 sm:h-72 md:h-80 flex flex-col items-center shrink-0 rounded-[1.5rem] sm:rounded-[2.5rem] md:rounded-[3rem] border-4 sm:border-[6px] md:border-[8px] transition-all duration-300 transform ${bgClass} ${borderClass} ${shadowClass} ${isLocked ? 'card-locked' : ''}`;
-    
+
     // Glossy effect
     const glossy = document.createElement('div');
     glossy.className = `absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 w-4/5 h-1/4 rounded-t-[1rem] sm:rounded-t-[2rem] pointer-events-none bg-gradient-to-b from-white/30 to-transparent`;
     card.appendChild(glossy);
-    
+
     // Middle section with level number
     const middleSection = document.createElement('div');
     middleSection.className = 'flex-1 flex items-center justify-center w-full relative';
@@ -309,13 +309,13 @@ function createLevelCard(level) {
     }
     numberText.style.fontFamily = "'Nunito', sans-serif";
     middleSection.appendChild(numberText);
-    
+
     // Lock icon for locked levels (smaller on mobile)
     if (isLocked) {
         middleSection.innerHTML += `<div class="absolute inset-0 flex items-center justify-center z-20"><span class="text-4xl sm:text-5xl md:text-7xl opacity-60">🔒</span></div>`;
     }
     card.appendChild(middleSection);
-    
+
     // Stars section (smaller on mobile)
     const starsSection = document.createElement('div');
     starsSection.className = `w-full mt-auto rounded-b-[1.5rem] sm:rounded-b-[2.5rem] flex items-end justify-between px-3 sm:px-6 pb-3 sm:pb-6`;
@@ -323,7 +323,7 @@ function createLevelCard(level) {
         const isFilled = i < level.stars;
         const fill = isFilled ? "#fbbf24" : "rgba(0,0,0,0.2)";
         const stroke = isFilled ? "#f59e0b" : "rgba(255,255,255,0.4)";
-        
+
         // Smaller stars on mobile
         starsSection.innerHTML += `
             <svg class="w-7 h-7 sm:w-10 sm:h-10 md:w-[45px] md:h-[45px]" viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="2">

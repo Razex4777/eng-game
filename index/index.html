@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>بوابة الطالب الذكي</title>
-    
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-H90E46NFQT"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-H90E46NFQT');
     </script>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -38,15 +39,18 @@
     </script>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+
     <!-- Page Styles -->
     <link rel="stylesheet" href="/index/css/index.css">
-    
+
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/supabase-config.js"></script>
+    <script src="/js/app-sb.js?v=2.0.1"></script>
 </head>
+
 <body class="min-h-screen transition-colors duration-500 level-selector-bg bg-blue-50 dark:bg-slate-900">
 
     <!-- Floating Feedback Button -->
@@ -57,15 +61,20 @@
 
     <!-- Feedback Modal -->
     <div id="feedback-modal" class="fixed inset-0 z-[60] modal-overlay hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl transform transition-all scale-100 relative border-4 border-indigo-100">
-            <button type="button" onclick="closeFeedbackModal()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 text-xl font-black bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer z-50">✕</button>
+        <div
+            class="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl transform transition-all scale-100 relative border-4 border-indigo-100">
+            <button type="button" onclick="closeFeedbackModal()"
+                class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 text-xl font-black bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer z-50">✕</button>
             <div class="text-center mb-6">
                 <div class="text-5xl mb-4 animate-bounce">🤔</div>
                 <h3 class="text-xl font-black text-slate-800 mb-2">اللعبة تكبر بأفكاركم...</h3>
                 <p class="text-indigo-500 text-sm font-black">شنو اقتراحك حتى نطوّرها؟</p>
             </div>
-            <textarea id="feedback-text" class="w-full h-32 bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-right mb-4 focus:border-brand focus:outline-none font-bold text-slate-700 placeholder-slate-400 resize-none transition-all focus:ring-4 focus:ring-indigo-100" placeholder="اكتب اقتراحك هنا..."></textarea>
-            <button onclick="submitFeedback()" class="w-full bg-gradient-to-r from-brand to-brand-light text-white font-black py-4 rounded-xl shadow-xl shadow-indigo-200 hover:translate-y-[-2px] hover:shadow-2xl transition-all active:scale-95 text-lg">
+            <textarea id="feedback-text"
+                class="w-full h-32 bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-right mb-4 focus:border-brand focus:outline-none font-bold text-slate-700 placeholder-slate-400 resize-none transition-all focus:ring-4 focus:ring-indigo-100"
+                placeholder="اكتب اقتراحك هنا..."></textarea>
+            <button onclick="submitFeedback()"
+                class="w-full bg-gradient-to-r from-brand to-brand-light text-white font-black py-4 rounded-xl shadow-xl shadow-indigo-200 hover:translate-y-[-2px] hover:shadow-2xl transition-all active:scale-95 text-lg">
                 إرسال الاقتراح 🚀
             </button>
         </div>
@@ -73,50 +82,68 @@
 
     <!-- Background Container -->
     <div id="bg-container" class="fixed inset-0 bg-gradient-to-br from-blue-100 via-blue-50 to-blue-100 -z-10"></div>
-    
+
     <!-- Top Bar (Mobile-first: smaller on mobile) -->
     <div class="fixed top-0 left-0 w-full z-40 p-2 sm:p-4 flex justify-between items-start pointer-events-none">
         <!-- XP Display (clickable for profile) -->
-        <button onclick="toggleProfileCard()" class="pointer-events-auto bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl flex flex-col items-center shadow-lg border-2 border-white/20 transform hover:scale-105 transition-transform cursor-pointer ml-2 sm:ml-4">
-            <span class="text-[8px] sm:text-[10px] font-black opacity-90 tracking-widest mb-0.5" style="font-family: 'Nunito', sans-serif;">TOTAL XP</span>
+        <button onclick="toggleProfileCard()"
+            class="pointer-events-auto bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl flex flex-col items-center shadow-lg border-2 border-white/20 transform hover:scale-105 transition-transform cursor-pointer ml-2 sm:ml-4">
+            <span class="text-[8px] sm:text-[10px] font-black opacity-90 tracking-widest mb-0.5"
+                style="font-family: 'Nunito', sans-serif;">TOTAL XP</span>
             <div class="flex items-center gap-0.5 sm:gap-1">
                 <span class="text-base sm:text-xl">✨</span>
-                <span id="total-xp-display" class="text-xl sm:text-3xl font-black leading-none" style="font-family: 'Nunito', sans-serif;">0</span>
+                <span id="total-xp-display" class="text-xl sm:text-3xl font-black leading-none"
+                    style="font-family: 'Nunito', sans-serif;">0</span>
             </div>
         </button>
 
         <!-- User Info: Stack vertically on mobile, horizontal on desktop -->
-        <div class="pointer-events-auto flex flex-col sm:flex-row items-end sm:items-start gap-1.5 sm:gap-3 mr-2 sm:mr-4">
+        <div
+            class="pointer-events-auto flex flex-col sm:flex-row items-end sm:items-start gap-1.5 sm:gap-3 mr-2 sm:mr-4">
             <!-- Fullscreen Toggle -->
-            <button onclick="toggleFullScreen()" class="bg-white/90 dark:bg-slate-800 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 flex items-center justify-center rounded-lg sm:rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-600 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 transition-all" title="ملء الشاشة">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            <button onclick="toggleFullScreen()"
+                class="bg-white/90 dark:bg-slate-800 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 flex items-center justify-center rounded-lg sm:rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-600 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 transition-all"
+                title="ملء الشاشة">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    class="w-[18px] h-[18px] sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400">
+                    <path
+                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                 </svg>
             </button>
-            
+
             <!-- Logout Button -->
-            <button onclick="logout()" class="bg-white/90 dark:bg-slate-800 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 flex items-center justify-center rounded-lg sm:rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-600 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 transition-all group" title="تسجيل خروج">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] sm:w-6 sm:h-6 text-slate-700 dark:text-slate-200 group-hover:translate-x-1 transition-transform">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
+            <button onclick="logout()"
+                class="bg-white/90 dark:bg-slate-800 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 flex items-center justify-center rounded-lg sm:rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-600 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 transition-all group"
+                title="تسجيل خروج">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    class="w-[18px] h-[18px] sm:w-6 sm:h-6 text-slate-700 dark:text-slate-200 group-hover:translate-x-1 transition-transform">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
             </button>
-            
+
             <!-- Dark Mode Toggle -->
-            <button onclick="toggleDarkMode()" id="darkmode-toggle" class="bg-white/90 dark:bg-slate-800 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 flex items-center justify-center rounded-lg sm:rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-600 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 transition-all group" title="الوضع الليلي">
+            <button onclick="toggleDarkMode()" id="darkmode-toggle"
+                class="bg-white/90 dark:bg-slate-800 w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-3 flex items-center justify-center rounded-lg sm:rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-600 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 transition-all group"
+                title="الوضع الليلي">
                 <span id="darkmode-icon" class="text-lg sm:text-xl">🌙</span>
             </button>
         </div>
     </div>
 
     <!-- Profile Card -->
-    <div id="profile-card" class="hidden fixed top-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-5 z-50 border-2 border-slate-100 dark:border-slate-700">
+    <div id="profile-card"
+        class="hidden fixed top-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-5 z-50 border-2 border-slate-100 dark:border-slate-700">
         <div class="flex items-center gap-4 mb-4">
-            <img id="profile-avatar" src="https://ui-avatars.com/api/?name=Demo&background=8b5cf6&color=fff&bold=true" alt="Avatar" class="w-16 h-16 rounded-full border-4 border-indigo-500 object-cover">
+            <img id="profile-avatar" src="https://ui-avatars.com/api/?name=Demo&background=8b5cf6&color=fff&bold=true"
+                alt="Avatar" class="w-16 h-16 rounded-full border-4 border-indigo-500 object-cover">
             <div class="flex-1 text-right">
                 <h3 id="profile-name" class="font-black text-lg text-slate-800 dark:text-white">🎮 وضع التجربة</h3>
-                <p id="profile-email" class="text-sm text-slate-500 dark:text-slate-400 truncate">سجّل دخولك لحفظ تقدمك!</p>
+                <p id="profile-email" class="text-sm text-slate-500 dark:text-slate-400 truncate">سجّل دخولك لحفظ تقدمك!
+                </p>
             </div>
         </div>
         <div class="grid grid-cols-3 gap-3 text-center mb-4">
@@ -133,14 +160,18 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400 font-bold">النجوم</p>
             </div>
         </div>
-        <button onclick="toggleProfileCard()" class="w-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+        <button onclick="toggleProfileCard()"
+            class="w-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
             إغلاق
         </button>
     </div>
 
     <!-- Levels Grid (Mobile-first: smaller gaps and padding) -->
-    <div class="w-full max-w-md mx-auto px-3 sm:px-4 relative flex flex-col items-center gap-4 sm:gap-8 pb-24 sm:pb-32 z-10" style="min-height: 100vh; padding-top: 70px;">
-        <div id="level-path" class="absolute top-16 sm:top-24 bottom-16 sm:bottom-20 left-1/2 w-3 sm:w-4 -translate-x-1/2 rounded-full border sm:border-2 shadow-inner bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600"></div>
+    <div class="w-full max-w-md mx-auto px-3 sm:px-4 relative flex flex-col items-center gap-4 sm:gap-8 pb-24 sm:pb-32 z-10"
+        style="min-height: 100vh; padding-top: 70px;">
+        <div id="level-path"
+            class="absolute top-16 sm:top-24 bottom-16 sm:bottom-20 left-1/2 w-3 sm:w-4 -translate-x-1/2 rounded-full border sm:border-2 shadow-inner bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
+        </div>
         <div id="levels-grid" class="flex flex-col items-center gap-4 sm:gap-8 w-full"></div>
     </div>
 
@@ -150,4 +181,5 @@
     <script src="/index/js/index-ui.js?v=1.0.5"></script>
     <script src="/index/js/index-init.js?v=1.0.2"></script>
 </body>
+
 </html>
