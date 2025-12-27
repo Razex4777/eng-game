@@ -12,20 +12,20 @@ async function initializeIndex() {
     console.log('🚀 initializeIndex() called');
     // Load dark mode preference first
     loadDarkModePreference();
-    
+
     // Initialize Supabase
-    supabaseClient = initSupabase();
-    
+    sb_client = initSB();
+
     // Check if guest mode
     const isGuest = sessionStorage.getItem('guestMode');
     const urlParams = new URLSearchParams(window.location.search);
     const isGuestUrl = urlParams.get('guest') === 'true';
-    
+
     if (isGuest || isGuestUrl) {
         guestLogin(true);
         return;
     }
-    
+
     // Prevent redirect loop
     const lastRedirect = sessionStorage.getItem('lastRedirectTime');
     const now = Date.now();
@@ -34,24 +34,24 @@ async function initializeIndex() {
         guestLogin(true);
         return;
     }
-    
+
     // Check Supabase auth
     console.log('🔐 About to call checkSupabaseAuth()...');
     const isLoggedIn = await checkSupabaseAuth();
     console.log('🔐 checkSupabaseAuth() returned:', isLoggedIn);
-    
+
     if (!isLoggedIn) {
         console.log('❌ Not logged in, redirecting to login...');
         sessionStorage.setItem('lastRedirectTime', now.toString());
         window.location.href = '../login.html?from=index';
         return;
     }
-    
+
     console.log('✅ Auth successful, proceeding with level setup...');
-    
+
     // Clear redirect flag on successful auth
     sessionStorage.removeItem('lastRedirectTime');
-    
+
     // Restore level data from localStorage
     console.log('📦 Restoring level data from localStorage...');
     state.levels.forEach(level => {
@@ -69,7 +69,7 @@ async function initializeIndex() {
     if (state.levels[0].status === 'locked') {
         state.levels[0].status = 'unlocked';
     }
-    
+
     console.log('🎮 About to call renderLevels()...');
     renderLevels();
     console.log('✅ renderLevels() completed');
