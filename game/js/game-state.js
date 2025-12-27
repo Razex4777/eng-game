@@ -92,24 +92,24 @@ async function initializeSupabaseGame() {
     const urlParams = new URLSearchParams(window.location.search);
     const isGuestUrl = urlParams.get('guest') === 'true';
     const levelFromUrl = urlParams.get('level');
-    
+
     // Set level from URL if provided
     if (levelFromUrl) {
         state.levelId = parseInt(levelFromUrl);
         localStorage.setItem('selectedLevel', levelFromUrl);
         console.log(`📍 Level from URL: ${state.levelId}`);
     }
-    
+
     // Initialize Supabase client first (needed for settings even in guest mode)
-    supabaseClient = initSupabase();
-    console.log("🔌 Supabase client initialized:", supabaseClient ? "✅" : "❌");
-    
+    sb_client = initSB();
+    console.log("🔌 SB client initialized:", sb_client ? "✅" : "❌");
+
     // Guest mode - allow demo only
     if (isGuestSession || isGuestUrl) {
         console.log("🎮 Demo Mode - Playing as guest");
         state.demoMode = true;
         state.userId = 'guest_' + Date.now();
-        
+
         // Guests can only play level 0 (demo)
         if (state.levelId !== 0) {
             console.log("⚠️ Guests can only play demo level");
@@ -117,22 +117,22 @@ async function initializeSupabaseGame() {
         }
         return true;
     }
-    
+
     // Check Supabase authentication
     const isAuthenticated = await checkGameAuth();
-    
+
     if (!isAuthenticated) {
         console.log("❌ Not authenticated or profile incomplete");
         console.log("🔄 Redirecting to login page...");
-        
+
         // Save intended destination
         sessionStorage.setItem('redirectAfterLogin', window.location.href);
-        
+
         // Redirect to login
         window.location.href = '../login.html?from=game';
         return false;
     }
-    
+
     console.log("✅ Supabase game initialized - User authenticated");
     return true;
 }
@@ -143,31 +143,31 @@ async function initializeSupabaseGame() {
 async function loadGameSettings() {
     try {
         console.log("🔄 Loading game settings from Supabase...");
-        
-        if (!supabaseClient) {
+
+        if (!sb_client) {
             console.log("⚠️ Supabase not initialized, using default settings");
             console.log(`⚙️ Default speed: ${state.speed}`);
             return;
         }
-        
-        const { data: settings, error } = await supabaseClient
+
+        const { data: settings, error } = await sb_client
             .from('game_settings')
             .select('setting_key, setting_value');
-        
+
         if (error) {
             console.log("⚠️ Could not load game settings:", error.message);
             console.log(`⚙️ Using default speed: ${state.speed}`);
             return;
         }
-        
+
         console.log("📦 Settings from Supabase:", settings);
-        
+
         if (settings && settings.length > 0) {
             settings.forEach(setting => {
                 if (setting.setting_key === 'game_speed') {
                     const speed = parseFloat(setting.setting_value);
                     console.log(`📊 Raw speed value: "${setting.setting_value}" → parsed: ${speed}`);
-                    
+
                     // Validate speed is reasonable (0.1 to 5.0) - allowing very slow for testing
                     if (!isNaN(speed) && speed >= 0.1 && speed <= 5.0) {
                         state.speed = speed;
@@ -188,7 +188,7 @@ async function loadGameSettings() {
         } else {
             console.log("⚠️ No settings found in Supabase");
         }
-        
+
         console.log(`🎮 FINAL GAME SPEED: ${state.speed}`);
     } catch (error) {
         console.log("⚠️ Error loading game settings:", error);

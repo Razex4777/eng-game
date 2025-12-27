@@ -8,17 +8,17 @@
 // ====================================
 async function loadQuestionsForLevel(levelId) {
     console.log(`\n📚 Loading questions for Level ${levelId} from Supabase...`);
-    
+
     try {
         // Try to load from Supabase first
-        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-            const { data, error } = await supabaseClient
+        if (typeof sb_client !== 'undefined' && sb_client) {
+            const { data, error } = await sb_client
                 .from('questions')
                 .select('*')
                 .eq('stage_id', levelId)
                 .eq('is_active', true)
                 .order('question_order', { ascending: true });
-            
+
             if (!error && data && data.length > 0) {
                 // Transform Supabase data to game format
                 const questions = data.map(q => ({
@@ -30,15 +30,15 @@ async function loadQuestionsForLevel(levelId) {
                     golden: q.is_golden ? 1 : 0,
                     explanation: q.explanation || ''
                 }));
-                
+
                 console.log(`✅ Loaded ${questions.length} questions from Supabase for Stage ${levelId}`);
                 const goldenCount = questions.filter(q => q.golden === 1).length;
                 console.log(`   📊 Golden questions: ${goldenCount}`);
                 console.log(`   📊 First question: "${questions[0].q.substring(0, 50)}..."`);
-                
+
                 return questions;
             }
-            
+
             if (error) {
                 console.error("❌ Supabase error:", error);
             }
@@ -46,7 +46,7 @@ async function loadQuestionsForLevel(levelId) {
     } catch (err) {
         console.error("❌ Failed to load from Supabase:", err);
     }
-    
+
     // Fallback to local files if Supabase fails
     console.log("⚠️ Falling back to local question files...");
     return loadQuestionsFromLocalFiles(levelId);
@@ -59,7 +59,7 @@ function loadQuestionsFromLocalFiles(levelId) {
         console.log("🎮 Using demo questions");
         return DEMO_QUESTIONS;
     }
-    
+
     // Try local questionsData
     if (typeof getStageQuestions === 'function') {
         const questions = getStageQuestions(levelId);
@@ -68,7 +68,7 @@ function loadQuestionsFromLocalFiles(levelId) {
             return questions;
         }
     }
-    
+
     // Final fallback
     console.log("⚠️ No questions found, using demo questions");
     return DEMO_QUESTIONS;
@@ -86,7 +86,7 @@ async function startGame() {
     console.log('🎮 STARTING GAME');
     console.log('🎮 =======================================');
     console.log('📍 Level ID:', state.levelId);
-    
+
     state.playing = true;
     state.retryMode = false;  // Reset retry mode
     state.qIndex = 0;
@@ -103,26 +103,26 @@ async function startGame() {
 
     startSession();
     state.sessionId = Date.now().toString();
-    
+
     console.log('\n📥 Fetching questions from database...');
-    
+
     try {
         state.questions = await fetchQuestionsFromFirebase();
-        
+
         if (!state.questions || state.questions.length === 0) {
             throw new Error('No questions returned from fetch!');
         }
-        
+
         console.log('✅ Questions loaded successfully!');
         console.log(`   Total: ${state.questions.length} questions`);
-        
+
     } catch (error) {
         console.error('❌ CRITICAL ERROR in startGame:', error);
         alert('⚠️ فشل تحميل الأسئلة!\nيرجى إعادة تحميل الصفحة.');
         state.playing = false;
         return;
     }
-    
+
     state.wrongAnswers = [];
     state.correctAnswers = [];
 
@@ -132,16 +132,16 @@ async function startGame() {
         repeat: q.repeat || 1,
         golden: (q.golden === 1) || (q.repeat >= 5)
     }));
-    
+
     // Questions are kept in order (as defined in the file)
     // Only the answer options are shuffled, not the questions themselves
-    
+
     // DEMO MODE: Limit to 5 questions only for level 0
     if (state.levelId === 0 || state.levelId === '0') {
         state.questions = state.questions.slice(0, 5);
         console.log('🎯 DEMO MODE: Limited to 5 questions');
     }
-    
+
     console.log(`   🌟 Golden questions: ${state.questions.filter(q => q.golden).length}`);
 
     updateHUD();
@@ -155,21 +155,21 @@ async function startGame() {
 // ====================================
 function nextQuestion() {
     console.log(`📍 nextQuestion called - qIndex: ${state.qIndex}`);
-    
+
     if (!state.questions || state.questions.length === 0) {
         console.error('❌ No questions loaded!');
         alert('⚠️ لم يتم تحميل الأسئلة! يرجى إعادة المحاولة.');
         return;
     }
-    
+
     if (state.qIndex >= state.questions.length) {
         endLevel();
         return;
     }
-    
+
     state.qData = state.questions[state.qIndex];
     console.log(`❓ Question ${state.qIndex + 1}:`, state.qData.q);
-    
+
     state.qY = -120; // Start just above the visible area (closer for faster appearance)
     state.frozen = false;
     if (state.freezeTimeout) {
@@ -177,17 +177,17 @@ function nextQuestion() {
         state.freezeTimeout = null;
     }
     state.waiting = false;
-    
+
     const qEl = document.getElementById('falling-question');
     const goldenBadge = document.getElementById('golden-badge');
     const repeatBadge = document.getElementById('repeat-badge');
     const repeatCount = document.getElementById('repeat-count');
-    
+
     document.getElementById('q-text').innerText = state.qData.q;
     qEl.classList.remove('hidden');
     qEl.style.display = 'block';
     qEl.style.top = `${state.qY}px`; // Set initial position
-    
+
     if (state.qData.golden) {
         goldenBadge.classList.remove('hidden');
     } else {
@@ -205,10 +205,10 @@ function nextQuestion() {
 
     const grid = document.getElementById('options-grid');
     grid.innerHTML = '';
-    
+
     // Shuffle options randomly
     const shuffledOptions = [...state.qData.options].sort(() => Math.random() - 0.5);
-    
+
     shuffledOptions.forEach(opt => {
         const btn = document.createElement('button');
         btn.dataset.text = opt;
@@ -217,7 +217,7 @@ function nextQuestion() {
         btn.onclick = () => handleAnswer(opt, btn);
         grid.appendChild(btn);
     });
-    
+
     const prog = (state.qIndex / state.questions.length) * 100;
     document.getElementById('progress-fill').style.width = `${prog}%`;
 }
@@ -227,11 +227,11 @@ function nextQuestion() {
 // ====================================
 function handleAnswer(sel, btnEl) {
     if (!state.playing || state.waiting || state.paused) return;
-    
+
     const correct = sel === state.qData.a;
     state.waiting = true;
     if (state.animFrame) cancelAnimationFrame(state.animFrame);
-    
+
     const answerRecord = {
         question: state.qData,
         userAnswer: sel,
@@ -243,29 +243,29 @@ function handleAnswer(sel, btnEl) {
         const gameArea = document.getElementById('game-area');
         const questionMiddle = state.qY + qEl.offsetHeight / 2;
         const halfScreen = gameArea ? (gameArea.offsetHeight / 2) : 300;
-        
+
         // Update streak if answered in top half
         const isTopHalf = questionMiddle < halfScreen;
-        if (isTopHalf) { 
-            updateStreak(); 
-        } else { 
-            stopStreak(); 
+        if (isTopHalf) {
+            updateStreak();
+        } else {
+            stopStreak();
         }
-        
+
         const basePoints = state.qData.golden ? 20 : 10;
         const streakMultiplier = state.streak.active ? state.streak.multiplier : 1;
         const finalPoints = basePoints * streakMultiplier;
-        
+
         btnEl.classList.add('bg-emerald-500');
         state.score += finalPoints;
         state.combo++;
         // Speed is constant
-        
+
         state.correctAnswers.push(answerRecord);
         state.answeredQuestions.add(state.qData.id);
-        
+
         trackCorrectAnswerLocal();
-        
+
         launchButtonToQuestion(btnEl, true);
         AudioSys.correct();
         if (navigator.vibrate) navigator.vibrate(50);
@@ -276,16 +276,16 @@ function handleAnswer(sel, btnEl) {
         btnEl.classList.add('bg-red-500');
         state.combo = 0;
         state.lives--;
-        
+
         state.wrongAnswers.push(answerRecord);
-        
+
         trackMistakeLocal(state.qData, answerRecord);
-        
+
         // IMPORTANT: In strict mode (3 hearts), we might not want to re-add the question
         // if we are going to fail anyway. But for now, let's keep it consistent.
         // User said: "When error returns... do not return hearts 3".
         // If lives == 0, we will fail anyway.
-        
+
         launchButtonToQuestion(btnEl, false);
         AudioSys.wrong();
         if (navigator.vibrate) navigator.vibrate(200);
@@ -300,16 +300,16 @@ function handleMiss() {
     stopStreak();
     state.combo = 0;
     state.lives--;
-    
+
     const answerRecord = {
         question: state.qData,
         userAnswer: null,
         correct: false
     };
-    
+
     state.wrongAnswers.push(answerRecord);
     trackMistakeLocal(state.qData, null);
-    
+
     AudioSys.wrong();
     if (navigator.vibrate) navigator.vibrate(200);
     state.waiting = true;
@@ -345,31 +345,31 @@ function gameLoop() {
         return;
     }
     state._loopDebugLogged = false;
-    
+
     if (!state.frozen) {
         // Use speed from state (loaded from Supabase or default)
         const speed = state.speed || 0.8;
-        
+
         // Debug: Log speed every 100 frames
         if (!state._speedLogCounter) state._speedLogCounter = 0;
         state._speedLogCounter++;
         if (state._speedLogCounter === 1 || state._speedLogCounter % 100 === 0) {
             console.log(`🚀 SPEED: ${speed} | qY: ${Math.round(state.qY)}`);
         }
-        
+
         state.qY += speed;
-        
+
         const qEl = document.getElementById('falling-question');
         qEl.style.top = `${state.qY}px`;
-        
+
         // Fail line: when TOP of question reaches TOP of answer buttons
         // Use getBoundingClientRect for accurate position comparison
         const optionsGrid = document.getElementById('options-grid');
-        
+
         if (optionsGrid && qEl) {
             const questionRect = qEl.getBoundingClientRect();
             const optionsRect = optionsGrid.getBoundingClientRect();
-            
+
             // Question loses when its TOP edge reaches the TOP of buttons
             if (questionRect.top >= optionsRect.top) {
                 console.log(`❌ FAIL: Question top (${Math.round(questionRect.top)}) reached buttons top (${Math.round(optionsRect.top)})`);
@@ -378,7 +378,7 @@ function gameLoop() {
             }
         }
     }
-    
+
     state.animFrame = requestAnimationFrame(gameLoop);
 }
 
@@ -389,7 +389,7 @@ async function endLevel(failed = false) {
     state.playing = false;
     if (state.animFrame) cancelAnimationFrame(state.animFrame);
     stopStreak();
-    
+
     // GAME OVER - 0 Lives
     if (failed || state.lives <= 0) {
         console.log("❌ GAME OVER - 0 Lives");
@@ -397,7 +397,7 @@ async function endLevel(failed = false) {
         showResultsScreen(true); // Show failed screen
         return;
     }
-    
+
     // Check if we have wrong answers to retry
     // User requested: "When error returns... do not return hearts 3".
     // If they finished the level but had errors (and > 0 lives), 
@@ -408,11 +408,11 @@ async function endLevel(failed = false) {
     // "When error returns for the question do not return the hearts 3"
     // I will DISABLE auto-retry for now, and just show results. 
     // They can replay the whole level if they want.
-    
+
     // Calculate final results
     const totalQuestions = state.correctAnswers.length + state.wrongAnswers.length;
     const accuracy = totalQuestions > 0 ? Math.round((state.correctAnswers.length / totalQuestions) * 100) : 0;
-    
+
     // Calculate stars
     let stars = 0;
     if (accuracy >= 90 && state.lives === 3) {
@@ -422,10 +422,10 @@ async function endLevel(failed = false) {
     } else if (accuracy >= 50) {
         stars = 1;
     }
-    
+
     // Calculate XP earned
     const xpEarned = state.score + (stars * 50) + 100;
-    
+
     console.log(`\n🏆 LEVEL COMPLETE!`);
     console.log(`   📊 Score: ${state.score}`);
     console.log(`   ✅ Correct: ${state.correctAnswers.length}`);
@@ -433,28 +433,28 @@ async function endLevel(failed = false) {
     console.log(`   🎯 Accuracy: ${accuracy}%`);
     console.log(`   ⭐ Stars: ${stars}`);
     console.log(`   ✨ XP: ${xpEarned}`);
-    
+
     // Save progress to Supabase
     const isLoggedIn = state.userId && !state.userId.startsWith('guest_') && !state.demoMode;
-    
+
     if (isLoggedIn) {
         // SAVE FOR ALL LEVELS (Including 0 if it counts as completing Demo)
         console.log('   📊 Saving progress');
-        
+
         // For Level 0, we treat it as unlocking Level 1
         await saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions);
-        
+
         if (state.levelId === 0) {
-             // Unlock Level 1 locally too
-             localStorage.setItem('level_0_completed', 'true');
-             localStorage.setItem('level_1_unlocked', 'true');
+            // Unlock Level 1 locally too
+            localStorage.setItem('level_0_completed', 'true');
+            localStorage.setItem('level_1_unlocked', 'true');
         }
     }
-    
+
     // Save to localStorage as backup
     localStorage.setItem(`level_${state.levelId}_stars`, stars);
     localStorage.setItem(`level_${state.levelId}_completed`, 'true');
-    
+
     showResultsScreen(false);
 }
 
@@ -470,7 +470,7 @@ async function endLevel(failed = false) {
 // ====================================
 async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions) {
     console.log('\n💾 Saving progress to Supabase...');
-    
+
     try {
         // Get user's database ID
         const userData = state.currentUserData || await getUserDataFromSupabase();
@@ -478,7 +478,7 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
             console.log('⚠️ No user data, skipping Supabase save');
             return;
         }
-        
+
         // Save stage progress
         if (typeof saveStageProgress === 'function') {
             await saveStageProgress(userData.id, state.levelId, {
@@ -491,15 +491,15 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
             });
             console.log('✅ Stage progress saved');
         }
-        
+
         // Update user's total XP and Level
         const newTotalXP = (userData.total_xp || 0) + xpEarned;
-        
+
         // Only unlock the NEXT level if completing the current highest level
         // This prevents skipping levels (e.g., completing level 5 when level 4 is not done)
         const currentUserLevel = userData.current_level || 1;
         const completedLevel = state.levelId;
-        
+
         // Only advance current_level if completing the level that matches current_level
         // OR if completing level 0 (demo) to unlock level 1
         let newCurrentLevel = currentUserLevel;
@@ -510,7 +510,7 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
             newCurrentLevel = completedLevel + 1;
         }
         // If completing a level that's not the current one, don't change current_level
-        
+
         if (typeof updateUserStats === 'function') {
             await updateUserStats(userData.id, {
                 totalXP: newTotalXP,
@@ -520,7 +520,7 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
             });
             console.log(`✅ User stats updated (Level -> ${newCurrentLevel})`);
         }
-        
+
         // Save wrong answers for analytics
         if (state.wrongAnswers.length > 0 && typeof saveWrongAnswer === 'function') {
             for (const answer of state.wrongAnswers) {
@@ -534,9 +534,9 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
             }
             console.log('✅ Wrong answers saved');
         }
-        
+
         console.log('✅ All progress saved to Supabase!');
-        
+
     } catch (error) {
         console.error('❌ Error saving to Supabase:', error);
     }
@@ -544,23 +544,23 @@ async function saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions)
 
 // Save wrong answers only (Kept for compatibility)
 async function saveWrongAnswersOnly() {
-   // Redirect to main save function
-   await saveProgressToSupabase(0, 0, 0, state.wrongAnswers.length);
+    // Redirect to main save function
+    await saveProgressToSupabase(0, 0, 0, state.wrongAnswers.length);
 }
 
 async function getUserDataFromSupabase() {
     try {
-        if (!supabaseClient) return null;
-        
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!sb_client) return null;
+
+        const { data: { session } } = await sb_client.auth.getSession();
         if (!session) return null;
-        
-        const { data } = await supabaseClient
+
+        const { data } = await sb_client
             .from('users')
             .select('*')
             .eq('auth_id', session.user.id)
             .single();
-        
+
         return data;
     } catch (e) {
         console.error('Error getting user data:', e);
@@ -578,8 +578,8 @@ function updateStreak() {
         state.streak.maxTime = 7000;
         startStreakTimer();
     } else {
-        if (state.streak.multiplier < 5) { 
-            state.streak.multiplier++; 
+        if (state.streak.multiplier < 5) {
+            state.streak.multiplier++;
         }
         const currentRemaining = state.streak.timeLeft;
         const newTime = Math.min(currentRemaining + 7000, 12000);
@@ -600,15 +600,15 @@ function startStreakTimer() {
 }
 
 function runStreakTimer() {
-    if (state.streak.timer) { 
-        clearInterval(state.streak.timer); 
+    if (state.streak.timer) {
+        clearInterval(state.streak.timer);
     }
     state.streak.timer = setInterval(() => {
         if (state.paused) return;
-        
+
         const elapsed = Date.now() - state.streak.startTime;
         state.streak.timeLeft = state.streak.maxTime - elapsed;
-        
+
         if (state.streak.timeLeft <= 0) {
             stopStreak();
         } else {
