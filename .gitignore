@@ -30,5 +30,5 @@ npm-debug.log*
 *.md.bak
 
 mostaql_summery/
-docs/
+# docs/ (Removed to allow documentation tracking as per requirements)
 backup/

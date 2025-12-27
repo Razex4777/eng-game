@@ -529,7 +529,9 @@
         // ====================================
         // INITIALIZATION
         // ====================================
-        let supabaseClient;
+        // supabaseClient is declared in /js/supabase-config.js in the global scope
+        // We just need to initialize it here
+
         let currentUser = null;
         let userData = {
             authId: null,
