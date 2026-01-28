@@ -15,6 +15,13 @@ const SUBJECT_COLORS = {
 const SubjectSelectScreen = ({ isDark, onSelectSubject, onBack }) => {
     const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fallback subjects in case Supabase fails
+    const FALLBACK_SUBJECTS = [
+        { id: 'biology', name: 'Biology', name_ar: 'الأحياء', icon: '🧬', color: '#22c55e', order_index: 1 },
+        { id: 'english', name: 'English', name_ar: 'الإنجليزية', icon: '📚', color: '#3b82f6', order_index: 2 }
+    ];
 
     useEffect(() => {
         loadSubjects();
@@ -22,19 +29,39 @@ const SubjectSelectScreen = ({ isDark, onSelectSubject, onBack }) => {
 
     const loadSubjects = async () => {
         console.log('📚 Loading subjects...');
-        const { data, error } = await supabase
-            .from('subjects')
-            .select('*')
-            .order('order_index');
 
-        console.log('📚 Subjects result:', { data, error });
+        // Set a timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+            console.warn('⚠️ Subjects loading timed out after 5s, using fallback');
+            setSubjects(FALLBACK_SUBJECTS);
+            setError('تحميل بطيء - جاري استخدام البيانات المحلية');
+            setLoading(false);
+        }, 5000);
 
-        if (error) {
-            console.error('❌ Subjects error:', error);
-        }
+        try {
+            const { data, error: queryError } = await supabase
+                .from('subjects')
+                .select('*')
+                .order('order_index');
 
-        if (data) {
-            setSubjects(data);
+            clearTimeout(timeoutId);
+            console.log('📚 Subjects result:', { data, error: queryError });
+
+            if (queryError) {
+                console.error('❌ Subjects error:', queryError);
+                setSubjects(FALLBACK_SUBJECTS);
+                setError('خطأ في التحميل - جاري استخدام البيانات المحلية');
+            } else if (data && data.length > 0) {
+                setSubjects(data);
+            } else {
+                console.warn('⚠️ No subjects found, using fallback');
+                setSubjects(FALLBACK_SUBJECTS);
+            }
+        } catch (err) {
+            clearTimeout(timeoutId);
+            console.error('❌ Subjects fetch error:', err);
+            setSubjects(FALLBACK_SUBJECTS);
+            setError('خطأ في الاتصال');
         }
         setLoading(false);
     };
