@@ -32,13 +32,3 @@ mostaql_summery/
 # Development files
 *.md.bak
 code.txt
-
-# Old folders (to be deleted)
-game/
-index/
-js/
-login/
-questions.js
-questions-part1.js
-questions-part2.js
-questions-part3.js
