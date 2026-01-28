@@ -74,18 +74,31 @@ export function AuthProvider({ children }) {
         if (initialized.current) return;
         initialized.current = true;
 
-        // Get initial session
+        // Get initial session with timeout to prevent infinite loading
         const initAuth = async () => {
+            // Set a timeout to force loading to false after 5 seconds
+            const timeoutId = setTimeout(() => {
+                console.warn('⚠️ Auth initialization timed out after 5s');
+                setLoading(false);
+            }, 5000);
+
             try {
+                console.log('🔄 Starting auth initialization...');
                 const { data: { session }, error } = await supabase.auth.getSession();
+
+                clearTimeout(timeoutId);
+
                 if (error) {
                     console.error('Session error:', error);
                 }
+                console.log('✅ Session check complete:', session ? 'User found' : 'No session');
+
                 setUser(session?.user ?? null);
                 if (session?.user) {
                     await fetchProfile(session.user);
                 }
             } catch (err) {
+                clearTimeout(timeoutId);
                 // Ignore abort errors from React Strict Mode
                 if (err.name !== 'AbortError') {
                     console.error('Auth init error:', err);
