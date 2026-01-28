@@ -74,51 +74,54 @@ export function AuthProvider({ children }) {
         if (initialized.current) return;
         initialized.current = true;
 
-        // Get initial session with timeout to prevent infinite loading
+        // Get initial session
         const initAuth = async () => {
-            // Set a timeout to force loading to false after 5 seconds
-            const timeoutId = setTimeout(() => {
-                console.warn('⚠️ Auth initialization timed out after 5s');
-                setLoading(false);
-            }, 5000);
-
             try {
                 console.log('🔄 Starting auth initialization...');
-                const { data: { session }, error } = await supabase.auth.getSession();
 
-                clearTimeout(timeoutId);
+                // First, try to get the session from storage
+                const { data: { session }, error } = await supabase.auth.getSession();
 
                 if (error) {
                     console.error('Session error:', error);
+                    setLoading(false);
+                    return;
                 }
-                console.log('✅ Session check complete:', session ? 'User found' : 'No session');
 
-                setUser(session?.user ?? null);
                 if (session?.user) {
-                    await fetchProfile(session.user);
+                    console.log('✅ Session restored from storage');
+                    setUser(session.user);
+                    // Fetch profile in background, don't block loading
+                    fetchProfile(session.user);
+                    setLoading(false);
+                } else {
+                    console.log('📭 No existing session found');
+                    setLoading(false);
                 }
             } catch (err) {
-                clearTimeout(timeoutId);
-                // Ignore abort errors from React Strict Mode
-                if (err.name !== 'AbortError') {
-                    console.error('Auth init error:', err);
-                }
-            } finally {
+                console.error('Auth init error:', err);
                 setLoading(false);
             }
         };
 
         initAuth();
 
-        // Listen for auth changes
+        // Listen for auth changes (including OAuth redirects)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                setUser(session?.user ?? null);
-                if (session?.user) {
+                console.log('🔔 Auth state changed:', event);
+
+                if (event === 'SIGNED_IN' && session?.user) {
+                    setUser(session.user);
                     await fetchProfile(session.user);
-                } else {
+                } else if (event === 'SIGNED_OUT') {
+                    setUser(null);
                     setProfile(null);
+                } else if (event === 'TOKEN_REFRESHED') {
+                    console.log('🔄 Token refreshed');
+                    setUser(session?.user ?? null);
                 }
+
                 setLoading(false);
             }
         );

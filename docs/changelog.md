@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-01-28 18:30
+
+### Vercel Deployment Fixes & Project Cleanup
+
+- **Fixed Infinite Loading on Vercel**:
+  - Added 5-second timeout to auth initialization in `AuthContext.jsx`
+  - Added 5-second timeout to subjects loading in `SubjectSelectScreen.jsx`
+  - Added fallback subjects data if Supabase query times out
+- **vercel.json**: Added SPA rewrite rule for React client-side routing
+- **Project Cleanup**: Removed obsolete files:
+  - Removed `game/`, `index/`, `js/`, `login/`, `part2/`, `scripts/` directories
+  - Removed `questions-part1.js`, `questions-part2.js`, `questions-part3.js`, `questions.js`
+  - Removed `code.txt`, `All files excel/`, `all files markdown/`
+- **Updated documentation**: Refreshed `project_structure.md` to reflect cleaned-up structure
+
+---
+
 ## 2026-01-28 14:15
 
 ### Stage Locking & Progress Tracking

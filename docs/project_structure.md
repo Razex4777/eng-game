@@ -1,31 +1,20 @@
-part2/
-├── 📄 .env                                # Supabase environment variables
+# Project Structure
+
+eng-game/
+├── 📄 .env                                # Supabase environment variables (local only)
 ├── 📄 .gitignore                          # Git configuration
-├── 📄 eslint.config.js                    # ESLint configuration
 ├── 📄 index.html                          # Main HTML entry point
 ├── 📄 package.json                        # Dependencies and scripts
 ├── 📄 postcss.config.js                   # PostCSS configuration
 ├── 📄 tailwind.config.js                  # Tailwind CSS configuration
+├── 📄 vercel.json                         # Vercel deployment configuration
 ├── 📄 vite.config.js                      # Vite build configuration
-│
-├── 📁 All files excel/                    # Excel question files (imported to Supabase)
-│   ├── 📁 Biology/                        # Biology subject
-│   │   ├── 📁 Chapters_Review/            # 12 stages (Ch1-Ch4, 3 parts each)
-│   │   ├── 📁 FullYear/                   # 10 stages
-│   │   └── 📁 HalfYear/                   # 8 stages
-│   └── 📁 English/                        # English subject
-│       ├── 📁 Chapters_Review/            # 24 stages (Ch1-Ch8, 3 parts each)
-│       ├── 📁 FullYear/                   # 25 stages
-│       └── 📁 HalfYear/                   # 13 stages
 │
 ├── 📁 docs/                               # Project documentation
 │   ├── 📄 changelog.md                    # Change history
 │   └── 📄 project_structure.md            # This file
 │
-├── 📁 scripts/                            # Utility scripts
-│   └── 📄 import-excel.js                 # Excel to Supabase import script
-│
-└── 📁 src/                                # Source code
+└── 📁 src/                                # Source code (React/Vite)
     ├── 📄 App.jsx                         # Main game controller with auth + navigation
     ├── 📄 index.css                       # Global styles and animations
     ├── 📄 main.jsx                        # React entry point

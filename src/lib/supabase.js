@@ -10,4 +10,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.log('✅ Supabase initialized:', supabaseUrl);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        // Persist session in localStorage (default, but explicit)
+        persistSession: true,
+        // Storage key for session
+        storageKey: 'eng-game-auth',
+        // Auto refresh token before expiry
+        autoRefreshToken: true,
+        // Detect session from URL (for OAuth redirects)
+        detectSessionInUrl: true,
+    },
+});
