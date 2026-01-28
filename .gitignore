@@ -31,11 +31,10 @@ mostaql_summery/
 
 # Development files
 *.md.bak
+code.txt
 
-# Docs (tracked in part2/docs)
-docs/
-
-# Old project files (keep only part2)
+# Old folders (to be deleted)
+part2/
 game/
 index/
 js/
