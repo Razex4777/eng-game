@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "public": true,
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "buildCommand": "cd part2 && npm install && npm run build",
+  "outputDirectory": "part2/dist",
+  "installCommand": "cd part2 && npm install",
+  "framework": "vite",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
