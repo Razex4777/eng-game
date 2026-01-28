@@ -3,9 +3,9 @@
   "public": true,
   "cleanUrls": false,
   "trailingSlash": false,
-  "buildCommand": "cd part2 && npm install && npm run build",
-  "outputDirectory": "part2/dist",
-  "installCommand": "cd part2 && npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
   "framework": "vite",
   "headers": [
     {
