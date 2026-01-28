@@ -205,6 +205,37 @@ async function getUserProgress(userId) {
     }
 }
 
+async function saveMonsterHighScore(userId, score) {
+    try {
+        if (!sb_client) initSB();
+
+        // Save to user_progress with a special stage_id (e.g., 999)
+        const { data, error } = await sb_client
+            .from('user_progress')
+            .upsert({
+                user_id: userId,
+                stage_id: 999, // 999 for Monster Challenge
+                score: score,
+                best_score: score,
+                completed_at: new Date().toISOString()
+            }, { onConflict: 'user_id,stage_id' })
+            .select().single();
+
+        if (error) throw error;
+
+        // Also update users.monster_highscore if column exists (optional/future-proof)
+        await sb_client
+            .from('users')
+            .update({ monster_highscore: score })
+            .eq('id', userId);
+
+        return data;
+    } catch (err) {
+        console.error('❌ Save Monster HighScore Failed:', err.message);
+        return null;
+    }
+}
+
 async function updateUserStats(userId, stats) {
     try {
         if (!sb_client) initSB();

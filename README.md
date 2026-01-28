@@ -31,7 +31,10 @@
 
 ```
 mql/
-├── 📄 login.html          # Login page (entry point)
+├── 📁 login/              # Login & Onboarding (separated into HTML/CSS/JS)
+│   ├── 📄 login.html      # Login entry point
+│   ├── 📁 css/            # Login styles
+│   └── 📁 js/             # Login logic
 ├── 📄 index.html           # Redirect to index/
 ├── 📄 game.html            # Redirect to game/
 ├── 📄 vercel.json          # Vercel configuration

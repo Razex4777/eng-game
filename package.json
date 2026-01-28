@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "description": "Educational English quiz game - Iraqi Ministry Curriculum",
   "scripts": {
-    "dev": "npx live-server --port=3000 --open=/login.html",
+    "dev": "npx live-server --port=3000 --open=/login/login.html",
     "start": "npx live-server --port=3000",
     "serve": "npx http-server -p 3000 -o"
   },
-  "keywords": ["education", "english", "quiz", "game"],
+  "keywords": [
+    "education",
+    "english",
+    "quiz",
+    "game"
+  ],
   "author": "Abdullah & Gasmi",
   "license": "MIT"
 }

@@ -40,7 +40,9 @@ let state = {
     questions: [],
     correctAnswers: [],
     wrongAnswers: [],
-    answeredQuestions: new Set()
+    answeredQuestions: new Set(),
+    isEndless: false,           // تحدي الوحش
+    endlessMode: null           // endless_all or endless_chX
 };
 
 // ====================================
@@ -100,6 +102,14 @@ async function initializeSupabaseGame() {
         console.log(`📍 Level from URL: ${state.levelId}`);
     }
 
+    // Check for Endless Mode
+    const mode = urlParams.get('mode');
+    if (mode && mode.startsWith('endless_')) {
+        state.isEndless = true;
+        state.endlessMode = mode;
+        console.log(`👹 ENDLESS MODE ACTIVE: ${mode}`);
+    }
+
     // Initialize Supabase client first (needed for settings even in guest mode)
     sb_client = initSB();
     console.log("🔌 SB client initialized:", sb_client ? "✅" : "❌");
@@ -130,7 +140,7 @@ async function initializeSupabaseGame() {
 
         // Redirect to login
         alert("عذراً، يجب تسجيل الدخول للعب هذه المرحلة. سيتم تحويلك لصفحة الدخول.");
-        window.location.href = '../login.html?from=game';
+        window.location.href = '../login/login.html?from=game';
         return false;
     }
 

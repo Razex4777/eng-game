@@ -352,3 +352,175 @@ function createLevelCard(level) {
     }
     return card;
 }
+// ====================================
+// MONSTER CHALLENGE RENDERING
+// ====================================
+function renderMonsterCard() {
+    const container = document.getElementById('monster-challenge-card');
+    if (!container) return;
+
+    const isGuest = state.isGuest;
+    const isDarkMode = document.body.classList.contains('dark');
+    const highScore = isGuest ? '0' : '12,500'; // Placeholder, will sync with SB later
+
+    container.innerHTML = `
+        <button onclick="openBattleArena()" 
+            class="tactile-btn monster-card-bg w-full mb-6 border-b-[6px] group ${isGuest ? 'opacity-80 grayscale-[0.8]' : ''}">
+            
+            <div class="absolute inset-0 bg-white/5"></div>
+            ${!isGuest ? '<div class="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>' : ''}
+            
+            <div class="relative z-10 w-full p-6 flex items-center justify-between">
+                <div class="flex flex-col items-start text-right w-full">
+                    <div class="inline-flex items-center gap-1.5 bg-white/20 px-3 py-1 rounded-xl border border-white/20 mb-2 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+                            <path d="m13 19 6-6" />
+                            <path d="m16 16 3 3" />
+                            <path d="m19 13 2 2" />
+                            <path d="M10 21 3 14" />
+                            <path d="m8 15 2 2" />
+                            <path d="m5 18 2 2" />
+                            <path d="M17.5 14.5 21 11V3h-8l-3.5 3.5" />
+                        </svg>
+                        <span class="text-[10px] font-black text-white tracking-wide">ENDLESS</span>
+                    </div>
+                    <h2 class="text-3xl font-black text-white drop-shadow-sm mb-1">تحدي الوحش</h2>
+                    <p class="text-purple-100 text-xs font-bold mb-4 opacity-90">${isGuest ? 'سجل لفتح التحدي' : 'اكسر حاجز الملل!'}</p>
+                    
+                    <div class="flex items-center gap-2 bg-black/20 p-2 rounded-2xl border border-white/10 mb-2 w-fit">
+                        <div class="flex flex-col items-start px-1">
+                            <span class="text-[9px] text-purple-100 font-bold uppercase opacity-80 text-right w-full">أعلى سكور</span>
+                            <span class="text-xl font-black text-white font-mono leading-none">${highScore}</span>
+                        </div>
+                        <div class="w-px h-8 bg-white/20 mx-2"></div>
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform ${isGuest ? 'bg-slate-400 text-slate-200' : 'bg-white text-purple-600 group-hover:scale-110'}">
+                            ${isGuest ? '<span class="text-xl">🔒</span>' : '<span class="text-xl">▶️</span>'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 transform group-hover:rotate-12 transition-transform duration-500">
+                    <svg class="w-32 h-32 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+                        <path d="m13 19 6-6" />
+                        <path d="m16 16 3 3" />
+                        <path d="m19 13 2 2" />
+                        <path d="M10 21 3 14" />
+                        <path d="m8 15 2 2" />
+                        <path d="m5 18 2 2" />
+                        <path d="M17.5 14.5 21 11V3h-8l-3.5 3.5" />
+                    </svg>
+                </div>
+                
+                ${isGuest ? '<div class="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-ping-slow shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>' : ''}
+        </button>
+    `;
+}
+
+let selectedChapterId = null;
+
+function openBattleArena() {
+    if (state.isGuest) {
+        showSuccessPopup("سجل دخولك لتحدي الوحش! 👾", "🔒");
+        return;
+    }
+
+    document.getElementById('battle-arena-modal').classList.remove('hidden');
+    renderChaptersList();
+}
+
+function closeBattleArena() {
+    document.getElementById('battle-arena-modal').classList.add('hidden');
+    selectedChapterId = null;
+    updateStartButton();
+}
+
+function renderChaptersList() {
+    const list = document.getElementById('chapters-list');
+    if (!list) return;
+
+    // Hardcoded chapters for English for now
+    const chapters = [
+        { id: 1, name: "الفصل الأول" },
+        { id: 2, name: "الفصل الثاني" },
+        { id: 3, name: "الفصل الثالث" },
+        { id: 4, name: "الفصل الرابع" },
+        { id: 5, name: "الفصل الخامس" },
+        { id: 6, name: "الفصل السادس" },
+        { id: 7, name: "الفصل السابع" },
+        { id: 8, name: "الفصل الثامن" }
+    ];
+
+    list.innerHTML = chapters.map(ch => `
+        <div onclick="selectChapter(${ch.id})" id="chapter-${ch.id}" 
+            class="chapter-option p-4 rounded-3xl border-2 transition-all cursor-pointer flex items-center justify-between bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                    ${ch.id}
+                </div>
+                <div class="text-right">
+                    <h3 class="font-black text-slate-800 dark:text-white">${ch.name}</h3>
+                    <p class="text-[10px] font-bold text-slate-400">تحدي كلمات وقواعد الفصل</p>
+                </div>
+            </div>
+            <div class="text-left">
+                <span class="text-[10px] font-black text-slate-400 block">BEST</span>
+                <span class="font-black text-slate-600 dark:text-slate-400 font-mono">0</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectChapter(id) {
+    // Reset all options
+    document.querySelectorAll('.chapter-option').forEach(el => {
+        el.className = "chapter-option p-4 rounded-3xl border-2 transition-all cursor-pointer flex items-center justify-between bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700";
+        const numCircle = el.querySelector('div > div');
+        if (numCircle && !numCircle.classList.contains('bg-indigo-600')) {
+            numCircle.className = "w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-200";
+        }
+    });
+
+    selectedChapterId = id;
+    const selectedEl = document.getElementById(`chapter-${id}`);
+    if (selectedEl) {
+        selectedEl.className = "chapter-option p-4 rounded-3xl border-2 border-purple-400 bg-purple-100 dark:bg-purple-900/40 transition-all cursor-pointer flex items-center justify-between";
+        const numCircle = selectedEl.querySelector('div > div');
+        if (numCircle) {
+            numCircle.className = "w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg bg-purple-600 text-white";
+        }
+    }
+
+    updateStartButton();
+}
+
+function updateStartButton() {
+    const btn = document.getElementById('start-battle-btn');
+    if (!btn) return;
+
+    if (selectedChapterId) {
+        btn.disabled = false;
+        btn.className = "w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black py-4 rounded-2xl shadow-xl hover:translate-y-[-2px] transition-all text-lg cursor-pointer";
+        btn.innerText = "ابدأ المعركة 🔥";
+    } else {
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 font-black py-4 rounded-2xl shadow-xl transition-all text-lg cursor-not-allowed";
+        btn.innerText = "ابدأ التحدي 🔥";
+    }
+}
+
+function startMonsterChallenge() {
+    if (!selectedChapterId) return;
+
+    // In Part 2, we navigate to the game with special monster mode flags
+    const mode = selectedChapterId === 'all' ? 'endless_all' : `endless_ch${selectedChapterId}`;
+    window.location.href = `../game/game.html?mode=${mode}`;
+}
+
+// Update renderLevels to call renderMonsterCard
+const originalRenderLevels = renderLevels;
+renderLevels = function () {
+    originalRenderLevels();
+    renderMonsterCard();
+};

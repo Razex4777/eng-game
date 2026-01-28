@@ -59,24 +59,58 @@
         <span class="text-base">خلي بصمتك</span>
     </button>
 
-    <!-- Feedback Modal -->
+    <!-- Feedback Modal (remains same) -->
     <div id="feedback-modal" class="fixed inset-0 z-[60] modal-overlay hidden flex items-center justify-center p-4">
+        ...
+    </div>
+
+    <!-- Battle Arena Modal -->
+    <div id="battle-arena-modal" class="fixed inset-0 z-[60] modal-overlay hidden flex items-center justify-center p-4">
         <div
-            class="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl transform transition-all scale-100 relative border-4 border-indigo-100">
-            <button type="button" onclick="closeFeedbackModal()"
-                class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 text-xl font-black bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer z-50">✕</button>
-            <div class="text-center mb-6">
-                <div class="text-5xl mb-4 animate-bounce">🤔</div>
-                <h3 class="text-xl font-black text-slate-800 mb-2">اللعبة تكبر بأفكاركم...</h3>
-                <p class="text-indigo-500 text-sm font-black">شنو اقتراحك حتى نطوّرها؟</p>
+            class="bg-white dark:bg-[#1E293B] rounded-[2.5rem] w-full max-w-sm shadow-2xl transform transition-all scale-100 relative border-4 border-slate-100 dark:border-slate-700 flex flex-col max-h-[90vh]">
+
+            <!-- Modal Header -->
+            <div class="p-6 pb-0 flex items-center justify-between shrink-0">
+                <button onclick="closeBattleArena()"
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-black bg-slate-50 dark:bg-slate-800 w-10 h-10 rounded-full flex items-center justify-center transition-colors">✕</button>
+                <div class="text-right">
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">ساحة المعركة ⚔️</h2>
+                    <p class="text-indigo-500 dark:text-indigo-400 text-sm font-black">اختر الفصل الذي تريد تحديه</p>
+                </div>
             </div>
-            <textarea id="feedback-text"
-                class="w-full h-32 bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-right mb-4 focus:border-brand focus:outline-none font-bold text-slate-700 placeholder-slate-400 resize-none transition-all focus:ring-4 focus:ring-indigo-100"
-                placeholder="اكتب اقتراحك هنا..."></textarea>
-            <button onclick="submitFeedback()"
-                class="w-full bg-gradient-to-r from-brand to-brand-light text-white font-black py-4 rounded-xl shadow-xl shadow-indigo-200 hover:translate-y-[-2px] hover:shadow-2xl transition-all active:scale-95 text-lg">
-                إرسال الاقتراح 🚀
-            </button>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
+                <!-- Full Curriculum Option -->
+                <div id="chapter-all" onclick="selectChapter('all')"
+                    class="chapter-option p-4 rounded-3xl border-2 transition-all cursor-pointer flex items-center justify-between bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-600 text-white font-black text-lg">
+                            ∞</div>
+                        <div class="text-right">
+                            <h3 class="font-black text-slate-800 dark:text-white">المنهج كاملاً</h3>
+                            <p class="text-[10px] font-bold text-slate-400">تحدي غير محدود لجميع القواعد</p>
+                        </div>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[10px] font-black text-slate-400 block">BEST</span>
+                        <span class="font-black text-indigo-600 dark:text-indigo-400 font-mono">0</span>
+                    </div>
+                </div>
+
+                <div id="chapters-list" class="grid gap-3">
+                    <!-- Dynamic Chapters will be injected here -->
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 pt-2 shrink-0">
+                <button id="start-battle-btn" disabled onclick="startMonsterChallenge()"
+                    class="w-full bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600 font-black py-4 rounded-2xl shadow-xl transition-all text-lg cursor-not-allowed">
+                    ابدأ التحدي 🔥
+                </button>
+            </div>
         </div>
     </div>
 
@@ -166,9 +200,14 @@
         </button>
     </div>
 
-    <!-- Levels Grid (Mobile-first: smaller gaps and padding) -->
+    <!-- Monster Challenge Section -->
+    <div class="w-full max-w-md mx-auto px-4 mt-20 relative z-20">
+        <div id="monster-challenge-card"></div>
+    </div>
+
+    <!-- Levels Grid (remains same) -->
     <div class="w-full max-w-md mx-auto px-3 sm:px-4 relative flex flex-col items-center gap-4 sm:gap-8 pb-24 sm:pb-32 z-10"
-        style="min-height: 100vh; padding-top: 70px;">
+        style="min-height: 100vh; padding-top: 20px;">
         <div id="level-path"
             class="absolute top-16 sm:top-24 bottom-16 sm:bottom-20 left-1/2 w-3 sm:w-4 -translate-x-1/2 rounded-full border sm:border-2 shadow-inner bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600">
         </div>

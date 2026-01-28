@@ -198,6 +198,43 @@ body {
     background: #fffbeb; 
 }
 
+/* ================= Tactile Button & Cards ================= */
+.tactile-btn {
+    position: relative;
+    border-bottom-width: 6px;
+    border-radius: 20px;
+    transition: all 0.15s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.tactile-btn:active {
+    border-bottom-width: 2px;
+    transform: translateY(4px) scale(0.98);
+}
+
+.monster-card-bg {
+    background: #8B5CF6; /* Default Light Mode */
+    border-color: #7C3AED;
+}
+
+.dark .monster-card-bg {
+    background: #7C3AED;
+    border-color: #5B21B6;
+}
+
+/* ================= Animations ================= */
+@keyframes ping-slow {
+    0% { transform: scale(1); opacity: 1; }
+    70%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.animate-ping-slow {
+    animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 /* ================= Level Selector ================= */
 .level-selector-bg { 
     overflow-x: hidden; 

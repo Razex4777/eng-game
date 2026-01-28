@@ -43,7 +43,7 @@ async function initializeIndex() {
     if (!isLoggedIn) {
         console.log('❌ Not logged in, redirecting to login...');
         sessionStorage.setItem('lastRedirectTime', now.toString());
-        window.location.href = '../login.html?from=index';
+        window.location.href = '../login/login.html?from=index';
         return;
     }
 

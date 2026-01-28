@@ -3,6 +3,45 @@
 // English Mastery Battle
 // ====================================
 
+const CHAPTER_STAGES = {
+    1: [1, 2, 3, 4],
+    2: [5, 6, 7, 8],
+    3: [9, 10, 11, 12],
+    4: [13, 14, 15, 16],
+    5: [17, 18, 19, 20],
+    6: [21, 22, 23, 24],
+    7: [25, 26, 27, 28],
+    8: [29, 30]
+};
+
+// ====================================
+// ENDLESS QUESTIONS FETCHING
+// ====================================
+async function loadEndlessQuestions(mode) {
+    console.log(`👹 Loading questions for Endless Mode: ${mode}`);
+    let allQuestions = [];
+
+    if (mode === 'endless_all') {
+        // Load from all 30 stages
+        for (let i = 1; i <= 30; i++) {
+            const qs = await loadQuestionsForLevel(i);
+            allQuestions = allQuestions.concat(qs);
+        }
+    } else if (mode.startsWith('endless_ch')) {
+        const chId = parseInt(mode.replace('endless_ch', ''));
+        const stages = CHAPTER_STAGES[chId] || [];
+        console.log(`📂 Selected Chapter ${chId} (Stages: ${stages.join(', ')})`);
+
+        for (const stageId of stages) {
+            const qs = await loadQuestionsForLevel(stageId);
+            allQuestions = allQuestions.concat(qs);
+        }
+    }
+
+    // Shuffle endless questions
+    return allQuestions.sort(() => Math.random() - 0.5);
+}
+
 // ====================================
 // QUESTION FETCHING FROM SUPABASE
 // ====================================
@@ -91,7 +130,7 @@ async function startGame() {
     state.retryMode = false;  // Reset retry mode
     state.qIndex = 0;
     state.score = 0;
-    state.lives = 3;
+    state.lives = 10;
     state.combo = 0;
     state.powerups = { freeze: 2, bomb: 1 };
     state.frozen = false;
@@ -107,7 +146,11 @@ async function startGame() {
     console.log('\n📥 Fetching questions from database...');
 
     try {
-        state.questions = await fetchQuestionsFromFirebase();
+        if (state.isEndless) {
+            state.questions = await loadEndlessQuestions(state.endlessMode);
+        } else {
+            state.questions = await fetchQuestionsFromFirebase();
+        }
 
         if (!state.questions || state.questions.length === 0) {
             throw new Error('No questions returned from fetch!');
@@ -163,14 +206,20 @@ function nextQuestion() {
     }
 
     if (state.qIndex >= state.questions.length) {
-        endLevel();
-        return;
+        if (state.isEndless) {
+            console.log('👹 Endless Mode: Reshuffling questions and looping!');
+            state.questions.sort(() => Math.random() - 0.5);
+            state.qIndex = 0;
+        } else {
+            endLevel();
+            return;
+        }
     }
 
     state.qData = state.questions[state.qIndex];
     console.log(`❓ Question ${state.qIndex + 1}:`, state.qData.q);
 
-    state.qY = -120; // Start just above the visible area (closer for faster appearance)
+    state.qY = -120; // Start just above the visible area
     state.frozen = false;
     if (state.freezeTimeout) {
         clearTimeout(state.freezeTimeout);
@@ -265,6 +314,8 @@ function handleAnswer(sel, btnEl) {
         state.answeredQuestions.add(state.qData.id);
 
         trackCorrectAnswerLocal();
+
+        showScorePopup(finalPoints, state.streak.active);
 
         launchButtonToQuestion(btnEl, true);
         AudioSys.correct();
@@ -438,16 +489,19 @@ async function endLevel(failed = false) {
     const isLoggedIn = state.userId && !state.userId.startsWith('guest_') && !state.demoMode;
 
     if (isLoggedIn) {
-        // SAVE FOR ALL LEVELS (Including 0 if it counts as completing Demo)
-        console.log('   📊 Saving progress');
+        if (state.isEndless) {
+            console.log('   📊 Saving Monster Challenge high score');
+            await saveMonsterHighScore(state.userId, state.score);
+        } else {
+            // SAVE FOR ALL LEVELS
+            console.log('   📊 Saving progress');
+            await saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions);
 
-        // For Level 0, we treat it as unlocking Level 1
-        await saveProgressToSupabase(stars, xpEarned, accuracy, totalQuestions);
-
-        if (state.levelId === 0) {
-            // Unlock Level 1 locally too
-            localStorage.setItem('level_0_completed', 'true');
-            localStorage.setItem('level_1_unlocked', 'true');
+            if (state.levelId === 0) {
+                // Unlock Level 1 locally too
+                localStorage.setItem('level_0_completed', 'true');
+                localStorage.setItem('level_1_unlocked', 'true');
+            }
         }
     }
 

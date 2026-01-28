@@ -35,7 +35,7 @@ async function checkSupabaseAuth() {
             // Prevent redirect loop - only redirect if not already redirected
             if (!sessionStorage.getItem('authRedirectAttempt')) {
                 sessionStorage.setItem('authRedirectAttempt', 'true');
-                window.location.href = '/login.html?incomplete=true';
+                window.location.href = '/login/login.html?incomplete=true';
             } else {
                 console.log("⚠️ Already tried redirecting - showing guest mode");
                 sessionStorage.removeItem('authRedirectAttempt');
@@ -49,7 +49,7 @@ async function checkSupabaseAuth() {
         // Check if profile is complete (must have phone AND full_name)
         if (!userData.phone || !userData.full_name) {
             console.log("❌ Profile incomplete - missing phone or name");
-            window.location.href = '/login.html?incomplete=true';
+            window.location.href = '/login/login.html?incomplete=true';
             return false;
         }
 
@@ -182,9 +182,9 @@ async function logout() {
         }
 
         console.log("✅ Logged out successfully");
-        window.location.href = '/login.html';
+        window.location.href = '/login/login.html';
     } catch (error) {
         console.error("❌ Logout failed:", error);
-        window.location.href = '/login.html';
+        window.location.href = '/login/login.html';
     }
 }

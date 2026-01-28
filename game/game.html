@@ -296,27 +296,7 @@
     <!-- Pause Overlay (z-[200] to be above everything) -->
     <div id="pause-overlay"
         class="hidden fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6">
-        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full">
-            <h2 class="text-4xl font-black text-[#5B5FED] dark:text-[#7B7FFF] mb-2">PAUSED</h2>
-            <p class="text-gray-500 dark:text-gray-400 font-bold mb-8">Take a deep breath!</p>
-            <div class="flex flex-col gap-4">
-                <button id="btn-resume"
-                    class="w-full text-white font-black text-xl py-4 rounded-2xl active:shadow-none active:translate-y-[6px] transition-all"
-                    style="background: #5B5FED; box-shadow: 0 6px 0 #4347C7;">
-                    RESUME ▶️
-                </button>
-                <button id="btn-mute"
-                    class="w-full text-white font-black text-xl py-4 rounded-2xl active:shadow-none active:translate-y-[6px] transition-all"
-                    style="background: #F5A623; box-shadow: 0 6px 0 #D68910;">
-                    <span id="sound-status">MUTE SOUND 🔊</span>
-                </button>
-                <button onclick="window.location.href='../index/index.html'"
-                    class="w-full font-black text-xl py-4 rounded-2xl active:shadow-none active:translate-y-[6px] transition-all"
-                    style="background: #E8E8E8; color: #6B6B6B; box-shadow: 0 6px 0 #BEBEBE;">
-                    EXIT 🚪
-                </button>
-            </div>
-        </div>
+        <!-- JS-rendered menu will be injected here -->
     </div>
 
     <!-- Feedback Center -->
@@ -393,6 +373,7 @@
     <script src="/game/js/game-ui.js?v=2.0.0"></script>
     <script src="/game/js/game-core.js?v=2.0.1"></script>
     <script src="/game/js/game-controls.js?v=2.0.0"></script>
+    <script src="/game/js/pause-menu.js?v=2.0.0"></script>
     <script src="/game/js/game-init.js?v=2.0.0"></script>
 </body>
 
