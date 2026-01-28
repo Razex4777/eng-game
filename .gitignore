@@ -11,6 +11,7 @@ node_modules/
 .idea/
 *.swp
 *.swo
+.kilocode/
 
 # OS
 .DS_Store
@@ -22,13 +23,24 @@ npm-debug.log*
 
 # Build
 .vercel/
+dist/
 
-# Backup (optional - remove if you want to deploy backups)
-# backup/
+# Backup
+backup/
+mostaql_summery/
 
 # Development files
 *.md.bak
 
-mostaql_summery/
-# docs/ (Removed to allow documentation tracking as per requirements)
-backup/
+# Docs (tracked in part2/docs)
+docs/
+
+# Old project files (keep only part2)
+game/
+index/
+js/
+login/
+questions.js
+questions-part1.js
+questions-part2.js
+questions-part3.js
