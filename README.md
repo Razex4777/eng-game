@@ -1,78 +1,16 @@
-# 🎮 English Mastery Battle
+# React + Vite
 
-> لعبة تعليمية تفاعلية لتعلم اللغة الإنجليزية - المنهج الوزاري العراقي
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## 🚀 Deploy to Vercel
+Currently, two official plugins are available:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/english-mastery-battle)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-### Quick Deploy Steps:
+## React Compiler
 
-1. **Push to GitHub:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/YOUR_USERNAME/english-mastery-battle.git
-   git push -u origin main
-   ```
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-2. **Deploy on Vercel:**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your GitHub repository
-   - Click "Deploy"
+## Expanding the ESLint configuration
 
-3. **Done!** Your site will be live at: `https://your-project.vercel.app`
-
----
-
-## 📁 Project Structure
-
-```
-mql/
-├── 📁 login/              # Login & Onboarding (separated into HTML/CSS/JS)
-│   ├── 📄 login.html      # Login entry point
-│   ├── 📁 css/            # Login styles
-│   └── 📁 js/             # Login logic
-├── 📄 index.html           # Redirect to index/
-├── 📄 game.html            # Redirect to game/
-├── 📄 vercel.json          # Vercel configuration
-├── 📁 index/               # Levels page
-├── 📁 game/                # Game page
-├── 📁 js/                  # Shared JavaScript
-└── 📄 questions-part*.js   # Question files
-```
-
----
-
-## 🔑 Features
-
-- ✅ Google OAuth Login
-- ✅ 30 Levels (Iraqi Ministry Curriculum)
-- ✅ Golden Questions (5+ repeats)
-- ✅ Retry Mode for wrong answers
-- ✅ Streak System (2x-5x multiplier)
-- ✅ Progress saved in Supabase
-- ✅ Demo mode for guests
-- ✅ Dark/Light mode
-- ✅ Mobile responsive
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend:** HTML, Tailwind CSS, Vanilla JS
-- **Backend:** Supabase (Auth + Database)
-- **Analytics:** Google Analytics
-- **Hosting:** Vercel
-
----
-
-## 📞 Contact
-
-WhatsApp: [+964 776 727 5649](https://wa.me/9647767275649)
-
----
-
-*Made with ❤️ by Abdullah & Gasmi*
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

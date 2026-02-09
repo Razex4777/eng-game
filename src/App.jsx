@@ -1,774 +1,648 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Fingerprint, Send, X } from 'lucide-react';
 
-// Import Components
-import MenuScreen from './components/MenuScreen';
-import GameScreen from './components/GameScreen';
-import ResultsScreen from './components/ResultsScreen';
-import PauseMenuModal from './components/PauseMenuModal';
-import FeedbackOverlay from './components/FeedbackOverlay';
-import LoginScreen from './components/LoginScreen';
-import SubjectSelectScreen from './components/SubjectSelectScreen';
-import CategorySelectScreen from './components/CategorySelectScreen';
-import StageSelectScreen from './components/StageSelectScreen';
-import { ParticleSystem, ScorePopup } from './components/GameEffects';
+// Components
+import { SoftBackground, ToastNotification, TactileButton } from './components/ui';
+import { BottomDock, TopNav } from './components/layout';
+import { SettingsModal } from './components/settings';
+import { MonsterChallengeLoader } from './components/game';
 
-// Import Auth & Supabase
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { supabase } from './lib/supabase';
+// Views
+import { LoginView, ChaptersView, LevelsView, ReviewsView, BattleArenaModal, HomeView } from './views';
 
-// Import Data & Utils
-import { MESSAGES, SPEED_MODES, GAME_CONSTANTS } from './data/gameData';
-import { triggerHaptic } from './utils/haptic';
-
+// Hooks & Auth
+import { useDarkMode, useToast, useAudioMute } from './hooks';
+import { signInWithGoogle, signOut, onAuthStateChange, getOrCreateProfile, updateProfile } from './lib/auth';
+import { getWrongAnswersCount } from './services/wrongAnswersService';
+import { getUserDashboardStats, initializeUserStats } from './services/userProgressService';
 
 /**
- * useAudio - Custom hook for audio management
+ * Main App Component
+ * Root component managing navigation and global state
  */
-function useAudio(isMuted) {
-    const audioCtxRef = useRef(null);
-
-    const initAudio = useCallback(() => {
-        if (!audioCtxRef.current) {
-            try {
-                audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) {
-                console.error("Audio API not supported");
-            }
-        }
-        if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
-            audioCtxRef.current.resume();
-        }
-    }, []);
-
-    const playSound = useCallback((freq, type = 'sine', vol = 0.3, dur = 0.15) => {
-        if (isMuted) return;
-        initAudio();
-        if (!audioCtxRef.current) return;
-
-        try {
-            const ctx = audioCtxRef.current;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = freq;
-            osc.type = type;
-
-            gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-
-            osc.start();
-            osc.stop(ctx.currentTime + dur);
-        } catch (e) {
-            console.warn("Audio play failed", e);
-        }
-    }, [isMuted, initAudio]);
-
-    const playCorrectSound = useCallback((multiplier) => {
-        playSound(100, 'sawtooth', 0.4, 0.1);
-        setTimeout(() => {
-            const baseFreq = 600 + (multiplier * 150);
-            playSound(baseFreq, 'square', 0.15, 0.1);
-            playSound(baseFreq * 1.5, 'sine', 0.2, 0.2);
-        }, 50);
-    }, [playSound]);
-
-    const playWrongSound = useCallback(() => {
-        playSound(150, 'sawtooth', 0.4, 0.4);
-        setTimeout(() => playSound(100, 'sawtooth', 0.4, 0.4), 100);
-    }, [playSound]);
-
-    return { initAudio, playSound, playCorrectSound, playWrongSound };
-}
-
-/**
- * useFullscreen - Custom hook for fullscreen management
- */
-function useFullscreen() {
-    const [isFullscreen, setIsFullscreen] = useState(false);
-
-    const toggleFullScreen = useCallback(() => {
-        try {
-            if (!document.fullscreenElement) {
-                const elem = document.documentElement;
-                const requestFS = elem.requestFullscreen || elem.webkitRequestFullscreen ||
-                    elem.mozRequestFullScreen || elem.msRequestFullscreen;
-                if (requestFS) {
-                    requestFS.call(elem)
-                        .then(() => setIsFullscreen(true))
-                        .catch(err => console.warn("Full screen error:", err));
-                }
-            } else {
-                const exitFS = document.exitFullscreen || document.webkitExitFullscreen ||
-                    document.mozCancelFullScreen || document.msExitFullscreen;
-                if (exitFS) {
-                    exitFS.call(document)
-                        .then(() => setIsFullscreen(false))
-                        .catch(err => console.warn(err));
-                }
-            }
-        } catch (e) {
-            console.warn("Fullscreen API error:", e);
-        }
-    }, []);
-
-    return { isFullscreen, toggleFullScreen };
-}
-
-/**
- * Main App Component - Auth Wrapper
- */
-export default function App() {
-    return (
-        <AuthProvider>
-            <GameController />
-        </AuthProvider>
-    );
-}
-
-/**
- * GameController - Handles auth state and game logic
- */
-function GameController() {
-    const { user, profile, loading } = useAuth();
-
-    // ========================
-    // STATE MANAGEMENT
-    // ========================
-
-    // Core States
-    const [gameState, setGameState] = useState('menu');
-    const [isDark, setIsDark] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
-
-    // Navigation State (Subject → Category → Stage)
-    const [selectedSubject, setSelectedSubject] = useState(null);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [selectedStage, setSelectedStage] = useState(null);
-
-    // Game Data
-    const [score, setScore] = useState(0);
-    const [lives, setLives] = useState(GAME_CONSTANTS.INITIAL_LIVES);
-    const [combo, setCombo] = useState(0);
-    const [streak, setStreak] = useState({
-        active: false,
-        multiplier: 1,
-        timeLeft: 0,
-        maxTime: GAME_CONSTANTS.STREAK_DURATION
+function App() {
+    // Navigation State
+    const [currentView, setCurrentView] = useState('login'); // login, home, chapters, levels, game
+    const [selectedChapter, setSelectedChapter] = useState(null);
+    const [gameMode, setGameMode] = useState(null); // 'finite' or 'infinite'
+    const [showTutorial, setShowTutorial] = useState(false);
+    const [feedbackOpen, setFeedbackOpen] = useState(false);
+    const [monsterSheetOpen, setMonsterSheetOpen] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [seenTooltips, setSeenTooltips] = useState({
+        monster: false,
+        chapters: false,
+        reviews: false,
+        fingerprint: false,
+        daily: false,
+        mistakes: false
     });
-    const [powerups, setPowerups] = useState({
-        freeze: GAME_CONSTANTS.INITIAL_FREEZE,
-        bomb: GAME_CONSTANTS.INITIAL_BOMB
+
+    // User State
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isGuest, setIsGuest] = useState(false);
+    const [userData, setUserData] = useState(null);
+    const [authUser, setAuthUser] = useState(null); // Supabase auth user
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [authLoading, setAuthLoading] = useState(true);
+
+    // App-wide Settings
+    const { isDarkMode, toggleDarkMode } = useDarkMode(false);
+    const { isMuted, toggleMute } = useAudioMute();
+    const { toast, showToast, hideToast } = useToast();
+
+    // User Stats (fetched from Supabase)
+    const [userStats, setUserStats] = useState({
+        streakDays: 0,
+        totalQuestions: 0,
+        totalXP: 0,
+        dailyTasksDone: 0,
+        dailyTasksTotal: 5,
+        mistakesToReview: 0,
+        subjectProgress: {}
     });
-    const [frozen, setFrozen] = useState(false);
+    const [statsLoading, setStatsLoading] = useState(false);
 
-    // Settings
-    const [speedMode, setSpeedMode] = useState('teen');
-
-    // Question State (loaded from Supabase)
-    const [questions, setQuestions] = useState([]);
-    const [currentQ, setCurrentQ] = useState(null);
-    const [qIndex, setQIndex] = useState(0);
-    const [qY, setQY] = useState(100);
-    const [disabledOptions, setDisabledOptions] = useState([]);
-    const [answeredCorrectly, setAnsweredCorrectly] = useState(new Set());
-
-    // Animation States
-    const [flyingBtn, setFlyingBtn] = useState(null);
-    const [shakeScreen, setShakeScreen] = useState(0);
-    const [shakeQuestion, setShakeQuestion] = useState(false);
-    const [particles, setParticles] = useState([]);
-    const [scorePopup, setScorePopup] = useState(null);
-
-    // Results
-    const [correctAnswers, setCorrectAnswers] = useState([]);
-    const [wrongAnswers, setWrongAnswers] = useState([]);
-
-    // Feedback
-    const [feedback, setFeedback] = useState({ show: false, correct: false, message: '' });
-
-    // ========================
-    // REFS
-    // ========================
-    const gameAreaRef = useRef(null);
-    const questionRef = useRef(null);
-    const optionRefs = useRef([]);
-    const animFrameRef = useRef(null);
-    const streakTimerRef = useRef(null);
-    const freezeTimerRef = useRef(null);
-
-    // ========================
-    // CUSTOM HOOKS
-    // ========================
-    const { isFullscreen, toggleFullScreen } = useFullscreen();
-    const { initAudio, playSound, playCorrectSound, playWrongSound } = useAudio(isMuted);
-
-    // ========================
-    // PARTICLE SYSTEM
-    // ========================
-    const spawnParticles = useCallback((x, y, type = 'confetti', count = 15) => {
-        const newParticles = Array.from({ length: count }, (_, i) => ({
-            id: Date.now() + i + Math.random(),
-            x, y,
-            vx: (Math.random() - 0.5) * (type === 'coin' ? 15 : 20),
-            vy: (Math.random() - 0.5) * (type === 'coin' ? 25 : 20) - 10,
-            color: type === 'coin' ? '#fbbf24' : ['#f472b6', '#34d399', '#60a5fa', '#fcd34d'][Math.floor(Math.random() * 4)],
-            size: type === 'coin' ? Math.random() * 6 + 8 : Math.random() * 8 + 4,
-            life: 1,
-            decay: Math.random() * 0.02 + 0.015,
-            type
-        }));
-        setParticles(prev => [...prev, ...newParticles]);
-    }, []);
-
-    // ========================
-    // GAME INITIALIZATION
-    // ========================
-
-    // Navigate to subject selection
-    const handleStartGame = useCallback(() => {
-        setGameState('selectSubject');
-    }, []);
-
-    // Subject selected → go to category
-    const handleSelectSubject = useCallback((subject) => {
-        setSelectedSubject(subject);
-        setGameState('selectCategory');
-    }, []);
-
-    // Category selected → go to stage
-    const handleSelectCategory = useCallback((category) => {
-        setSelectedCategory(category);
-        setGameState('selectStage');
-    }, []);
-
-    // Stage selected → load questions and start game
-    const handleSelectStage = useCallback(async (stage) => {
-        setSelectedStage(stage);
-
-        // Fetch questions from Supabase
-        const { data, error } = await supabase
-            .from('questions')
-            .select('*')
-            .eq('stage_id', stage.id)
-            .order('question_no');
-
-        if (error || !data || data.length === 0) {
-            console.error('Failed to load questions:', error);
-            return;
-        }
-
-        // Transform questions to game format
-        const preparedQuestions = data.map(q => {
-            const options = [q.option_a, q.option_b];
-            if (q.option_c) options.push(q.option_c);
-            if (q.option_d) options.push(q.option_d);
-
-            return {
-                id: q.id,
-                q: q.question_text,
-                options: options.filter(Boolean).sort(() => Math.random() - 0.5),
-                correct: q.correct_answer || q.option_a
-            };
-        });
-
-        startGameWithQuestions(preparedQuestions);
-    }, []);
-
-    // Start game with loaded questions
-    const startGameWithQuestions = useCallback((preparedQuestions) => {
-        initAudio();
-        setQuestions(preparedQuestions);
-        setCurrentQ(preparedQuestions[0]);
-        setQIndex(0);
-        setQY(100);
-        setScore(0);
-        setLives(GAME_CONSTANTS.INITIAL_LIVES);
-        setCombo(0);
-        setStreak({ active: false, multiplier: 1, timeLeft: 0, maxTime: GAME_CONSTANTS.STREAK_DURATION });
-        setPowerups({ freeze: GAME_CONSTANTS.INITIAL_FREEZE, bomb: GAME_CONSTANTS.INITIAL_BOMB });
-        setFrozen(false);
-        setDisabledOptions([]);
-        setCorrectAnswers([]);
-        setWrongAnswers([]);
-        setAnsweredCorrectly(new Set());
-        setFeedback({ show: false, correct: false, message: '' });
-        setParticles([]);
-        setShakeScreen(0);
-        setGameState('playing');
-    }, [initAudio]);
-
-    // Navigation back handlers
-    const handleBackToMenu = useCallback(() => {
-        setSelectedSubject(null);
-        setSelectedCategory(null);
-        setSelectedStage(null);
-        setGameState('menu');
-    }, []);
-
-    const handleBackToSubject = useCallback(() => {
-        setSelectedCategory(null);
-        setSelectedStage(null);
-        setGameState('selectSubject');
-    }, []);
-
-    const handleBackToCategory = useCallback(() => {
-        setSelectedStage(null);
-        setGameState('selectCategory');
-    }, []);
-
-    // ========================
-    // GAME LOOP
-    // ========================
+    // Fetch user stats from Supabase when authenticated
     useEffect(() => {
-        if (gameState !== 'playing' || feedback.show || frozen) return;
+        const fetchUserStats = async () => {
+            if (!authUser?.id) {
+                // Reset stats for guest users
+                setUserStats({
+                    streakDays: 0,
+                    totalQuestions: 0,
+                    totalXP: 0,
+                    dailyTasksDone: 0,
+                    dailyTasksTotal: 5,
+                    mistakesToReview: 0,
+                    subjectProgress: {}
+                });
+                return;
+            }
 
-        let lastTime = performance.now();
+            setStatsLoading(true);
+            try {
+                // Initialize stats record if needed
+                await initializeUserStats(authUser.id);
 
-        const loop = (time) => {
-            const dt = (time - lastTime) / 16.67;
-            lastTime = time;
+                // Fetch dashboard stats
+                const { data: stats } = await getUserDashboardStats(authUser.id);
 
-            setQY(prev => {
-                const speedConfig = SPEED_MODES[speedMode];
-                const currentSpeed = (speedConfig?.val || 0.5) * 1.5;
-                const speedMultiplier = streak.active ? 1 + (streak.multiplier * 0.05) : 1;
-                const newY = prev + (currentSpeed * speedMultiplier * dt);
-                const gameH = gameAreaRef.current?.offsetHeight || 600;
-
-                if (newY > gameH + 100) {
-                    handleMiss();
-                    return 100;
+                if (stats) {
+                    setUserStats({
+                        streakDays: stats.streak_days || 0,
+                        totalQuestions: stats.total_questions || 0,
+                        totalXP: stats.total_xp || 0,
+                        dailyTasksDone: stats.daily_tasks_done || 0,
+                        dailyTasksTotal: stats.daily_tasks_total || 5,
+                        mistakesToReview: stats.mistakes_to_review || 0,
+                        subjectProgress: stats.subject_progress || {}
+                    });
                 }
-                return newY;
-            });
-            animFrameRef.current = requestAnimationFrame(loop);
+            } catch (err) {
+                console.error('[App] Failed to fetch user stats:', err);
+            } finally {
+                setStatsLoading(false);
+            }
         };
 
-        animFrameRef.current = requestAnimationFrame(loop);
-        return () => cancelAnimationFrame(animFrameRef.current);
-    }, [gameState, feedback.show, frozen, speedMode, streak.active, streak.multiplier]);
+        fetchUserStats();
+    }, [authUser?.id]);
 
-    // ========================
-    // PARTICLE ANIMATION
-    // ========================
+    // Listen to Supabase auth state changes
     useEffect(() => {
-        if (particles.length === 0) return;
-        const interval = setInterval(() => {
-            setParticles(prev => prev
-                .map(p => ({
-                    ...p,
-                    x: p.x + p.vx,
-                    y: p.y + p.vy,
-                    vy: p.vy + 0.8,
-                    life: p.life - p.decay,
-                    rotation: (p.rotation || 0) + 10
-                }))
-                .filter(p => p.life > 0)
-            );
-        }, 16);
-        return () => clearInterval(interval);
-    }, [particles.length]);
+        const unsubscribe = onAuthStateChange(async (event, session) => {
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Auth event:', event, session?.user?.id);
+            }
 
-    // ========================
-    // STREAK TIMER
-    // ========================
-    useEffect(() => {
-        if (!streak.active || gameState !== 'playing') return;
-        streakTimerRef.current = setInterval(() => {
-            setStreak(prev => {
-                const newTime = prev.timeLeft - 50;
-                if (newTime <= 0) {
-                    clearInterval(streakTimerRef.current);
-                    return { active: false, multiplier: 1, timeLeft: 0, maxTime: GAME_CONSTANTS.STREAK_DURATION };
+            if (event === 'SIGNED_IN' && session?.user) {
+                // User signed in
+                setAuthUser(session.user);
+
+                // Get or create profile
+                const { profile, error } = await getOrCreateProfile(session.user);
+
+                if (error) {
+                    console.error('Error fetching/creating profile:', error);
                 }
-                return { ...prev, timeLeft: newTime };
-            });
-        }, 50);
-        return () => clearInterval(streakTimerRef.current);
-    }, [streak.active, gameState]);
 
-    // ========================
-    // HELPER FUNCTIONS
-    // ========================
-    const isInUpperHalf = useCallback(() => {
-        const gameH = gameAreaRef.current?.offsetHeight || 600;
-        const headerOffset = 100;
-        return qY < (gameH / 2) + headerOffset;
-    }, [qY]);
+                const name = profile?.full_name ||
+                    session.user.user_metadata?.full_name ||
+                    session.user.email?.split('@')[0] ||
+                    'لاعب';
 
-    const nextQuestion = useCallback(() => {
-        let nextIdx = qIndex + 1;
+                const avatar = profile?.avatar_url ||
+                    session.user.user_metadata?.avatar_url ||
+                    session.user.user_metadata?.picture ||
+                    null;
 
-        // Check if all questions are done - game complete!
-        if (nextIdx >= questions.length) {
-            // All questions answered - save progress and show results
-            saveProgress(true);
-            setGameState('results');
-            return;
-        }
-
-        setQIndex(nextIdx);
-        setCurrentQ(questions[nextIdx]);
-        setQY(100);
-        setDisabledOptions([]);
-    }, [qIndex, questions]);
-
-    // Save user progress to database
-    const saveProgress = useCallback(async (completed) => {
-        if (!profile?.id || !selectedStage?.id) return;
-
-        // Calculate stars based on accuracy
-        const totalAnswered = correctAnswers.length + wrongAnswers.length;
-        const accuracy = totalAnswered > 0 ? (correctAnswers.length / totalAnswered) * 100 : 0;
-        let stars = 0;
-        if (accuracy >= 90) stars = 3;
-        else if (accuracy >= 70) stars = 2;
-        else if (accuracy >= 50) stars = 1;
-
-        try {
-            // Upsert progress
-            const { error } = await supabase
-                .from('user_progress')
-                .upsert({
-                    user_id: profile.id,
-                    stage_id: selectedStage.id,
-                    completed: completed,
-                    stars: stars,
-                    best_score: score,
-                    completed_at: completed ? new Date().toISOString() : null
-                }, {
-                    onConflict: 'user_id,stage_id',
-                    ignoreDuplicates: false
+                setUserData({
+                    id: session.user.id,
+                    auth_id: session.user.id, // For Supabase queries
+                    name: name,
+                    email: session.user.email,
+                    avatar: avatar,
+                    age: profile?.age,
+                    gender: profile?.gender,
+                    governorate: profile?.region, // DB 'region' maps to UI 'governorate'
+                    preferred_subject: profile?.preferred_subject || 'english',
+                    isGuest: false
                 });
 
-            if (error) console.error('Failed to save progress:', error);
-        } catch (err) {
-            console.error('Error saving progress:', err);
-        }
-    }, [profile, selectedStage, correctAnswers, wrongAnswers, score]);
+                setIsLoggedIn(true);
+                setIsGuest(false);
 
-    const showFeedbackModal = useCallback((correct, message) => {
-        setFeedback({ show: true, correct, message });
-        setTimeout(() => {
-            setFeedback({ show: false, correct: false, message: '' });
-            if (lives <= 1 && !correct) {
-                // Game over - save progress (not completed since they ran out of lives)
-                saveProgress(false);
-                setGameState('results');
-            } else {
-                nextQuestion();
-            }
-        }, 1000);
-    }, [lives, nextQuestion, saveProgress]);
-
-    // ========================
-    // GAME ACTIONS
-    // ========================
-    const handleMiss = useCallback(() => {
-        playWrongSound();
-        triggerHaptic(200);
-        setShakeScreen(1);
-        setLives(prev => prev - 1);
-        setCombo(0);
-        setStreak({ active: false, multiplier: 1, timeLeft: 0, maxTime: GAME_CONSTANTS.STREAK_DURATION });
-
-        if (!answeredCorrectly.has(currentQ?.id)) {
-            setQuestions(prev => [...prev, currentQ]);
-        }
-
-        setWrongAnswers(prev => [...prev, { question: currentQ, userAnswer: null }]);
-        showFeedbackModal(false, "⏰ خلص الوقت!");
-        setTimeout(() => setShakeScreen(0), 500);
-    }, [playWrongSound, currentQ, answeredCorrectly, showFeedbackModal]);
-
-    const handleAnswer = useCallback((answer, btnIndex) => {
-        if (gameState !== 'playing' || feedback.show || !currentQ || flyingBtn !== null) return;
-
-        initAudio();
-
-        const isCorrect = answer === currentQ.correct;
-        const btnEl = optionRefs.current[btnIndex];
-        const btnRect = btnEl?.getBoundingClientRect();
-        const qRect = questionRef.current?.getBoundingClientRect();
-
-        if (btnRect && qRect) {
-            triggerHaptic(50);
-            setFlyingBtn({
-                index: btnIndex,
-                text: answer,
-                startX: btnRect.left,
-                startY: btnRect.top,
-                startW: btnRect.width,
-                startH: btnRect.height,
-                targetX: qRect.left + qRect.width / 2 - btnRect.width / 2,
-                targetY: qRect.top + qRect.height / 2 - btnRect.height / 2,
-                correct: isCorrect
-            });
-        }
-
-        setTimeout(() => {
-            if (isCorrect) {
-                triggerHaptic(80);
-
-                const basePoints = currentQ.golden ?
-                    GAME_CONSTANTS.GOLDEN_POINTS : GAME_CONSTANTS.BASE_POINTS;
-                let finalPoints = basePoints;
-                let currentMult = streak.multiplier;
-
-                if (isInUpperHalf()) {
-                    if (streak.active) {
-                        const newMult = Math.min(streak.multiplier + 1, GAME_CONSTANTS.MAX_MULTIPLIER);
-                        setStreak(prev => ({
-                            ...prev,
-                            active: true,
-                            multiplier: newMult,
-                            timeLeft: GAME_CONSTANTS.STREAK_DURATION,
-                            maxTime: GAME_CONSTANTS.STREAK_DURATION
-                        }));
-                        finalPoints = basePoints * newMult;
-                        currentMult = newMult;
-                    } else {
-                        setStreak({
-                            active: true,
-                            multiplier: 2,
-                            timeLeft: GAME_CONSTANTS.STREAK_DURATION,
-                            maxTime: GAME_CONSTANTS.STREAK_DURATION
-                        });
-                        finalPoints = basePoints * 2;
-                        currentMult = 2;
-                    }
+                // If profile is new or missing details, stay on login to show registration steps
+                if (!profile?.age || !profile?.region) {
+                    setCurrentView('login');
+                    // We don't show toast yet, they need to finish registration
                 } else {
-                    if (streak.active) {
-                        finalPoints = basePoints * streak.multiplier;
-                    }
+                    setCurrentView('home');
+                    showToast(`أهلاً بك مجدداً ${name}! 👋`, 'success');
                 }
 
-                playCorrectSound(currentMult);
-                setScore(prev => prev + finalPoints);
-                setCombo(prev => prev + 1);
-                setCorrectAnswers(prev => [...prev, { question: currentQ, userAnswer: answer }]);
-                setAnsweredCorrectly(prev => new Set([...prev, currentQ.id]));
+                setShowLoginModal(false);
+            } else if (event === 'SIGNED_OUT') {
+                // User signed out
+                setAuthUser(null);
+                setUserData(null);
+                setIsLoggedIn(false);
+                setIsGuest(false);
+                setCurrentView('login');
+            }
 
-                setShakeQuestion(true);
-                if (qRect) {
-                    setScorePopup({
-                        x: qRect.left + qRect.width / 2,
-                        y: qRect.top,
-                        points: finalPoints,
-                        streak: streak.active
+            setAuthLoading(false);
+        });
+
+        // Check for existing guest mode
+        const guestMode = localStorage.getItem('guest_mode');
+        if (guestMode === 'true') {
+            setIsLoggedIn(true);
+            setIsGuest(true);
+            setUserData({ name: 'ضيف', isGuest: true });
+            setCurrentView('home');
+            setAuthLoading(false);
+        }
+
+        return () => unsubscribe();
+    }, []);
+
+    // Google Sign In Handler
+    const handleGoogleSignIn = async () => {
+        try {
+            const { error } = await signInWithGoogle();
+            if (error) {
+                console.error('Google sign-in error:', error);
+                showToast('حصل خطأ في تسجيل الدخول 😔', 'error');
+            }
+            // Auth state change listener will handle the rest
+        } catch (error) {
+            console.error('Sign-in error:', error);
+            showToast('حصل خطأ في تسجيل الدخول', 'error');
+        }
+    };
+
+    // Login Handler (for both guest and registered users)
+    const handleLoginSuccess = async (data, guest = false) => {
+        setIsLoggedIn(true);
+        setIsGuest(guest);
+
+        const mergedData = { ...userData, ...data };
+        setUserData(mergedData);
+        setCurrentView('home');
+
+        if (guest) {
+            localStorage.setItem('guest_mode', 'true');
+            showToast('مرحباً بك كضيف! 👋', 'info');
+        } else {
+            // If they are logged in via Supabase, sync their profile data
+            if (authUser) {
+                try {
+                    const { error } = await updateProfile(authUser.id, {
+                        full_name: data.name || mergedData.name,
+                        age: parseInt(data.age) || null,
+                        gender: data.gender || null,
+                        region: data.governorate || null, // UI 'governorate' matches DB 'region'
+                        is_demo_completed: true // Mark profile as complete
                     });
-                    spawnParticles(qRect.left + qRect.width / 2, qRect.top + qRect.height / 2, 'confetti', 15);
-                    spawnParticles(qRect.left + qRect.width / 2, qRect.top + qRect.height / 2, 'coin', 8);
+
+                    if (error) throw error;
+                    console.log('Profile synced to Supabase successfully');
+                } catch (error) {
+                    console.error('Failed to sync profile to Supabase:', error);
                 }
-
-                let msg = "";
-                if (currentMult >= 5) {
-                    msg = MESSAGES.streak[Math.floor(Math.random() * MESSAGES.streak.length)];
-                } else {
-                    msg = MESSAGES.correct[Math.floor(Math.random() * MESSAGES.correct.length)];
-                }
-                showFeedbackModal(true, msg);
-
-            } else {
-                setShakeScreen(2);
-                triggerHaptic(300);
-                playWrongSound();
-                setLives(prev => prev - 1);
-                setCombo(0);
-                setStreak({ active: false, multiplier: 1, timeLeft: 0, maxTime: GAME_CONSTANTS.STREAK_DURATION });
-
-                if (!answeredCorrectly.has(currentQ.id)) {
-                    setQuestions(prev => [...prev, currentQ]);
-                }
-
-                setWrongAnswers(prev => [...prev, { question: currentQ, userAnswer: answer }]);
-                if (qRect) spawnParticles(qRect.left + qRect.width / 2, qRect.top + qRect.height / 2, 'confetti', 20);
-
-                const msg = MESSAGES.wrong[Math.floor(Math.random() * MESSAGES.wrong.length)];
-                showFeedbackModal(false, msg);
             }
 
-            setTimeout(() => {
-                setShakeQuestion(false);
-                setShakeScreen(0);
-                setFlyingBtn(null);
-                setScorePopup(null);
-            }, 300);
+            localStorage.setItem('user_registered', 'true');
+            localStorage.setItem('user_name', data.name || mergedData.name);
+            showToast(`تم حفظ معلوماتك بنجاح! 🎉`, 'success');
+        }
+    };
 
-        }, 300);
-    }, [
-        gameState, feedback.show, currentQ, flyingBtn, initAudio,
-        streak, isInUpperHalf, playCorrectSound, playWrongSound,
-        spawnParticles, showFeedbackModal, answeredCorrectly
-    ]);
+    // Navigation Handlers
+    const handleNavigate = (view) => {
+        setCurrentView(view);
+        if (view === 'home') {
+            setSelectedChapter(null);
+            setGameMode(null);
+        }
+    };
 
-    // ========================
-    // POWERUPS
-    // ========================
-    const useFreeze = useCallback(() => {
-        if (powerups.freeze <= 0 || frozen || gameState !== 'playing' || feedback.show) return;
-        triggerHaptic(50);
-        playSound(600, 'sine', 0.2, 0.5);
-        setPowerups(prev => ({ ...prev, freeze: prev.freeze - 1 }));
-        setFrozen(true);
-        freezeTimerRef.current = setTimeout(() => setFrozen(false), GAME_CONSTANTS.FREEZE_DURATION);
-    }, [powerups.freeze, frozen, gameState, feedback.show, playSound]);
+    // Game configuration for chapters/reviews
+    const [chapterGameConfig, setChapterGameConfig] = useState(null);
 
-    const useBomb = useCallback(() => {
-        if (powerups.bomb <= 0 || gameState !== 'playing' || feedback.show || !currentQ) return;
-        triggerHaptic(50);
-        playSound(400, 'square', 0.15, 0.2);
-        setPowerups(prev => ({ ...prev, bomb: prev.bomb - 1 }));
-        const wrongOptions = currentQ.options.filter(o => o !== currentQ.a);
-        const toDisable = wrongOptions.sort(() => Math.random() - 0.5).slice(0, 2);
-        setDisabledOptions(toDisable);
-    }, [powerups.bomb, gameState, feedback.show, currentQ, playSound]);
+    const handleChapterClick = (chapterNum, subject = 'english') => {
+        setSelectedChapter(chapterNum);
+        setChapterGameConfig(prev => ({ ...prev, subject }));
+        setCurrentView('levels');
+    };
 
-    // ========================
-    // COMPUTED VALUES
-    // ========================
-    const bg = isDark ? 'bg-slate-900' : 'bg-slate-50';
+    const handleLevelClick = (levelData) => {
+        // levelData contains: { id, partNumber, chapterNum, subject, type }
+        setChapterGameConfig({
+            subject: levelData.subject || 'english',
+            type: levelData.type || 'chapters',
+            part: levelData.partNumber || levelData.id,
+            chapterNum: levelData.chapterNum,
+            gameMode: 'finite' // 3 lives mode for chapters
+        });
+        setGameMode('finite');
+        setCurrentView('game');
+        showToast('حظاً موفقاً! 🚀', 'fire');
+    };
 
-    // ========================
-    // RENDER
-    // ========================
-    return (
-        <div
-            className={`min-h-[100dvh] w-full ${bg} overflow-hidden select-none ${shakeScreen === 1 ? 'animate-shake' : shakeScreen === 2 ? 'animate-hardShake' : ''
-                }`}
-            style={{ fontFamily: "'Cairo', sans-serif", fontWeight: '700', touchAction: 'none' }}
-        >
-            {/* Dynamic Background */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                {isDark ? (
-                    <>
-                        <div className="absolute inset-0 bg-[#0A0A1A]" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A1A]/40 to-[#0A0A1A]" />
-                    </>
-                ) : (
-                    <>
-                        <div className="absolute inset-0 bg-sky-50" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-white via-sky-50/50 to-slate-100" />
-                    </>
-                )}
-                {streak.active && streak.multiplier >= 5 && (
-                    <div className="absolute inset-0 bg-orange-500/10 mix-blend-overlay animate-pulse" />
-                )}
-            </div>
+    const handleReviewClick = (reviewData) => {
+        // reviewData contains: { type, part, subject, questionCount }
+        setChapterGameConfig({
+            subject: reviewData.subject || 'english',
+            type: reviewData.type, // 'halfyear' or 'fullyear'
+            part: reviewData.part,
+            gameMode: 'finite'
+        });
+        setGameMode('finite');
+        setCurrentView('game');
+        showToast('حظاً موفقاً في المراجعة! 📚', 'fire');
+    };
 
-            {/* Loading State */}
-            {loading && (
-                <div className="fixed inset-0 z-[500] flex items-center justify-center bg-[#0A0A1A]">
-                    <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+    const [showBattleArena, setShowBattleArena] = useState(false);
+
+    const handleMonsterChallenge = () => {
+        if (isGuest) {
+            setShowLoginModal(true);
+            showToast('سجل دخول لفتح التحدي! 🔐', 'info');
+        } else {
+            setShowBattleArena(true);
+        }
+    };
+
+    const handleGameExit = async () => {
+        setCurrentView('home');
+        setGameMode(null);
+
+        // Refresh user stats after game
+        if (authUser?.id) {
+            try {
+                const { data: stats } = await getUserDashboardStats(authUser.id);
+                if (stats) {
+                    setUserStats({
+                        streakDays: stats.streak_days || 0,
+                        totalQuestions: stats.total_questions || 0,
+                        totalXP: stats.total_xp || 0,
+                        dailyTasksDone: stats.daily_tasks_done || 0,
+                        dailyTasksTotal: stats.daily_tasks_total || 5,
+                        mistakesToReview: stats.mistakes_to_review || 0,
+                        subjectProgress: stats.subject_progress || {}
+                    });
+                }
+            } catch (err) {
+                console.error('[App] Failed to refresh stats after game:', err);
+            }
+        }
+    };
+
+    // Show Login Modal for restricted features
+    const handleShowLogin = () => {
+        setShowLoginModal(true);
+    };
+
+    // Feature click handling (checks for guest status)
+    const handleFeatureClick = (feature) => {
+        if (isGuest) {
+            setShowLoginModal(true);
+            showToast('هذه الميزة متاحة للمسجلين فقط! 🔐', 'info');
+            return false;
+        }
+        setSeenTooltips(prev => ({ ...prev, [feature]: true }));
+        return true;
+    };
+
+    // Logout
+    const handleLogout = async () => {
+        try {
+            if (authUser) {
+                await signOut();
+            }
+            setIsLoggedIn(false);
+            setIsGuest(false);
+            setUserData(null);
+            setAuthUser(null);
+            localStorage.removeItem('user_registered');
+            localStorage.removeItem('user_name');
+            localStorage.removeItem('guest_mode');
+            setCurrentView('login');
+            showToast('تم تسجيل الخروج 👋', 'info');
+        } catch (error) {
+            console.error('Logout error:', error);
+            showToast('حصل خطأ في تسجيل الخروج', 'error');
+        }
+    };
+
+    // Loading state
+    if (authLoading && !localStorage.getItem('guest_mode')) {
+        return (
+            <div className={`min-h-screen w-full flex items-center justify-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+                <SoftBackground isDarkMode={isDarkMode} />
+                <div className="text-center z-10 animate-pulse">
+                    <div className="w-20 h-20 mx-auto bg-yellow-400 rounded-[1.5rem] flex items-center justify-center shadow-lg mb-4">
+                        <span className="text-3xl">✓</span>
+                    </div>
+                    <p className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                        جاري التحميل...
+                    </p>
                 </div>
-            )}
+            </div>
+        );
+    }
 
-            {/* Particles */}
-            <ParticleSystem particles={particles} />
+    // Render based on current view
+    const renderContent = () => {
+        // Login View
+        if (currentView === 'login' || showLoginModal) {
+            return (
+                <div className={`min-h-screen w-full ${showLoginModal ? 'fixed inset-0 z-[100]' : ''}`}>
+                    <SoftBackground isDarkMode={isDarkMode} />
+                    <LoginView
+                        isDarkMode={isDarkMode}
+                        onLoginSuccess={(data, guest) => {
+                            handleLoginSuccess(data, guest);
+                            setShowLoginModal(false);
+                        }}
+                        onGoogleSignIn={handleGoogleSignIn}
+                        initialData={userData}
+                    />
+                    {showLoginModal && (
+                        <button
+                            onClick={() => setShowLoginModal(false)}
+                            className="absolute top-4 right-4 text-3xl text-slate-400 hover:text-slate-600"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+            );
+        }
 
-            {/* Score Popup */}
-            <ScorePopup scorePopup={scorePopup} />
+        // Game View - All game modes now use Supabase
+        if (currentView === 'game' && gameMode) {
+            // All games now use MonsterChallengeLoader which fetches from Supabase
+            const gameConfig = typeof gameMode === 'object'
+                ? gameMode
+                : { mode: 'monster', subject: userData?.preferred_subject || 'english', type: 'fullyear', part: 1 };
 
-            {/* ============ LOGIN SCREEN ============ */}
-            {!loading && !user && (
-                <LoginScreen />
-            )}
-
-            {/* ============ MENU SCREEN ============ */}
-            {!loading && user && gameState === 'menu' && (
-                <MenuScreen
-                    isDark={isDark}
-                    onStartGame={handleStartGame}
+            return (
+                <MonsterChallengeLoader
+                    gameConfig={gameConfig}
+                    isDarkMode={isDarkMode}
+                    isMuted={isMuted}
+                    onExit={handleGameExit}
+                    toggleMute={toggleMute}
+                    toggleDarkMode={toggleDarkMode}
+                    showToast={showToast}
                 />
-            )}
+            );
+        }
 
-            {/* ============ SUBJECT SELECT SCREEN ============ */}
-            {!loading && user && gameState === 'selectSubject' && (
-                <SubjectSelectScreen
-                    isDark={isDark}
-                    onSelectSubject={handleSelectSubject}
-                    onBack={handleBackToMenu}
-                />
-            )}
+        // Main App Layout
+        return (
+            <div className="min-h-screen w-full relative" dir="rtl">
+                <SoftBackground isDarkMode={isDarkMode} />
 
-            {/* ============ CATEGORY SELECT SCREEN ============ */}
-            {!loading && user && gameState === 'selectCategory' && selectedSubject && (
-                <CategorySelectScreen
-                    isDark={isDark}
-                    subject={selectedSubject}
-                    onSelectCategory={handleSelectCategory}
-                    onBack={handleBackToSubject}
-                />
-            )}
+                <div className="w-full max-w-lg mx-auto px-4 py-6 pb-32 relative z-10">
+                    {/* Top Navigation */}
+                    <TopNav
+                        isDarkMode={isDarkMode}
+                        isMuted={isMuted}
+                        isGuest={isGuest}
+                        userName={userData?.name}
+                        userAvatar={userData?.avatar}
+                        onDarkModeToggle={toggleDarkMode}
+                        onMuteToggle={toggleMute}
+                        onSettingsClick={() => setSettingsOpen(true)}
+                        onLoginClick={handleShowLogin}
+                        onLogout={handleLogout}
+                    />
 
-            {/* ============ STAGE SELECT SCREEN ============ */}
-            {!loading && user && gameState === 'selectStage' && selectedSubject && selectedCategory && (
-                <StageSelectScreen
-                    isDark={isDark}
-                    subject={selectedSubject}
-                    category={selectedCategory}
-                    onSelectStage={handleSelectStage}
-                    onBack={handleBackToCategory}
-                />
-            )}
+                    {/* Home View */}
+                    {currentView === 'home' && (
+                        <HomeView
+                            isDarkMode={isDarkMode}
+                            isGuest={isGuest}
+                            userData={userData}
+                            userStats={userStats}
+                            showTutorial={showTutorial}
+                            seenTooltips={seenTooltips}
+                            onTutorialDismiss={() => setShowTutorial(false)}
+                            onContinueJourney={handleLevelClick}
+                            onMonsterClick={() => {
+                                if (handleFeatureClick('monster')) setShowBattleArena(true);
+                            }}
+                            onChaptersClick={() => {
+                                if (handleFeatureClick('chapters')) setCurrentView('chapters');
+                            }}
+                            onReviewsClick={() => {
+                                if (handleFeatureClick('reviews')) setCurrentView('reviews');
+                            }}
+                            onFlameClick={() => setCurrentView('reviews')}
+                            onQuestionsClick={() => setCurrentView('chapters')}
+                            showToast={showToast}
+                        />
+                    )}
 
-            {/* ============ GAME SCREEN ============ */}
-            {(gameState === 'playing' || gameState === 'paused') && (
-                <GameScreen
-                    isDark={isDark}
-                    score={score}
-                    lives={lives}
-                    combo={combo}
-                    streak={streak}
-                    powerups={powerups}
-                    frozen={frozen}
-                    currentQ={currentQ}
-                    qY={qY}
-                    disabledOptions={disabledOptions}
-                    flyingBtn={flyingBtn}
-                    shakeQuestion={shakeQuestion}
-                    feedbackShow={feedback.show}
-                    isFullscreen={isFullscreen}
-                    gameAreaRef={gameAreaRef}
-                    questionRef={questionRef}
-                    optionRefs={optionRefs}
-                    onPause={() => setGameState('paused')}
-                    onToggleFullscreen={toggleFullScreen}
-                    onFreeze={useFreeze}
-                    onBomb={useBomb}
-                    onAnswer={handleAnswer}
-                />
-            )}
+                    {currentView === 'chapters' && (
+                        <ChaptersView
+                            isDarkMode={isDarkMode}
+                            isGuest={isGuest}
+                            onBack={() => setCurrentView('home')}
+                            onChapterClick={handleChapterClick}
+                            onShowLogin={handleShowLogin}
+                            onFlameClick={() => setCurrentView('reviews')}
+                            onQuestionsClick={() => setCurrentView('chapters')}
+                            days={userStats.streakDays}
+                            questions={userStats.totalQuestions}
+                            xp={userStats.totalXP}
+                            userId={authUser?.id}
+                            subject={chapterGameConfig?.subject || 'english'}
+                        />
+                    )
+                    }
 
-            {/* ============ PAUSE MENU MODAL ============ */}
-            <PauseMenuModal
-                isOpen={gameState === 'paused'}
-                onResume={() => setGameState('playing')}
-                onExit={() => setGameState('menu')}
-                currentSpeedMode={speedMode}
-                setSpeedMode={setSpeedMode}
-                isMuted={isMuted}
-                setIsMuted={setIsMuted}
-                isDark={isDark}
-                setIsDark={setIsDark}
+                    {
+                        currentView === 'levels' && (
+                            <LevelsView
+                                isDarkMode={isDarkMode}
+                                isGuest={isGuest}
+                                chapterNum={selectedChapter}
+                                onBack={() => setCurrentView('chapters')}
+                                onLevelClick={handleLevelClick}
+                                onShowLogin={handleShowLogin}
+                                userId={authUser?.id}
+                                subject={chapterGameConfig?.subject || 'english'}
+                            />
+                        )
+                    }
+
+                    {
+                        currentView === 'reviews' && (
+                            <ReviewsView
+                                isDarkMode={isDarkMode}
+                                isGuest={isGuest}
+                                onBack={() => setCurrentView('home')}
+                                onShowLogin={handleShowLogin}
+                                onFlameClick={() => setCurrentView('reviews')}
+                                onQuestionsClick={() => setCurrentView('chapters')}
+                                onReviewClick={handleReviewClick}
+                                userId={authUser?.id}
+                                subject={chapterGameConfig?.subject || 'english'}
+                            />
+                        )
+                    }
+
+                    {
+                        !isGuest && (
+                            <>
+                                {/* Fingerprint / Feedback Button */}
+                                <div className="fixed bottom-28 left-5 z-50">
+                                    <div className="relative">
+                                        <TactileButton
+                                            onClick={() => {
+                                                if (handleFeatureClick('fingerprint')) setFeedbackOpen(true);
+                                            }}
+                                            className="w-12 h-12 rounded-full shadow-lg relative"
+                                            colorClass={isDarkMode ? 'bg-[#2A2640]' : 'bg-white'}
+                                            borderClass={isDarkMode ? 'border-[#3E3859]' : 'border-teal-200'}
+                                        >
+                                            {!seenTooltips.fingerprint && (
+                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
+                                            )}
+                                            <Fingerprint className="w-6 h-6 text-teal-500" />
+                                        </TactileButton>
+                                        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-teal-600 bg-white/80 px-2 rounded-full">بصمتك</span>
+                                    </div>
+                                </div>
+
+                                <BottomDock
+                                    isDarkMode={isDarkMode}
+                                    onTaskClick={() => handleFeatureClick('daily')}
+                                    onMistakeClick={() => handleFeatureClick('mistakes')}
+                                    tasksDone={userStats.dailyTasksDone}
+                                    tasksTotal={userStats.dailyTasksTotal}
+                                    mistakesCount={userStats.mistakesToReview}
+                                    userId={authUser?.id}
+                                />
+                            </>
+                        )
+                    }
+                </div >
+
+                {/* Feedback Selection Modal (بصمتك) */}
+                {
+                    feedbackOpen && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setFeedbackOpen(false)}></div>
+                            <div className={`relative w-full max-w-sm p-6 rounded-[2rem] border-2 shadow-2xl animate-pop-in ${isDarkMode ? 'bg-[#2A2640] border-[#3E3859]' : 'bg-white border-white'}`}>
+                                <button onClick={() => setFeedbackOpen(false)} className="absolute top-4 left-4 p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"><X className="w-5 h-5 text-slate-400" /></button>
+                                <div className="flex flex-col items-center text-center mb-6 mt-2">
+                                    <div className="w-16 h-16 bg-teal-50 dark:bg-teal-900/30 rounded-2xl flex items-center justify-center mb-4 rotate-3"><Fingerprint className="w-8 h-8 text-teal-500" /></div>
+                                    <h3 className={`text-xl font-black mb-1 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>اللعبة تكبر بأفكاركم 💡</h3>
+                                    <p className={`text-sm opacity-60 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>شنو اقتراحك حتى نطورها؟</p>
+                                </div>
+                                <textarea
+                                    className={`w-full h-32 p-4 rounded-xl border-2 mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all ${isDarkMode ? 'bg-black/20 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-800'}`}
+                                    placeholder="اكتب فكرتك الجهنمية هنا..."
+                                ></textarea>
+                                <TactileButton
+                                    onClick={() => {
+                                        setFeedbackOpen(false);
+                                        showToast('شكراً يا بطل! فكرتك وصلت 💡', 'info', Send);
+                                    }}
+                                    className="w-full py-3 rounded-xl gap-2"
+                                    colorClass="bg-teal-500"
+                                    borderClass="border-teal-700"
+                                >
+                                    <span className="font-bold text-white">إرسال الفكرة</span>
+                                    <Send className="w-4 h-4 text-white" />
+                                </TactileButton>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {
+                    showBattleArena && (
+                        <BattleArenaModal
+                            isDarkMode={isDarkMode}
+                            playerName={userData?.name}
+                            user={userData}
+                            preferredSubject={userData?.preferred_subject || 'english'}
+                            onClose={() => setShowBattleArena(false)}
+                            showToast={showToast}
+                            onStartGame={(config) => {
+                                // config contains: { mode, subject, type, part }
+                                setGameMode(config);
+                                setCurrentView('game');
+                                setShowBattleArena(false);
+                                showToast('انطلق! ⚔️', 'fire');
+                            }}
+                        />
+                    )
+                }
+            </div >
+        );
+    };
+
+    return (
+        <>
+            {renderContent()}
+
+            {/* Toast Notification */}
+            <ToastNotification
+                message={toast.message}
+                isVisible={toast.visible}
+                type={toast.type}
+                icon={toast.icon}
+                onClose={hideToast}
             />
 
-            {/* ============ RESULTS SCREEN ============ */}
-            {gameState === 'results' && (
-                <ResultsScreen
-                    isDark={isDark}
-                    score={score}
-                    correctAnswers={correctAnswers}
-                    wrongAnswers={wrongAnswers}
-                    onRestart={() => selectedStage && handleSelectStage(selectedStage)}
-                    onMenu={() => setGameState('selectStage')}
-                />
-            )}
-
-            {/* ============ FEEDBACK OVERLAY ============ */}
-            <FeedbackOverlay feedback={feedback} />
-        </div>
+            {/* Settings Modal */}
+            <SettingsModal
+                isOpen={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+                isDarkMode={isDarkMode}
+                user={authUser ? { auth_id: authUser.id, ...userData } : null}
+                onProfileUpdate={(updatedData) => {
+                    setUserData(prev => ({
+                        ...prev,
+                        name: updatedData.full_name,
+                        age: updatedData.age,
+                        gender: updatedData.gender,
+                        governorate: updatedData.region
+                    }));
+                }}
+                showToast={showToast}
+            />
+        </>
     );
 }
+
+export default App;

@@ -1,0 +1,44 @@
+/* ============================================
+   CSS VARIABLES - Design Tokens
+   ============================================ */
+:root {
+    /* Primary Colors */
+    --primary-purple: #8B5CF6;
+    --primary-blue: #3B82F6;
+    --primary-cyan: #06B6D4;
+    --primary-emerald: #10B981;
+    --primary-orange: #F97316;
+    --primary-pink: #EC4899;
+    --primary-red: #EF4444;
+    --primary-yellow: #EAB308;
+
+    /* Gradients */
+    --gradient-purple: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+    --gradient-blue: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+    --gradient-fire: linear-gradient(135deg, #F97316 0%, #EF4444 100%);
+    --gradient-gold: linear-gradient(135deg, #EAB308 0%, #F97316 100%);
+    --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-glow-purple: 0 0 30px rgba(139, 92, 246, 0.5);
+    --shadow-glow-blue: 0 0 30px rgba(59, 130, 246, 0.5);
+    --shadow-glow-fire: 0 0 30px rgba(249, 115, 22, 0.5);
+
+    /* Game Speeds */
+    --speed-baby: 12s;
+    --speed-teen: 8s;
+    --speed-beast: 5s;
+
+    /* Fonts */
+    font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

@@ -1,0 +1,151 @@
+import React, { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { SoftBackground } from '../ui';
+import { GameContainer } from './index';
+import { fetchMonsterChallengeQuestions } from '../../services/monsterChallengeService';
+import { supabase } from '../../lib/supabase';
+
+/**
+ * MonsterChallengeLoader Component
+ * Fetches questions from Supabase and renders GameContainer
+ */
+const MonsterChallengeLoader = ({
+    gameConfig,
+    isDarkMode,
+    isMuted,
+    onExit,
+    toggleMute,
+    toggleDarkMode,
+    showToast
+}) => {
+    const [questions, setQuestions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [userId, setUserId] = useState(null);
+
+    // Get current user ID
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) setUserId(user.id);
+        };
+        getUser();
+    }, []);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            setLoading(true);
+            setError(null);
+
+            console.log('[MonsterChallenge] Loading questions for:', gameConfig);
+
+            try {
+                const { questions: dbQuestions, error: fetchError } = await fetchMonsterChallengeQuestions(
+                    gameConfig.subject,
+                    gameConfig.type,
+                    gameConfig.part
+                );
+
+                console.log('[MonsterChallenge] DB response:', { count: dbQuestions?.length, error: fetchError });
+
+                if (fetchError) throw fetchError;
+
+                if (!dbQuestions || dbQuestions.length === 0) {
+                    throw new Error('لا توجد أسئلة في هذه المرحلة');
+                }
+
+                // Transform database format to GameContainer/QuestionCard format
+                const transformedQuestions = dbQuestions.map(q => ({
+                    id: q.id,
+                    q: q.question,
+                    text: q.question,
+                    options: [q.options.a, q.options.b, q.options.c, q.options.d],
+                    correct: ['a', 'b', 'c', 'd'].indexOf(q.correctAnswer),
+                    explanation: q.explanation,
+                    type: q.type || 'text',
+                    difficulty: 'medium'
+                }));
+
+                console.log('[MonsterChallenge] Transformed questions:', transformedQuestions.length);
+
+                setQuestions(transformedQuestions);
+            } catch (err) {
+                console.error('[MonsterChallenge] Error loading questions:', err);
+                setError(err.message || 'خطأ في تحميل الأسئلة');
+                showToast?.('خطأ في تحميل الأسئلة', 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadQuestions();
+    }, [gameConfig, showToast]);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className={`fixed inset-0 flex items-center justify-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+                <SoftBackground isDarkMode={isDarkMode} />
+                <div className="text-center z-10">
+                    <Loader2 className={`w-16 h-16 mx-auto animate-spin ${isDarkMode ? 'text-white' : 'text-slate-800'}`} />
+                    <p className={`mt-4 text-lg font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                        جاري تحميل الأسئلة...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className={`fixed inset-0 flex items-center justify-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+                <SoftBackground isDarkMode={isDarkMode} />
+                <div className="text-center z-10 p-8">
+                    <div className="text-6xl mb-4">😢</div>
+                    <p className={`text-lg font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                        {error}
+                    </p>
+                    <button
+                        onClick={onExit}
+                        className="px-6 py-3 bg-blue-500 text-white rounded-xl font-bold"
+                    >
+                        العودة
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Wait for questions before rendering
+    if (questions.length === 0) {
+        return (
+            <div className={`fixed inset-0 flex items-center justify-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+                <SoftBackground isDarkMode={isDarkMode} />
+                <div className="text-center z-10">
+                    <Loader2 className={`w-16 h-16 mx-auto animate-spin ${isDarkMode ? 'text-white' : 'text-slate-800'}`} />
+                    <p className={`mt-4 text-lg font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                        جاري تجهيز التحدي...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <GameContainer
+            key={`monster-${gameConfig.subject}-${gameConfig.type}-${gameConfig.part}`}
+            initialQuestions={questions}
+            initialMode="infinite"
+            isDark={isDarkMode}
+            isMuted={isMuted}
+            onExit={onExit}
+            setIsMuted={toggleMute}
+            setIsDark={toggleDarkMode}
+            gameConfig={gameConfig}
+            userId={userId}
+        />
+    );
+};
+
+export default MonsterChallengeLoader;
