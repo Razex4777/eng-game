@@ -111,10 +111,11 @@ export const updateUserProgress = async (authId, subject, type, newPart) => {
         if (fetchError) throw fetchError;
 
         // Update the specific subject/type part
+        const safeProgress = progress || {};
         const updatedProgress = {
-            ...progress,
+            ...safeProgress,
             [subject]: {
-                ...progress[subject],
+                ...(safeProgress[subject] || {}),
                 [type]: newPart
             }
         };
@@ -251,11 +252,76 @@ const shuffleArray = (array) => {
     return shuffled;
 };
 
+/**
+ * Get last attempt score for a subject/type
+ * @param {string} userId - User's ID
+ * @param {string} subject - 'biology' or 'english'
+ * @param {string} type - 'chapters', 'fullyear', or 'halfyear'
+ * @returns {Promise<{score: number|null, createdAt: string|null, error: Error|null}>}
+ */
+export const getLastAttemptScore = async (userId, subject, type) => {
+    try {
+        const { data, error } = await supabase
+            .from('game_sessions')
+            .select('score, created_at')
+            .eq('user_id', userId)
+            .eq('subject', subject)
+            .eq('question_type', type)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+
+        return {
+            score: data?.score || null,
+            createdAt: data?.created_at || null,
+            error: null
+        };
+    } catch (error) {
+        console.error('Error fetching last attempt score:', error);
+        return { score: null, createdAt: null, error };
+    }
+};
+
+/**
+ * Get high score for a subject/type
+ * @param {string} userId - User's ID
+ * @param {string} subject - 'biology' or 'english'
+ * @param {string} type - 'chapters', 'fullyear', or 'halfyear'
+ * @returns {Promise<{highScore: number|null, error: Error|null}>}
+ */
+export const getHighScore = async (userId, subject, type) => {
+    try {
+        const { data, error } = await supabase
+            .from('game_sessions')
+            .select('score')
+            .eq('user_id', userId)
+            .eq('subject', subject)
+            .eq('question_type', type)
+            .order('score', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+
+        return {
+            highScore: data?.score || null,
+            error: null
+        };
+    } catch (error) {
+        console.error('Error fetching high score:', error);
+        return { highScore: null, error };
+    }
+};
+
 export default {
     fetchMonsterChallengeQuestions,
     getUserProgress,
     updateUserProgress,
     getMaxPart,
     getAllPartCounts,
-    updateUserAnalytics
+    updateUserAnalytics,
+    getLastAttemptScore,
+    getHighScore
 };

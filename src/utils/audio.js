@@ -18,11 +18,11 @@ export const initAudio = () => {
 /**
  * Play a beep sound with customizable frequency and duration
  */
-export const playBeep = (frequency = 440, duration = 0.1, type = 'sine', volume = 0.3) => {
+export const playBeep = async (frequency = 440, duration = 0.1, type = 'sine', volume = 0.3) => {
     try {
         const ctx = initAudio();
         if (ctx.state === 'suspended') {
-            ctx.resume();
+            await ctx.resume();
         }
 
         const oscillator = ctx.createOscillator();

@@ -77,6 +77,7 @@ export const getRandomWrongMessage = (messages) => {
  * @returns {string} Streak message
  */
 export const getStreakMessage = (streakCount, messages) => {
+    streakCount = Math.max(1, streakCount);
     const streakMessages = messages?.streak || cachedMessages?.streak;
     if (!streakMessages?.length) {
         // Fallback streak messages

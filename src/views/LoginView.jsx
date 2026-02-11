@@ -6,7 +6,7 @@ import TactileButton from '../components/ui/TactileButton';
 const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, initialData }) => {
     const [step, setStep] = useState(() => {
         // If we have initialData (Partially logged in via Supabase), jump to appropriate step
-        if (initialData && !initialData.isGuest) {
+        if (initialData) {
             if (!initialData.name) return 1;
             if (!initialData.age || !initialData.gender) return 2;
             if (!initialData.governorate) return 3;
@@ -37,9 +37,7 @@ const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, initialData }) 
         }
     };
 
-    const handleGuestLogin = () => {
-        onLoginSuccess({ name: 'ضيف', isGuest: true }, true);
-    };
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -104,7 +102,7 @@ const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, initialData }) 
                                 </div>
                                 <span className="font-bold text-slate-700">دخول سريع عبر Google</span>
                             </TactileButton>
-                            <button onClick={handleGuestLogin} className="w-full py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-sm">الدخول كضيف (تجربة مجانية)</button>
+
                         </div>
 
                         {/* استرجاع أزرار المجتمع والدعم */}

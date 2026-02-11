@@ -3,7 +3,6 @@ import { shuffleArray } from '../utils/helpers';
 import {
     getRandomCorrectMessage,
     getRandomWrongMessage,
-    getStreakMessage,
     getFinalCountdownMessage
 } from '../services/messagesService';
 import { SPEED_MODES } from '../services/gameSettingsService';
@@ -31,7 +30,6 @@ const useGameLogic = (questions, options = {}) => {
         initialLives = mode === 'infinite' ? 10 : 3,
         baseSpeed = 2000, // Base fall duration in ms
         freezeDuration = 5000,
-        streakTimeout = 5000,
         onGameEnd,
     } = options;
 
@@ -42,19 +40,10 @@ const useGameLogic = (questions, options = {}) => {
     const [combo, setCombo] = useState(0);
     const [progress, setProgress] = useState(0);
 
-    // Streak State
-    const [streak, setStreak] = useState({
-        active: false,
-        count: 0,
-        multiplier: 1,
-        timeLeft: streakTimeout,
-        maxTime: streakTimeout
-    });
-
     // Question State
     const [questionIndex, setQuestionIndex] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState(null);
-    const [questionY, setQuestionY] = useState(0);
+    const [questionY, setQuestionY] = useState(120); // Start from progress bar bottom
     const [shakeQuestion, setShakeQuestion] = useState(false);
     const [shakeScreen, setShakeScreen] = useState(0); // 0: none, 1: shake, 2: hardShake
     const [gameQuestions, setGameQuestions] = useState([]);
@@ -81,7 +70,6 @@ const useGameLogic = (questions, options = {}) => {
     const gameAreaRef = useRef(null);
     const questionRef = useRef(null);
     const animationRef = useRef(null);
-    const streakTimerRef = useRef(null);
     const handleMissRef = useRef(null);
     const getCurrentSpeedRef = useRef(null);
     const nextQuestionRef = useRef(null);
@@ -111,7 +99,6 @@ const useGameLogic = (questions, options = {}) => {
         setLives(initialLives);
         setCombo(0);
         setProgress(0);
-        setStreak({ active: false, count: 0, multiplier: 1, timeLeft: streakTimeout, maxTime: streakTimeout });
         setPowerups({ freeze: 2, bomb: 1 });
         setFrozen(false);
         setDisabledOptions([]);
@@ -119,21 +106,22 @@ const useGameLogic = (questions, options = {}) => {
         setWrongAnswers([]);
         setQuestionIndex(0);
         setCurrentQuestion(shuffled[0]);
-        setQuestionY(0);
+        setQuestionY(120); // Start from progress bar bottom
         setFeedback({ show: false, correct: false, message: '' });
         setFlyingBtn(null);
         setShakeScreen(0);
         setGameState('playing');
-    }, [questions, initialLives, streakTimeout]);
+    }, [questions, initialLives]);
 
     // Handle correct answer
     const handleCorrectAnswer = useCallback((answer, answerIndex) => {
         hapticSuccess();
         playCorrectSound();
 
-        // Calculate score with multiplier
+        // Calculate score with combo-based multiplier
         const basePoints = currentQuestion?.golden ? 50 : 10;
-        const multiplier = streak.active ? streak.multiplier : 1;
+        const newCombo = combo + 1;
+        const multiplier = Math.min(Math.floor(newCombo / 3) + 1, 5);
         const points = basePoints * multiplier;
 
         setScore(prev => {
@@ -141,37 +129,23 @@ const useGameLogic = (questions, options = {}) => {
             scoreRef.current = newScore;
             return newScore;
         });
-        setCombo(prev => prev + 1);
+
+        const oldMultiplier = Math.min(Math.floor(combo / 3) + 1, 5);
+        if (multiplier > oldMultiplier) {
+            hapticCombo();
+            playComboSound();
+        }
+
+        setCombo(newCombo);
         setCorrectAnswers(prev => {
             const updated = [...prev, { question: currentQuestion, userAnswer: answer }];
             correctAnswersRef.current = updated;
             return updated;
         });
 
-        // Update streak
-        const newCount = streak.count + 1;
-        const newMultiplier = Math.min(Math.floor(newCount / 3) + 1, 5);
-
-        if (newMultiplier > streak.multiplier) {
-            hapticCombo();
-            playComboSound();
-        }
-
-        setStreak({
-            active: true,
-            count: newCount,
-            multiplier: newMultiplier,
-            timeLeft: streakTimeout,
-            maxTime: streakTimeout
-        });
-
         // Show feedback
-        const message = newMultiplier >= 3
-            ? getStreakMessage(newCount)
-            : getRandomCorrectMessage();
-
-        showFeedbackRef.current?.(true, message);
-    }, [currentQuestion, streak, streakTimeout]);
+        showFeedbackRef.current?.(true, getRandomCorrectMessage());
+    }, [currentQuestion, combo]);
 
     // Handle wrong answer
     const handleWrongAnswer = useCallback((answer) => {
@@ -187,7 +161,6 @@ const useGameLogic = (questions, options = {}) => {
 
         setLives(prev => Math.max(0, prev - 1)); // Prevent going below 0
         setCombo(0);
-        setStreak({ active: false, count: 0, multiplier: 1, timeLeft: streakTimeout, maxTime: streakTimeout });
         setWrongAnswers(prev => {
             const updated = [...prev, { question: currentQuestion, userAnswer: answer }];
             wrongAnswersRef.current = updated;
@@ -195,7 +168,7 @@ const useGameLogic = (questions, options = {}) => {
         });
 
         showFeedbackRef.current?.(false, getRandomWrongMessage());
-    }, [currentQuestion, streakTimeout]);
+    }, [currentQuestion]);
 
     // Handle answer selection
     const handleAnswer = useCallback((answer, answerIndex) => {
@@ -221,7 +194,6 @@ const useGameLogic = (questions, options = {}) => {
 
         setLives(prev => Math.max(0, prev - 1)); // Prevent going below 0
         setCombo(0);
-        setStreak({ active: false, count: 0, multiplier: 1, timeLeft: streakTimeout, maxTime: streakTimeout });
         setWrongAnswers(prev => {
             const updated = [...prev, { question: currentQuestion, userAnswer: null }];
             wrongAnswersRef.current = updated;
@@ -229,7 +201,7 @@ const useGameLogic = (questions, options = {}) => {
         });
 
         showFeedbackRef.current?.(false, 'خلصّ الوقت! ⏰');
-    }, [currentQuestion, streakTimeout]);
+    }, [currentQuestion]);
 
     // Keep refs updated with latest callbacks and values
     useEffect(() => {
@@ -267,6 +239,17 @@ const useGameLogic = (questions, options = {}) => {
             }
             return currentLives;
         });
+
+        // Monster Challenge mode: Enforce 10-error limit
+        if (initialLives >= 10 && wrongAnswersRef.current.length >= 10) {
+            setGameState('results');
+            onGameEndRef.current?.({
+                score: scoreRef.current,
+                correctAnswers: correctAnswersRef.current,
+                wrongAnswers: wrongAnswersRef.current
+            });
+            return;
+        }
 
         const nextIdx = questionIndex + 1;
 
@@ -306,7 +289,7 @@ const useGameLogic = (questions, options = {}) => {
 
         setQuestionIndex(nextIdx);
         setCurrentQuestion(gameQuestions[nextIdx] || gameQuestions[0]);
-        setQuestionY(0);
+        setQuestionY(120); // Start from progress bar bottom
         setDisabledOptions([]);
         setFrozen(false);
     }, [questionIndex, gameQuestions, mode, questions, score, correctAnswers, wrongAnswers, onGameEnd]);
@@ -354,10 +337,28 @@ const useGameLogic = (questions, options = {}) => {
         const speed = getCurrentSpeedRef.current ? getCurrentSpeedRef.current() : baseSpeed;
         const startTime = Date.now();
 
+        // Fast initial descent settings
+        const INITIAL_START_Y = 120; // Progress bar bottom
+        const INITIAL_END_Y = 250; // Readable position
+        const INITIAL_DURATION = 2500; // 2.5 seconds for fast initial descent
+
         const animate = () => {
             const elapsed = Date.now() - startTime;
-            const progress = elapsed / speed;
-            const newY = progress * (gameAreaHeight - 100);
+
+            let newY;
+
+            // Phase 1: Fast initial descent from progress bar to readable position
+            if (elapsed < INITIAL_DURATION) {
+                const initialProgress = elapsed / INITIAL_DURATION;
+                newY = INITIAL_START_Y + (initialProgress * (INITIAL_END_Y - INITIAL_START_Y));
+            }
+            // Phase 2: Normal speed descent from readable position to bottom
+            else {
+                const normalStartTime = elapsed - INITIAL_DURATION;
+                const normalProgress = normalStartTime / speed;
+                const remainingDistance = gameAreaHeight - 100 - INITIAL_END_Y;
+                newY = INITIAL_END_Y + (normalProgress * remainingDistance);
+            }
 
             if (newY >= gameAreaHeight - 50) {
                 handleMissRef.current?.();
@@ -379,27 +380,6 @@ const useGameLogic = (questions, options = {}) => {
         // Also watching currentQuestion to trigger when it first becomes available
     }, [gameState, questionIndex, !!currentQuestion, feedback.show, frozen, baseSpeed]);
 
-    // Streak timer
-    useEffect(() => {
-        if (!streak.active || gameState !== 'playing') return;
-
-        streakTimerRef.current = setInterval(() => {
-            setStreak(prev => {
-                const newTimeLeft = prev.timeLeft - 100;
-                if (newTimeLeft <= 0) {
-                    return { active: false, count: 0, multiplier: 1, timeLeft: streakTimeout, maxTime: streakTimeout };
-                }
-                return { ...prev, timeLeft: newTimeLeft };
-            });
-        }, 100);
-
-        return () => {
-            if (streakTimerRef.current) {
-                clearInterval(streakTimerRef.current);
-            }
-        };
-    }, [streak.active, gameState, streakTimeout]);
-
     // Pause/Resume
     const pauseGame = useCallback(() => setGameState('paused'), []);
     const resumeGame = useCallback(() => setGameState('playing'), []);
@@ -412,7 +392,6 @@ const useGameLogic = (questions, options = {}) => {
         lives,
         combo,
         progress,
-        streak,
         currentQuestion,
         questionY,
         shakeQuestion,
@@ -425,6 +404,8 @@ const useGameLogic = (questions, options = {}) => {
         correctAnswers,
         wrongAnswers,
         speedMode,
+        questionIndex,
+        gameQuestions,
 
         // Refs
         gameAreaRef,

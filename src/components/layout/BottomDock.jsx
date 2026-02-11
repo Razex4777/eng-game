@@ -1,23 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { Target, Play, CheckCircle2, Briefcase, X, Loader2, ChevronLeft, Trash2 } from 'lucide-react';
 import TactileButton from '../ui/TactileButton';
-import { getWrongAnswers, deleteWrongAnswer } from '../../services/wrongAnswersService';
+import { getWrongAnswers, deleteWrongAnswer, getRealCorrectAnswer } from '../../services/wrongAnswersService';
+import { getTodayActivity } from '../../services/userProgressService';
 
 const BottomDock = ({
     isDarkMode,
     onTaskClick,
     onMistakeClick,
-    tasksDone = 0,
-    tasksTotal = 1,
+    onReviewStart,
     mistakesCount = 0,
     userId = null
 }) => {
-    // Determine task state index (0, 1, or 2)
-    const taskState = tasksDone === 0 ? 0 : (tasksDone < tasksTotal ? 1 : 2);
+    const DAILY_GOAL = 2; // 2 stages per day as per client requirements
+    const [dailyStages, setDailyStages] = useState(0);
+    const [dailyLoading, setDailyLoading] = useState(true);
+
+    // Mistakes modal state
     const [mistakesOpen, setMistakesOpen] = useState(false);
     const [wrongAnswers, setWrongAnswers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+    // Fetch daily activity from Supabase
+    useEffect(() => {
+        const fetchDailyActivity = async () => {
+            if (!userId) {
+                setDailyLoading(false);
+                return;
+            }
+
+            try {
+                const { data: todayActivity } = await getTodayActivity(userId);
+                const stagesCompleted = todayActivity?.games_played || 0;
+                setDailyStages(stagesCompleted);
+            } catch (error) {
+                console.error('[BottomDock] Error fetching daily activity:', error);
+            } finally {
+                setDailyLoading(false);
+            }
+        };
+
+        fetchDailyActivity();
+    }, [userId]);
+
+    // Determine task state index (0, 1, or 2)
+    const taskState = dailyStages === 0 ? 0 : (dailyStages < DAILY_GOAL ? 1 : 2);
 
     // Fetch wrong answers when modal opens
     useEffect(() => {
@@ -33,14 +61,20 @@ const BottomDock = ({
     }, [mistakesOpen, userId]);
 
     const handleDelete = async (id) => {
-        await deleteWrongAnswer(id);
-        setWrongAnswers(prev => prev.filter(wa => wa.id !== id));
+        // Optimistic delete
+        const prev = wrongAnswers;
+        setWrongAnswers(wa => wa.filter(w => w.id !== id));
+        const { error } = await deleteWrongAnswer(id);
+        if (error) {
+            console.error('[BottomDock] Delete failed, rolling back:', error);
+            setWrongAnswers(prev);
+        }
     };
 
     const currentTask = [
-        { color: 'bg-rose-400', border: 'border-rose-600', text: 'text-rose-900', label: 'ابدأ المهام', sub: `${tasksDone}/${tasksTotal}`, icon: Target, iconBg: 'bg-rose-100' },
-        { color: 'bg-yellow-400', border: 'border-yellow-600', text: 'text-yellow-900', label: 'جاري العمل', sub: `${tasksDone}/${tasksTotal}`, icon: Play, iconBg: 'bg-yellow-100' },
-        { color: 'bg-emerald-400', border: 'border-emerald-600', text: 'text-emerald-900', label: 'أحسنت!', sub: `${tasksDone}/${tasksTotal}`, icon: CheckCircle2, iconBg: 'bg-emerald-100' }
+        { color: 'bg-rose-400', border: 'border-rose-600', text: 'text-rose-900', label: 'ابدأ المهام', sub: `${dailyStages}/${DAILY_GOAL}`, icon: Target, iconBg: 'bg-rose-100' },
+        { color: 'bg-yellow-400', border: 'border-yellow-600', text: 'text-yellow-900', label: 'جاري العمل', sub: `${dailyStages}/${DAILY_GOAL}`, icon: Play, iconBg: 'bg-yellow-100' },
+        { color: 'bg-emerald-400', border: 'border-emerald-600', text: 'text-emerald-900', label: 'مكتمل ✓', sub: `${dailyStages}/${DAILY_GOAL}`, icon: CheckCircle2, iconBg: 'bg-emerald-100' }
     ][taskState];
 
     return (
@@ -79,28 +113,33 @@ const BottomDock = ({
                                         <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
                                     </div>
                                 ) : selectedAnswer ? (
-                                    // Detail View
+                                    // Detail View - Simplified to show only wrong answer and correct answer
                                     <div className="space-y-3">
                                         <p className={`text-sm font-bold text-right ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                                             {selectedAnswer.question_text}
                                         </p>
-                                        <div className="space-y-1">
-                                            {JSON.parse(selectedAnswer.options || '[]').map((opt, i) => (
-                                                <div
-                                                    key={i}
-                                                    className={`p-2 rounded-lg text-xs text-right font-bold ${opt === selectedAnswer.correct_answer
-                                                            ? 'bg-green-100 text-green-700 border border-green-300'
-                                                            : opt === selectedAnswer.user_answer
-                                                                ? 'bg-red-100 text-red-700 border border-red-300 line-through'
-                                                                : isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'
-                                                        }`}
-                                                >
-                                                    {opt}
+
+                                        {/* Show user's wrong answer if different from correct */}
+                                        {selectedAnswer.user_answer && selectedAnswer.user_answer !== selectedAnswer.correct_answer && (
+                                            <div className="text-right">
+                                                <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">إجابتك:</span>
+                                                <div className="p-2 rounded-lg text-xs text-right font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-800 line-through">
+                                                    {selectedAnswer.user_answer}
                                                 </div>
-                                            ))}
+                                            </div>
+                                        )}
+
+                                        {/* Show correct answer */}
+                                        <div className="text-right">
+                                            <span className="text-xs text-slate-500 dark:text-slate-400 block mb-1">الإجابة الصحيحة:</span>
+                                            <div className="p-2 rounded-lg text-xs text-right font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-800">
+                                                {selectedAnswer.correct_answer || 'غير متوفر'}
+                                            </div>
                                         </div>
+
+                                        {/* Show explanation if available */}
                                         {selectedAnswer.explanation && (
-                                            <p className="text-xs text-blue-500 bg-blue-50 p-2 rounded-lg text-right">
+                                            <p className="text-xs text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg text-right">
                                                 💡 {selectedAnswer.explanation}
                                             </p>
                                         )}
@@ -145,7 +184,14 @@ const BottomDock = ({
                             </div>
 
                             {!selectedAnswer && wrongAnswers.length > 0 && (
-                                <button className="w-full py-2 bg-amber-400 border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 text-white rounded-xl text-xs font-bold shadow-sm transition-all mt-3">
+                                <button
+                                    onClick={() => {
+                                        setMistakesOpen(false);
+                                        setSelectedAnswer(null);
+                                        onReviewStart?.();
+                                    }}
+                                    className="w-full py-2 bg-amber-400 border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 text-white rounded-xl text-xs font-bold shadow-sm transition-all mt-3"
+                                >
                                     راجعها الآن
                                 </button>
                             )}

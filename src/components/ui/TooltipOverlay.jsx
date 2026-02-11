@@ -1,7 +1,7 @@
 import React from 'react';
 import { Info } from 'lucide-react';
 
-const TooltipOverlay = ({ title, text, onClose, targetRef }) => {
+const TooltipOverlay = ({ title, text, onClose }) => {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-[2px] animate-fade-in" onClick={onClose}>
             <div

@@ -34,7 +34,8 @@ eng-game-main/
 │   │   │   ├── 📄 MonsterChallengeLoader.jsx # Questions loader with Supabase fetch
 │   │   │   ├── 📄 PauseMenuModal.jsx
 │   │   │   ├── 📄 QuestionCard.jsx
-│   │   │   └── 📄 ResultsScreen.jsx
+│   │   │   ├── 📄 ResultsScreen.jsx
+│   │   │   └── 📄 WrongAnswersReviewMode.jsx
 │   │   ├── 📁 layout/
 │   │   │   ├── 📄 BottomDock.jsx
 │   │   │   ├── 📄 index.js
@@ -44,8 +45,12 @@ eng-game-main/
 │   │   │   └── 📄 SettingsModal.jsx     # User settings with subject preference
 │   │   └── 📁 ui/
 │   │       ├── 📄 index.js
+│   │       ├── 📄 CompletionProgress.jsx     # Curriculum completion % with circular progress
+│   │       ├── 📄 DailyTasksWidget.jsx       # Daily goal tracker: 2 stages/day indicator
+│   │       ├── 📄 SharePopup.jsx             # Social sharing popup component
 │   │       ├── 📄 SoftBackground.jsx
-│   │       ├── 📄 StatsHUD.jsx
+│   │       ├── 📄 StatsHUD.jsx               # Main stats display with question counter
+│   │       ├── 📄 StreakDisplay.jsx           # 7-day streak calendar with fire icons
 │   │       ├── 📄 TactileButton.jsx
 │   │       ├── 📄 ToastNotification.jsx
 │   │       ├── 📄 TooltipOverlay.jsx
@@ -57,8 +62,10 @@ eng-game-main/
 │   │   ├── 📄 auth.js
 │   │   └── 📄 supabase.js
 │   ├── 📁 services/                     # Service layer for API calls
+│   │   ├── 📄 analyticsService.js       # Analytics: most wrong questions, time/speed metrics
 │   │   ├── 📄 chaptersService.js        # Chapters & Reviews structure, questions, progress
 │   │   ├── 📄 gameSettingsService.js    # Game settings CRUD with Supabase
+
 │   │   ├── 📄 messagesService.js        # Encouragement messages from Supabase
 │   │   ├── 📄 monsterChallengeService.js # Monster Challenge Supabase queries
 │   │   ├── 📄 userProgressService.js    # User stats, streaks, achievements, game sessions

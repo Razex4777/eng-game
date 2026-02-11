@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Lock, Zap, Infinity as InfinityIcon, ChevronLeft, CheckCircle2, Play, Loader2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Lock, Zap, Infinity as InfinityIcon, ChevronLeft, CheckCircle2, Play, Loader2, BookOpen, Package } from 'lucide-react';
 import TactileButton from '../components/ui/TactileButton';
 import StatsHUD from '../components/ui/StatsHUD';
 import {
@@ -7,12 +7,13 @@ import {
     getSubjectConfig,
     getUserChapterProgress
 } from '../services/chaptersService';
+import { getDueReviews, getReviewStats } from '../services/wrongAnswersService';
+import { WrongAnswersReviewMode } from '../components/game';
 
 // واجهة المراجعات
 const ReviewsView = ({
     isDarkMode,
     onBack,
-    isGuest,
     onShowLogin,
     onFlameClick,
     onQuestionsClick,
@@ -26,7 +27,25 @@ const ReviewsView = ({
     const [userProgress, setUserProgress] = useState({});
     const [loading, setLoading] = useState(true);
 
+    // Wrong answers review state
+    const [wrongAnswersStats, setWrongAnswersStats] = useState(null);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [selectedReviewId, setSelectedReviewId] = useState(null);
+    const [reviewLoading, setReviewLoading] = useState(false);
+
     const toggleReview = (id) => setExpandedReview(expandedReview === id ? null : id);
+
+    // Load wrong answers stats
+    const loadWrongAnswersStats = async () => {
+        if (!userId) return;
+
+        try {
+            const stats = await getReviewStats(userId);
+            setWrongAnswersStats(stats);
+        } catch (error) {
+            console.error('Error loading wrong answers stats:', error);
+        }
+    };
 
     // Fetch review structures and user progress
     useEffect(() => {
@@ -45,6 +64,9 @@ const ReviewsView = ({
                 if (userId) {
                     const { progress } = await getUserChapterProgress(userId, subject);
                     setUserProgress(progress);
+
+                    // Load wrong answers stats
+                    await loadWrongAnswersStats();
                 }
             } catch (error) {
                 console.error('Error loading reviews:', error);
@@ -58,7 +80,7 @@ const ReviewsView = ({
 
     // Get part status based on user progress
     const getPartStatus = (type, partNum) => {
-        if (isGuest) return 'locked';
+
 
         const typeProgress = userProgress?.[type] || {};
         const partProgress = typeProgress[partNum];
@@ -75,10 +97,6 @@ const ReviewsView = ({
 
     // Handle clicking on a review part
     const handlePartClick = (type, part) => {
-        if (isGuest) {
-            onShowLogin();
-            return;
-        }
 
         const status = getPartStatus(type, part.part);
         if (status === 'locked') return;
@@ -91,6 +109,51 @@ const ReviewsView = ({
                 questionCount: part.questionCount
             });
         }
+    };
+
+    // Start wrong answers review
+    const startReview = async (reviewSubject, chapter) => {
+        setReviewLoading(true);
+        try {
+            // Get first due review for this subject/chapter
+            const { data: dueReviews, error } = await getDueReviews(userId, reviewSubject, 1);
+
+            if (error) {
+                console.error('[ReviewsView] Error fetching due reviews:', error);
+                return;
+            }
+
+            if (dueReviews && dueReviews.length > 0) {
+                console.log('[ReviewsView] Starting review with ID:', dueReviews[0].id);
+
+                // Use onReviewClick to notify parent (App.jsx) to launch full-screen review
+                if (onReviewClick) {
+                    onReviewClick({
+                        type: 'wrongAnswers',
+                        wrongAnswerId: dueReviews[0].id,
+                        subject: reviewSubject
+                    });
+                }
+            } else {
+                console.log('[ReviewsView] No due reviews found');
+            }
+        } catch (error) {
+            console.error('Error starting review:', error);
+        } finally {
+            setReviewLoading(false);
+        }
+    };
+
+    // Handle review completion
+    const handleReviewComplete = async (result) => {
+        setShowReviewModal(false);
+        setSelectedReviewId(null);
+
+        // Refresh stats
+        await loadWrongAnswersStats();
+
+        // Show feedback (could add toast notification here)
+        console.log(result.success ? 'أحسنت! 🎉' : 'حاول مرة أخرى 💪');
     };
 
     // Render special review section (halfyear or fullyear)
@@ -156,10 +219,10 @@ const ReviewsView = ({
                                 >
                                     <div className="flex items-center gap-4 z-10">
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 ${isCompleted
-                                                ? 'bg-emerald-500 border-emerald-600 text-white'
-                                                : isLocked
-                                                    ? 'bg-slate-200 border-slate-300 text-slate-400 dark:bg-slate-700 dark:border-slate-600'
-                                                    : (isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-600')
+                                            ? 'bg-emerald-500 border-emerald-600 text-white'
+                                            : isLocked
+                                                ? 'bg-slate-200 border-slate-300 text-slate-400 dark:bg-slate-700 dark:border-slate-600'
+                                                : (isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-600')
                                             }`}>
                                             {isCompleted
                                                 ? <CheckCircle2 className="w-6 h-6" />
@@ -200,7 +263,7 @@ const ReviewsView = ({
 
     return (
         <div className="animate-fade-in-up pb-32">
-            <StatsHUD isDarkMode={isDarkMode} compact={true} onFlameClick={onFlameClick} onQuestionsClick={onQuestionsClick} isGuest={isGuest} />
+            <StatsHUD isDarkMode={isDarkMode} compact={true} onFlameClick={onFlameClick} onQuestionsClick={onQuestionsClick} />
             <div className="flex items-center gap-4 mb-6">
                 <TactileButton onClick={() => onBack('home')} className="w-12 h-12 rounded-xl" colorClass={isDarkMode ? 'bg-slate-800' : 'bg-white'} borderClass={isDarkMode ? 'border-slate-700' : 'border-slate-200'}>
                     <ArrowLeft className={isDarkMode ? 'text-white' : 'text-slate-700'} />
@@ -208,17 +271,70 @@ const ReviewsView = ({
                 <h2 className={`text-3xl font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>المراجعات</h2>
             </div>
 
-            {isGuest ? (
-                <div className="text-center py-20 opacity-60">
-                    <Lock className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-                    <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>المراجعات للمشتركين فقط</h3>
-                    <p className="text-sm text-slate-500 mb-6">سجل دخولك لتتمتع بكافة المميزات</p>
-                    <TactileButton onClick={onShowLogin} className="w-48 mx-auto p-3 rounded-xl" colorClass="bg-yellow-400" borderClass="border-yellow-600">
-                        <span className="font-bold text-yellow-900">تسجيل الدخول</span>
-                    </TactileButton>
-                </div>
-            ) : (
+            {
                 <div className="space-y-4">
+                    {/* حقيبة الأخطاء - Wrong Answers Bag */}
+                    {wrongAnswersStats && wrongAnswersStats.dueReviews > 0 && (
+                        <div className="mb-6 p-6 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border-2 border-red-200 dark:border-red-800 animate-pulse-subtle">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="text-4xl">📦</div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-red-700 dark:text-red-300">
+                                        حقيبة الأخطاء
+                                    </h3>
+                                    <p className="text-sm text-red-600 dark:text-red-400">
+                                        {wrongAnswersStats.dueReviews} سؤال جاهز للمراجعة الآن
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Group by subject */}
+                            {Object.entries(wrongAnswersStats.bySubject || {}).map(([reviewSubject, data]) => (
+                                data.due > 0 && (
+                                    <div key={reviewSubject} className="mb-4">
+                                        <h4 className="font-bold mb-2 text-red-800 dark:text-red-200">
+                                            {reviewSubject === 'english' ? 'English 📚' : 'Biology 🧬'}
+                                        </h4>
+
+                                        {/* Group by chapter */}
+                                        {Object.entries(data.byChapter || {}).map(([chapter, chapterData]) => (
+                                            chapterData.due > 0 && (
+                                                <div key={chapter} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg mb-2 shadow-sm">
+                                                    <div>
+                                                        <span className="font-bold text-slate-800 dark:text-white">الفصل {chapter}</span>
+                                                        <span className="text-sm text-slate-500 dark:text-slate-400 mr-2">
+                                                            {chapterData.due} أسئلة
+                                                        </span>
+                                                    </div>
+                                                    <TactileButton
+                                                        onClick={() => startReview(reviewSubject, chapter)}
+                                                        disabled={reviewLoading}
+                                                        className="px-4 py-2 rounded-xl"
+                                                        colorClass="bg-gradient-to-r from-red-500 to-orange-500"
+                                                        borderClass="border-red-600"
+                                                    >
+                                                        <span className="text-white font-bold text-sm flex items-center gap-2">
+                                                            {reviewLoading ? (
+                                                                <>
+                                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                                    جاري التحميل...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    ابدأ المراجعة 🎯
+                                                                </>
+                                                            )}
+                                                        </span>
+                                                    </TactileButton>
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                )
+                            ))}
+                        </div>
+                    )}
+
                     {/* مراجعة نصف السنة */}
                     {renderSpecialReview(
                         'halfyear',
@@ -237,7 +353,7 @@ const ReviewsView = ({
                         InfinityIcon
                     )}
                 </div>
-            )}
+            }
         </div>
     );
 };

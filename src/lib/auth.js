@@ -45,7 +45,6 @@ export const signOut = async () => {
         // Clear local storage
         localStorage.removeItem('user_registered');
         localStorage.removeItem('user_name');
-        localStorage.removeItem('guest_mode');
 
         return { error: null };
     } catch (error) {
@@ -88,12 +87,17 @@ export const getCurrentUser = async () => {
  * @returns {Function} Unsubscribe function
  */
 export const onAuthStateChange = (callback) => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-            callback(event, session);
-        }
-    );
-    return () => subscription.unsubscribe();
+    try {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                callback(event, session);
+            }
+        );
+        return () => subscription.unsubscribe();
+    } catch (error) {
+        console.error('[Auth] Failed to subscribe to auth state changes:', error);
+        return () => { };
+    }
 };
 
 /**

@@ -154,7 +154,7 @@
 
 /* Fever Mode */
 .fever-mode {
-    animation: neonPulse 1s infinite alternate;
+    animation: neon-pulse 1s infinite alternate;
 }
 
 /* Pause Animation */

@@ -1,6 +1,6 @@
 import React from 'react';
 import { List, FileText, Star } from 'lucide-react';
-import { TactileButton, StatsHUD } from '../components/ui';
+import { TactileButton, StatsHUD, StreakDisplay, CompletionProgress } from '../components/ui';
 import MonsterCard from './MonsterCard';
 
 /**
@@ -9,7 +9,6 @@ import MonsterCard from './MonsterCard';
  */
 const HomeView = ({
     isDarkMode,
-    isGuest,
     userData,
     userStats,
     showTutorial,
@@ -25,23 +24,30 @@ const HomeView = ({
 }) => {
     return (
         <div className="animate-fade-in-up">
+            {/* Logo */}
+            <div className="relative mb-8 text-center">
+                <h1 className="text-5xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient" style={{
+                    backgroundSize: '200% auto',
+                    animation: 'gradient 3s linear infinite'
+                }}>
+                    ختمتها
+                </h1>
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-pink-600 blur-xl opacity-30 -z-10"></div>
+            </div>
+
             {/* Continue Journey / Try Free Card */}
             <div className="relative mb-6">
                 {showTutorial && (
                     <div className="absolute -top-12 left-0 right-0 flex justify-center animate-bounce z-50 pointer-events-none">
                         <div className="bg-yellow-400 text-yellow-900 text-xs font-black px-4 py-2 rounded-xl shadow-lg border-2 border-yellow-100">
-                            {isGuest ? "جرب مجاناً هنا 👇" : "ابدأ رحلتك من هنا 👇"}
+                            ابدأ رحلتك من هنا 👇
                         </div>
                     </div>
                 )}
                 <TactileButton
                     onClick={() => {
                         onTutorialDismiss();
-                        if (isGuest) {
-                            onContinueJourney(1);
-                        } else {
-                            showToast("قريباً.. من هنا تكمل آخر درس وصلت اله! 🚀", "info", Star);
-                        }
+                        onContinueJourney();
                     }}
                     className={`w-full p-6 rounded-[32px] group border-2 relative overflow-hidden ${showTutorial ? 'animate-pulse-ring z-40' : ''}`}
                     colorClass="bg-gradient-to-br from-indigo-500 to-blue-600"
@@ -49,45 +55,62 @@ const HomeView = ({
                 >
                     <div className="w-full flex items-center justify-between z-20 relative">
                         <div className="flex flex-col items-start gap-1">
-                            <span className="text-2xl font-black text-white drop-shadow-md">{isGuest ? 'جرب التحدي مجاناً 🎮' : 'تابع رحلتك 🚀'}</span>
+                            <span className="text-2xl font-black text-white drop-shadow-md">
+                                تابع رحلتك 🚀
+                            </span>
                             <span className="text-sm font-bold text-indigo-100 opacity-90">
-                                {isGuest ? 'العب أول مرحلة واكتشف مستواك!' : 'الفصل 2 - الدرس 3'}
+                                {userStats?.lastPlayedPart
+                                    ? `الفصل ${userStats.lastPlayedPart.chapterNumber} - الدرس ${userStats.lastPlayedPart.part}`
+                                    : 'ابدأ رحلتك التعليمية'
+                                }
                             </span>
                         </div>
                         <div className="relative flex items-center justify-center">
                             <span className="text-5xl font-black text-white drop-shadow-lg tracking-tighter" style={{ textShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
-                                {isGuest ? '0' : '45'}<span className="text-2xl">%</span>
+                                {userStats?.overallProgress || '0'}<span className="text-2xl">%</span>
                             </span>
                         </div>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 h-3 bg-black/20">
-                        <div className="h-full bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.9)]" style={{ width: isGuest ? '0%' : '45%' }}></div>
+                        <div className="h-full bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.9)]" style={{ width: `${userStats?.overallProgress || 0}%` }}></div>
                     </div>
                 </TactileButton>
             </div>
 
-            {/* Stats HUD (Only for logged in) */}
-            {!isGuest && (
-                <StatsHUD
-                    isDarkMode={isDarkMode}
-                    isGuest={isGuest}
-                    days={userStats.streakDays}
-                    questions={userStats.totalQuestions}
-                    xp={userStats.totalXP}
-                    onFlameClick={onFlameClick}
-                    onQuestionsClick={onQuestionsClick}
-                />
-            )}
+            {/* Stats HUD */}
+            <StatsHUD
+                isDarkMode={isDarkMode}
+                days={userStats.streakDays}
+                questions={userStats.totalQuestions}
+                xp={userStats.totalXP}
+                subject={userData?.preferred_subject}
+                onFlameClick={onFlameClick}
+                onQuestionsClick={onQuestionsClick}
+            />
+
+            {/* 7-Day Streak Display */}
+            <StreakDisplay
+                userId={userData?.id || userData?.auth_id}
+                isDark={isDarkMode}
+                className="mb-4"
+            />
+
+            {/* Completion Progress */}
+            <CompletionProgress
+                totalQuestionsAnswered={userStats.totalQuestions}
+                subject={userData?.preferred_subject}
+                isDark={isDarkMode}
+                className="mb-4"
+            />
 
             {/* Monster Challenge Card */}
             <div className="relative">
                 <MonsterCard
                     isDarkMode={isDarkMode}
-                    isGuest={isGuest}
                     onClick={onMonsterClick}
                     playerName={userData?.name}
                 />
-                {!seenTooltips.monster && !isGuest && (
+                {!seenTooltips.monster && (
                     <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce pointer-events-none"></div>
                 )}
             </div>
@@ -100,7 +123,7 @@ const HomeView = ({
                     colorClass={isDarkMode ? 'bg-emerald-600' : 'bg-[#6EE7B7]'}
                     borderClass={isDarkMode ? 'border-emerald-800' : 'border-[#059669]'}
                 >
-                    {!seenTooltips.chapters && !isGuest && (
+                    {!seenTooltips.chapters && (
                         <div className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
                     )}
                     <div className="w-16 h-16 rounded-3xl flex items-center justify-center transform group-active:scale-90 transition-transform bg-white/20 border-2 border-white/20">
@@ -118,7 +141,7 @@ const HomeView = ({
                     colorClass={isDarkMode ? 'bg-orange-600' : 'bg-[#FDBA74]'}
                     borderClass={isDarkMode ? 'border-orange-800' : 'border-[#EA580C]'}
                 >
-                    {!seenTooltips.reviews && !isGuest && (
+                    {!seenTooltips.reviews && (
                         <div className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
                     )}
                     <div className="w-16 h-16 rounded-3xl flex items-center justify-center transform group-active:scale-90 transition-transform bg-white/20 border-2 border-white/20">

@@ -11,7 +11,6 @@ const LevelsView = ({
     isDarkMode,
     chapterNum,
     onBack,
-    isGuest,
     onShowLogin,
     onLevelClick,
     userId = null,
@@ -81,9 +80,6 @@ const LevelsView = ({
 
     const handleLevelClick = (level) => {
         if (level.status === 'locked') {
-            if (isGuest) {
-                onShowLogin();
-            }
             return; // Can't click locked levels
         }
 
@@ -124,7 +120,7 @@ const LevelsView = ({
                         الفصل {chapterName}
                     </h2>
                     <p className="text-sm font-bold text-slate-400">
-                        {isGuest ? 'سجل دخولك للمتابعة' : `${parts.length} مراحل`}
+                        {`${parts.length} مراحل`}
                     </p>
                 </div>
             </div>
@@ -176,8 +172,8 @@ const LevelsView = ({
                                             <Star
                                                 key={star}
                                                 className={`w-5 h-5 drop-shadow-sm ${star <= level.stars
-                                                        ? 'text-yellow-300 fill-yellow-300'
-                                                        : 'text-white/30'
+                                                    ? 'text-yellow-300 fill-yellow-300'
+                                                    : 'text-white/30'
                                                     }`}
                                             />
                                         ))}
@@ -196,12 +192,12 @@ const LevelsView = ({
 
                             {/* Part label */}
                             <span className={`text-xs font-bold ${isLocked
-                                    ? 'text-slate-400'
-                                    : isCompleted
-                                        ? 'text-emerald-500'
-                                        : isDarkMode
-                                            ? 'text-indigo-400'
-                                            : 'text-indigo-600'
+                                ? 'text-slate-400'
+                                : isCompleted
+                                    ? 'text-emerald-500'
+                                    : isDarkMode
+                                        ? 'text-indigo-400'
+                                        : 'text-indigo-600'
                                 }`}>
                                 {isCompleted ? 'مكتمل' : isUnlocked ? 'العب الآن' : 'مغلق'}
                             </span>

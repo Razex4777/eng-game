@@ -1,5 +1,104 @@
 # Changelog
 
+# 2026-02-11 19:30
+- **🐛 Bug Fixes & Robustness Pass (17 fixes across 13 files)**:
+  - **`hooks/index.js`**: Fixed `useDarkMode` — wrapped `localStorage` reads in `try/catch` for private browsing safety; Fixed `useToast` — timer now uses `useRef` to prevent stale closures and race conditions, with cleanup on unmount
+  - **`lib/auth.js`**: Wrapped `onAuthStateChange` in `try/catch` to prevent crash if Supabase client isn't initialized
+  - **`services/messagesService.js`**: Clamped `streakCount` to minimum 1 to prevent negative array index
+  - **`services/monsterChallengeService.js`**: Added null safety for `progress` and `progress[subject]` in `updateUserProgress`
+  - **`services/userProgressService.js`**: Fixed broken `supabase.rpc('increment')` in `completeDailyTask` — replaced with fetch-then-increment pattern
+  - **`services/wrongAnswersService.js`**: Three fixes — null-check `correct_answer` before `.toLowerCase()`; Fixed `getRandomQuestionsFromSameChapter` field mapping (was using transformed names `q.question`/`q.options.a` on raw DB rows, corrected to `q.question_text`/`q.option_a`); Added case-insensitive correct index lookup
+  - **`components/game/MonsterChallengeLoader.jsx`**: Added `try/catch` around `supabase.auth.getUser()` call
+  - **`components/game/GameHUD.jsx`**: Added default value `lives = 3` to prevent undefined display
+  - **`components/ui/StatsHUD.jsx`**: Added null-safe `onClick?.()` handlers; Added fallback for unknown subject in `QUESTION_TOTALS`
+  - **`components/ui/TooltipOverlay.jsx`**: Removed unused `targetRef` prop
+  - **`components/ui/ToastNotification.jsx`**: Fixed CSS `cubic-bezier` — moved to `transitionTimingFunction` inline style
+  - **`components/layout/BottomDock.jsx`**: Improved `handleDelete` with optimistic update and error rollback
+  - **`utils/helpers.js`**: Fixed `debounce` — changed arrow function to regular function for correct `this` context
+  - **`utils/audio.js`**: Made `playBeep` async and awaited `ctx.resume()` for suspended AudioContext
+  - **`styles/animations.css`**: Corrected `.fever-mode` animation name from `neonPulse` to `neon-pulse`
+
+# 2026-02-11 18:30
+- **🗑️ Removed Guest User Feature (Complete)**:
+  - Deleted `guestTrackingService.js` — entire guest analytics service removed
+  - **`App.jsx`**: Removed `isGuest` state, `guest_mode` localStorage logic, guest toast messages, and guest-gated feature routing
+  - **`LoginView.jsx`**: Removed `handleGuestLogin` function and "الدخول كضيف" button
+  - **`TopNav.jsx`**: Removed `isGuest` prop and conditional guest "تسجيل" button
+  - **`HomeView.jsx`**: Removed `isGuest` prop, guest-specific text on journey card, and conditional stat hiding
+  - **`MonsterCard.jsx`**: Removed `isGuest` prop, locked/dimmed guest state, and guest-only text
+  - **`StatsHUD.jsx`**: Removed `isGuest` prop and zeroed-out stats logic for guests
+  - **`ChaptersView.jsx`**: Removed `isGuest` prop, "سجل لفتح" labels, and guest lock overrides
+  - **`LevelsView.jsx`**: Removed `isGuest` prop and login redirect for locked levels
+  - **`ReviewsView.jsx`**: Removed `isGuest` prop and subscriber-only gate screen
+  - **`auth.js`**: Removed `guest_mode` from `signOut` localStorage cleanup
+  - Updated `docs/project_structure.md` to reflect deletion
+
+# 2026-02-09 23:45
+- **🎯 Guest Tracking System**:
+  - Created `guest_sessions` table in Supabase with indexes and RLS policies
+  - Created `guestTrackingService.js` with comprehensive guest analytics:
+    - `getOrCreateGuestId()`: Generate/retrieve guest UUID from localStorage
+    - `trackGuestSession()`: Log guest game sessions to Supabase
+    - `getGuestStats()`: Aggregate statistics for individual guests
+    - `getGlobalGuestAnalytics()`: Dashboard metrics for Abdullah
+    - `syncLocalSessions()`: Offline fallback with localStorage
+    - `isGuestUser()`: Check authentication status
+  - Features:
+    - Persistent guest IDs using crypto.randomUUID()
+    - Offline session storage with auto-sync
+    - Global analytics: unique guests, win rates, popular subjects
+    - Conversion tracking structure (ready for signup integration)
+- **📊 Analytics Service**:
+  - Created `analyticsService.js` for performance insights:
+    - `getMostWrongQuestions()`: Top errors per user with review flags
+    - `getGlobalMostWrongQuestions()`: Aggregate wrong answers across all users
+    - `getWrongQuestionsByPart()`: Targeted review by part number
+    - `getAverageTimePerStage()`: Duration analysis grouped by part
+    - `getAverageAnswerSpeed()`: Seconds per question with rating system
+    - `getGlobalAverageAnswerSpeed()`: Platform-wide speed benchmarks
+    - `getPerformanceTrends()`: 7-day accuracy and score trends
+    - `getUserAnalyticsDashboard()`: Comprehensive dashboard with parallel queries
+  - Features:
+    - Smart aggregation using reduce for client-side grouping
+    - Performance ratings (سريع جداً, سريع, متوسط, بطيء, بطيء جداً)
+    - Critical question flagging (3+ errors = needs review)
+    - Difficulty scoring for global questions
+    - Subject-specific breakdowns
+- **Database Updates**:
+  - Applied migration: `create_guest_sessions_table`
+  - Indexes: guest_id, subject, created_at for optimized queries
+  - RLS policies: anonymous insert allowed, universal read access
+
+# 2026-02-09 22:00
+- **Daily Tracking UI System (4 Components)**:
+  - Created `DailyTasksWidget.jsx`: Daily goal tracker showing 2 stages/day target
+    - Green indicator for 2+ stages completed
+    - Red indicator for 0-1 stages completed
+    - Progress bar with motivational messages
+    - Fetches data from user_daily_activity table
+  - Created `StreakDisplay.jsx`: 7-day streak calendar visualization
+    - Fire icons 🔥 for completed days
+    - Gray circles for missed days
+    - Current streak number prominently displayed
+    - Max streak badge when current = max
+    - Shows last 7 days with Arabic day names
+  - Created `CompletionProgress.jsx`: Curriculum completion percentage
+    - Circular progress indicator with color coding
+    - Green (75%+), Blue (50-74%), Orange (25-49%), Red (<25%)
+    - Displays X/682 questions (or subject-specific totals)
+    - Linear progress bar at bottom
+    - Subject-aware: English (348), Biology (334), Combined (682)
+  - Updated `StatsHUD.jsx`: Added question counter with subject totals
+    - Now shows "X من 348" for English, "X من 334" for Biology
+    - Dynamic total based on preferred_subject prop
+- **HomeView Integration**:
+  - Added all 4 tracking widgets to HomeView
+  - Widgets only visible for logged-in users (not guests)
+  - Proper spacing and RTL support
+- **Exports Updated**:
+  - Added new components to ui/index.js
+  - All components ready for import
+
 # 2026-02-01 19:30
 - **📚 Chapters & Reviews Service (chaptersService.js)**:
   - Created comprehensive service for handling Chapters/Levels/Reviews:

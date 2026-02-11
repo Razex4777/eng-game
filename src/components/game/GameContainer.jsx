@@ -33,7 +33,6 @@ const GameContainer = ({
         lives,
         combo,
         progress,
-        streak,
         currentQuestion,
         questionY,
         shakeQuestion,
@@ -57,7 +56,9 @@ const GameContainer = ({
         exitToMenu,
         setSpeedMode,
         isInfiniteMode,
-        initialLives
+        initialLives,
+        questionIndex,
+        gameQuestions
     } = useGameLogic(initialQuestions, {
         mode: initialMode,
         onGameEnd: async (results) => {
@@ -178,7 +179,7 @@ const GameContainer = ({
 
     return (
         <div
-            className={`fixed inset-0 overflow-hidden ${shakeScreen === 1 ? 'animate-shake' : shakeScreen === 2 ? 'animate-hardShake' : ''} ${streak.active && streak.multiplier >= 5 ? 'fever-mode' : ''}`}
+            className={`fixed inset-0 overflow-hidden ${shakeScreen === 1 ? 'animate-shake' : shakeScreen === 2 ? 'animate-hardShake' : ''}`}
             ref={gameAreaRef}
         >
             <SoftBackground isDarkMode={isDark} />
@@ -205,6 +206,8 @@ const GameContainer = ({
                         shaking={shakeQuestion}
                         frozen={frozen}
                         isDark={isDark}
+                        currentIndex={questionIndex + 1}
+                        totalQuestions={gameQuestions.length}
                     />
                 )}
             </div>
@@ -215,15 +218,6 @@ const GameContainer = ({
                 correct={feedback.correct}
                 message={feedback.message}
             />
-
-            {/* Streak Indicator */}
-            {streak.active && (
-                <div className="fixed top-32 right-6 z-40 animate-bounce">
-                    <div className="bg-orange-500 text-white px-4 py-2 rounded-full font-black shadow-lg border-2 border-orange-300">
-                        🔥 STREAK x{streak.count} ({streak.multiplier}x)
-                    </div>
-                </div>
-            )}
 
             {/* Answer Controls */}
             <div className="fixed bottom-0 left-0 right-0 z-50">
@@ -246,6 +240,14 @@ const GameContainer = ({
                     startPosition={flyingBtn.start}
                     targetPosition={flyingBtn.target}
                 />
+            )}
+
+            {/* Combo Indicator - Bottom Right */}
+            {combo > 0 && (
+                <div className="fixed bottom-32 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full shadow-xl border-2 border-white dark:border-slate-800 animate-pulse">
+                    <span className="text-3xl">🔥</span>
+                    <span className="text-2xl font-black text-white">{combo}</span>
+                </div>
             )}
 
             {/* Pause Menu */}

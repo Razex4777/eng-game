@@ -171,6 +171,111 @@ export const getSubjectProgress = async (userId, subject) => {
 };
 
 /**
+ * Get the last played or first incomplete part for Continue Journey
+ * Returns { subject, type, part, chapterNumber } or null
+ *
+ * Strategy:
+ * 1. Check game_sessions for the most recent session
+ * 2. If last session was won, return next part
+ * 3. If last session was lost/incomplete, return same part
+ * 4. If no sessions, return first part (chapters/1/1)
+ */
+export const getLastPlayedPart = async (userId, subject = 'english') => {
+    if (!userId) return { data: null, error: 'No user ID' };
+
+    try {
+        // Get the most recent game session
+        const { data: recentSession, error: sessionError } = await supabase
+            .from('game_sessions')
+            .select('subject, question_type, part_number, won, completed, created_at')
+            .eq('user_id', userId)
+            .eq('subject', subject)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (sessionError && sessionError.code !== 'PGRST116') {
+            console.error('[getLastPlayedPart] Error fetching session:', sessionError);
+        }
+
+        // If no sessions found, start from the beginning
+        if (!recentSession) {
+            return {
+                data: {
+                    subject,
+                    type: 'chapters',
+                    part: 1,
+                    chapterNumber: 1,
+                    isFirstTime: true
+                },
+                error: null
+            };
+        }
+
+        // Determine next part based on last session
+        let nextPart = recentSession.part_number;
+        let nextType = recentSession.question_type;
+
+        // If last session was won and completed, advance to next part
+        if (recentSession.won && recentSession.completed) {
+            nextPart = recentSession.part_number + 1;
+        }
+
+        // For chapters mode, extract chapter number from part
+        // Assuming parts are numbered sequentially across chapters
+        // Chapter 1: parts 1-N, Chapter 2: parts N+1-M, etc.
+        let chapterNumber = 1;
+        if (nextType === 'chapters') {
+            // Simple estimation: if we know chapters structure
+            // For now, use part number to estimate chapter (can be refined)
+            chapterNumber = Math.ceil(nextPart / 3); // Assuming ~3 parts per chapter
+        }
+
+        return {
+            data: {
+                subject: recentSession.subject,
+                type: nextType,
+                part: nextPart,
+                chapterNumber,
+                lastSessionWon: recentSession.won,
+                isFirstTime: false
+            },
+            error: null
+        };
+    } catch (error) {
+        console.error('[getLastPlayedPart] Unexpected error:', error);
+        return { data: null, error };
+    }
+};
+
+/**
+ * Get overall progress percentage across all subjects
+ */
+export const getOverallProgress = async (userId) => {
+    if (!userId) return { data: 0, error: 'No user ID' };
+
+    const { data: stats, error } = await getUserStats(userId);
+    if (error) return { data: 0, error };
+
+    const subjectProgress = stats?.subject_progress || {};
+    const subjects = Object.keys(subjectProgress);
+
+    if (subjects.length === 0) return { data: 0, error: null };
+
+    // Calculate average progress across all subjects
+    let totalProgress = 0;
+    subjects.forEach(subject => {
+        const progress = subjectProgress[subject];
+        const chaptersProgress = progress?.chapters?.current_part || 1;
+        // Assuming 24 total parts across 8 chapters (3 parts each)
+        const percentage = Math.min(100, ((chaptersProgress - 1) / 24) * 100);
+        totalProgress += percentage;
+    });
+
+    return { data: Math.round(totalProgress / subjects.length), error: null };
+};
+
+/**
  * Calculate overall progress percentage for a subject
  */
 export const calculateProgressPercent = (subjectProgress, maxParts = 12) => {
@@ -268,11 +373,18 @@ export const completeDailyTask = async (userId) => {
         });
 
     if (!error) {
-        // Increment daily tasks completed
+        // Fetch current count and increment
+        const { data: current } = await supabase
+            .from('user_daily_activity')
+            .select('daily_tasks_completed')
+            .eq('user_id', userId)
+            .eq('activity_date', today)
+            .single();
+
         await supabase
             .from('user_daily_activity')
             .update({
-                daily_tasks_completed: supabase.rpc('increment', { x: 1 }),
+                daily_tasks_completed: (current?.daily_tasks_completed || 0) + 1,
                 updated_at: new Date().toISOString()
             })
             .eq('user_id', userId)
@@ -481,6 +593,8 @@ export default {
     recordGameSession,
     updateStatsAfterGame,
     getSubjectProgress,
+    getLastPlayedPart,
+    getOverallProgress,
     calculateProgressPercent,
     checkAndUpdateStreak,
     getTodayActivity,

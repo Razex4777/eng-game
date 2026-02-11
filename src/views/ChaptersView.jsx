@@ -16,7 +16,6 @@ const ChaptersView = ({
     onFlameClick,
     onQuestionsClick,
     onChapterClick,
-    isGuest,
     onShowLogin,
     days = 0,
     questions = 0,
@@ -55,17 +54,13 @@ const ChaptersView = ({
     }, [subject, userId]);
 
     const handleChapterClick = (chapterNum) => {
-        if (isGuest && chapterNum > 1) {
-            onShowLogin();
-        } else {
-            // Check if chapter is unlocked
-            const unlocked = isChapterUnlocked(subject, chapterNum, userProgress);
-            if (!unlocked && !isGuest) {
-                // Could show a toast here
-                return;
-            }
-            onChapterClick(chapterNum, subject);
+        // Check if chapter is unlocked
+        const unlocked = isChapterUnlocked(subject, chapterNum, userProgress);
+        if (!unlocked) {
+            // Could show a toast here
+            return;
         }
+        onChapterClick(chapterNum, subject);
     };
 
     // Helper to determine progress bar color
@@ -83,7 +78,6 @@ const ChaptersView = ({
 
     // Check if chapter is locked
     const isChapterLocked = (chapterNum) => {
-        if (isGuest) return chapterNum !== 1;
         return !isChapterUnlocked(subject, chapterNum, userProgress);
     };
 
@@ -102,7 +96,7 @@ const ChaptersView = ({
                 compact={true}
                 onFlameClick={onFlameClick}
                 onQuestionsClick={onQuestionsClick}
-                isGuest={isGuest}
+
                 days={days}
                 questions={questions}
                 xp={xp}
@@ -167,13 +161,13 @@ const ChaptersView = ({
                                         <div className="flex items-center gap-2 mt-1">
                                             <div className="w-1.5 h-1.5 bg-slate-300 rounded-full"></div>
                                             <span className="text-xs font-bold text-red-400">
-                                                {isGuest ? 'سجل لفتح' : 'أكمل الفصل السابق'}
+                                                أكمل الفصل السابق
                                             </span>
                                         </div>
                                     )}
                                 </div>
                             </div>
-                            {isLocked && isGuest && <div className="bg-black/10 px-2 py-1 rounded text-[10px] font-bold shrink-0">للمشتركين</div>}
+
                         </TactileButton>
                     );
                 })}

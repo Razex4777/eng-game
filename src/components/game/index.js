@@ -8,3 +8,4 @@ export { default as ResultsScreen } from './ResultsScreen';
 export { default as GameMenu } from './GameMenu';
 export { default as GameContainer } from './GameContainer';
 export { default as MonsterChallengeLoader } from './MonsterChallengeLoader';
+export { default as WrongAnswersReviewMode } from './WrongAnswersReviewMode';

@@ -3,9 +3,10 @@ import React from 'react';
 const ToastNotification = ({ message, icon: Icon, isVisible, type = 'info' }) => {
     return (
         <div
-            className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-[150] transition-all duration-500 cubic-bezier(0.68, -0.55, 0.27, 1.55) w-[90%] max-w-sm
+            className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-[150] transition-all duration-500 w-[90%] max-w-sm
       ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none'}
       `}
+            style={{ transitionTimingFunction: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)' }}
         >
             <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border-b-4 backdrop-blur-md justify-center text-center relative overflow-hidden
         ${type === 'fire' ? 'bg-orange-500 border-orange-700 text-white' :

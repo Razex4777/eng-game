@@ -26,8 +26,12 @@ const MonsterChallengeLoader = ({
     // Get current user ID
     useEffect(() => {
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) setUserId(user.id);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) setUserId(user.id);
+            } catch (err) {
+                console.error('[MonsterChallenge] Failed to get user:', err);
+            }
         };
         getUser();
     }, []);

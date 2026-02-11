@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * useFullscreen Hook
@@ -35,8 +35,12 @@ export const useFullscreen = () => {
  */
 export const useDarkMode = (defaultValue = false) => {
     const [isDarkMode, setIsDarkMode] = useState(() => {
-        const saved = localStorage.getItem('darkMode');
-        return saved ? JSON.parse(saved) : defaultValue;
+        try {
+            const saved = localStorage.getItem('darkMode');
+            return saved ? JSON.parse(saved) : defaultValue;
+        } catch {
+            return defaultValue;
+        }
     });
 
     useEffect(() => {
@@ -68,11 +72,21 @@ export const useToast = (duration = 3500) => {
         type: 'info',
         icon: null
     });
+    const timerRef = useRef(null);
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
 
     const showToast = useCallback((message, type = 'info', icon = null) => {
+        if (timerRef.current) clearTimeout(timerRef.current);
         setToast({ visible: true, message, type, icon });
-        setTimeout(() => {
+        timerRef.current = setTimeout(() => {
             setToast(prev => ({ ...prev, visible: false }));
+            timerRef.current = null;
         }, duration);
     }, [duration]);
 

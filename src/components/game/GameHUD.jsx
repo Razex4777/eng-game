@@ -3,7 +3,7 @@ import { Pause, Maximize, Minimize, Heart } from 'lucide-react';
 
 const GameHUD = ({
     score = 0,
-    lives,
+    lives = 3,
     progress,
     onPause,
     onToggleFullScreen,

@@ -5,7 +5,7 @@ import { Fingerprint, Send, X } from 'lucide-react';
 import { SoftBackground, ToastNotification, TactileButton } from './components/ui';
 import { BottomDock, TopNav } from './components/layout';
 import { SettingsModal } from './components/settings';
-import { MonsterChallengeLoader } from './components/game';
+import { MonsterChallengeLoader, WrongAnswersReviewMode } from './components/game';
 
 // Views
 import { LoginView, ChaptersView, LevelsView, ReviewsView, BattleArenaModal, HomeView } from './views';
@@ -14,7 +14,7 @@ import { LoginView, ChaptersView, LevelsView, ReviewsView, BattleArenaModal, Hom
 import { useDarkMode, useToast, useAudioMute } from './hooks';
 import { signInWithGoogle, signOut, onAuthStateChange, getOrCreateProfile, updateProfile } from './lib/auth';
 import { getWrongAnswersCount } from './services/wrongAnswersService';
-import { getUserDashboardStats, initializeUserStats } from './services/userProgressService';
+import { getUserDashboardStats, initializeUserStats, getLastPlayedPart, getOverallProgress } from './services/userProgressService';
 
 /**
  * Main App Component
@@ -29,6 +29,8 @@ function App() {
     const [feedbackOpen, setFeedbackOpen] = useState(false);
     const [monsterSheetOpen, setMonsterSheetOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [showReviewMode, setShowReviewMode] = useState(false);
+    const [reviewData, setReviewData] = useState(null);
     const [seenTooltips, setSeenTooltips] = useState({
         monster: false,
         chapters: false,
@@ -40,7 +42,7 @@ function App() {
 
     // User State
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isGuest, setIsGuest] = useState(false);
+
     const [userData, setUserData] = useState(null);
     const [authUser, setAuthUser] = useState(null); // Supabase auth user
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -59,7 +61,9 @@ function App() {
         dailyTasksDone: 0,
         dailyTasksTotal: 5,
         mistakesToReview: 0,
-        subjectProgress: {}
+        subjectProgress: {},
+        overallProgress: 0,
+        lastPlayedPart: null
     });
     const [statsLoading, setStatsLoading] = useState(false);
 
@@ -67,16 +71,6 @@ function App() {
     useEffect(() => {
         const fetchUserStats = async () => {
             if (!authUser?.id) {
-                // Reset stats for guest users
-                setUserStats({
-                    streakDays: 0,
-                    totalQuestions: 0,
-                    totalXP: 0,
-                    dailyTasksDone: 0,
-                    dailyTasksTotal: 5,
-                    mistakesToReview: 0,
-                    subjectProgress: {}
-                });
                 return;
             }
 
@@ -88,6 +82,12 @@ function App() {
                 // Fetch dashboard stats
                 const { data: stats } = await getUserDashboardStats(authUser.id);
 
+                // Fetch overall progress
+                const { data: overallProgress } = await getOverallProgress(authUser.id);
+
+                // Fetch last played part for Continue Journey
+                const { data: lastPlayedPart } = await getLastPlayedPart(authUser.id, 'english');
+
                 if (stats) {
                     setUserStats({
                         streakDays: stats.streak_days || 0,
@@ -96,7 +96,9 @@ function App() {
                         dailyTasksDone: stats.daily_tasks_done || 0,
                         dailyTasksTotal: stats.daily_tasks_total || 5,
                         mistakesToReview: stats.mistakes_to_review || 0,
-                        subjectProgress: stats.subject_progress || {}
+                        subjectProgress: stats.subject_progress || {},
+                        overallProgress: overallProgress || 0,
+                        lastPlayedPart: lastPlayedPart
                     });
                 }
             } catch (err) {
@@ -146,12 +148,10 @@ function App() {
                     age: profile?.age,
                     gender: profile?.gender,
                     governorate: profile?.region, // DB 'region' maps to UI 'governorate'
-                    preferred_subject: profile?.preferred_subject || 'english',
-                    isGuest: false
+                    preferred_subject: profile?.preferred_subject || 'english'
                 });
 
                 setIsLoggedIn(true);
-                setIsGuest(false);
 
                 // If profile is new or missing details, stay on login to show registration steps
                 if (!profile?.age || !profile?.region) {
@@ -168,22 +168,13 @@ function App() {
                 setAuthUser(null);
                 setUserData(null);
                 setIsLoggedIn(false);
-                setIsGuest(false);
                 setCurrentView('login');
             }
 
             setAuthLoading(false);
         });
 
-        // Check for existing guest mode
-        const guestMode = localStorage.getItem('guest_mode');
-        if (guestMode === 'true') {
-            setIsLoggedIn(true);
-            setIsGuest(true);
-            setUserData({ name: 'ضيف', isGuest: true });
-            setCurrentView('home');
-            setAuthLoading(false);
-        }
+
 
         return () => unsubscribe();
     }, []);
@@ -203,41 +194,35 @@ function App() {
         }
     };
 
-    // Login Handler (for both guest and registered users)
-    const handleLoginSuccess = async (data, guest = false) => {
+    // Login Handler
+    const handleLoginSuccess = async (data) => {
         setIsLoggedIn(true);
-        setIsGuest(guest);
 
         const mergedData = { ...userData, ...data };
         setUserData(mergedData);
         setCurrentView('home');
 
-        if (guest) {
-            localStorage.setItem('guest_mode', 'true');
-            showToast('مرحباً بك كضيف! 👋', 'info');
-        } else {
-            // If they are logged in via Supabase, sync their profile data
-            if (authUser) {
-                try {
-                    const { error } = await updateProfile(authUser.id, {
-                        full_name: data.name || mergedData.name,
-                        age: parseInt(data.age) || null,
-                        gender: data.gender || null,
-                        region: data.governorate || null, // UI 'governorate' matches DB 'region'
-                        is_demo_completed: true // Mark profile as complete
-                    });
+        // If they are logged in via Supabase, sync their profile data
+        if (authUser) {
+            try {
+                const { error } = await updateProfile(authUser.id, {
+                    full_name: data.name || mergedData.name,
+                    age: parseInt(data.age) || null,
+                    gender: data.gender || null,
+                    region: data.governorate || null, // UI 'governorate' matches DB 'region'
+                    is_demo_completed: true // Mark profile as complete
+                });
 
-                    if (error) throw error;
-                    console.log('Profile synced to Supabase successfully');
-                } catch (error) {
-                    console.error('Failed to sync profile to Supabase:', error);
-                }
+                if (error) throw error;
+                console.log('Profile synced to Supabase successfully');
+            } catch (error) {
+                console.error('Failed to sync profile to Supabase:', error);
             }
-
-            localStorage.setItem('user_registered', 'true');
-            localStorage.setItem('user_name', data.name || mergedData.name);
-            showToast(`تم حفظ معلوماتك بنجاح! 🎉`, 'success');
         }
+
+        localStorage.setItem('user_registered', 'true');
+        localStorage.setItem('user_name', data.name || mergedData.name);
+        showToast(`تم حفظ معلوماتك بنجاح! 🎉`, 'success');
     };
 
     // Navigation Handlers
@@ -272,8 +257,40 @@ function App() {
         showToast('حظاً موفقاً! 🚀', 'fire');
     };
 
+    const handleContinueJourney = async () => {
+        // Load last played or first incomplete part
+        const { data: lastPart } = await getLastPlayedPart(authUser?.id, userData?.preferred_subject || 'english');
+
+        if (lastPart) {
+            handleLevelClick({
+                id: lastPart.part,
+                partNumber: lastPart.part,
+                chapterNum: lastPart.chapterNumber || 1,
+                subject: lastPart.subject,
+                type: lastPart.type
+            });
+        } else {
+            // Fallback to first part if no data
+            handleLevelClick({
+                id: 1,
+                partNumber: 1,
+                chapterNum: 1,
+                subject: userData?.preferred_subject || 'english',
+                type: 'chapters'
+            });
+        }
+    };
+
     const handleReviewClick = (reviewData) => {
-        // reviewData contains: { type, part, subject, questionCount }
+        // Handle wrong answers review separately
+        if (reviewData.type === 'wrongAnswers') {
+            setReviewData(reviewData);
+            setShowReviewMode(true);
+            showToast('ابدأ مراجعة أخطائك! 📦', 'fire');
+            return;
+        }
+
+        // Handle halfyear/fullyear reviews
         setChapterGameConfig({
             subject: reviewData.subject || 'english',
             type: reviewData.type, // 'halfyear' or 'fullyear'
@@ -288,12 +305,7 @@ function App() {
     const [showBattleArena, setShowBattleArena] = useState(false);
 
     const handleMonsterChallenge = () => {
-        if (isGuest) {
-            setShowLoginModal(true);
-            showToast('سجل دخول لفتح التحدي! 🔐', 'info');
-        } else {
-            setShowBattleArena(true);
-        }
+        setShowBattleArena(true);
     };
 
     const handleGameExit = async () => {
@@ -326,13 +338,8 @@ function App() {
         setShowLoginModal(true);
     };
 
-    // Feature click handling (checks for guest status)
+    // Feature click handling
     const handleFeatureClick = (feature) => {
-        if (isGuest) {
-            setShowLoginModal(true);
-            showToast('هذه الميزة متاحة للمسجلين فقط! 🔐', 'info');
-            return false;
-        }
         setSeenTooltips(prev => ({ ...prev, [feature]: true }));
         return true;
     };
@@ -344,12 +351,10 @@ function App() {
                 await signOut();
             }
             setIsLoggedIn(false);
-            setIsGuest(false);
             setUserData(null);
             setAuthUser(null);
             localStorage.removeItem('user_registered');
             localStorage.removeItem('user_name');
-            localStorage.removeItem('guest_mode');
             setCurrentView('login');
             showToast('تم تسجيل الخروج 👋', 'info');
         } catch (error) {
@@ -359,7 +364,7 @@ function App() {
     };
 
     // Loading state
-    if (authLoading && !localStorage.getItem('guest_mode')) {
+    if (authLoading) {
         return (
             <div className={`min-h-screen w-full flex items-center justify-center ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
                 <SoftBackground isDarkMode={isDarkMode} />
@@ -384,8 +389,8 @@ function App() {
                     <SoftBackground isDarkMode={isDarkMode} />
                     <LoginView
                         isDarkMode={isDarkMode}
-                        onLoginSuccess={(data, guest) => {
-                            handleLoginSuccess(data, guest);
+                        onLoginSuccess={(data) => {
+                            handleLoginSuccess(data);
                             setShowLoginModal(false);
                         }}
                         onGoogleSignIn={handleGoogleSignIn}
@@ -400,6 +405,39 @@ function App() {
                         </button>
                     )}
                 </div>
+            );
+        }
+
+        // Wrong Answers Review Mode - Full Screen
+        if (showReviewMode && reviewData) {
+            return (
+                <WrongAnswersReviewMode
+                    userId={authUser?.id}
+                    wrongAnswerId={reviewData.wrongAnswerId}
+                    onComplete={async (result) => {
+                        console.log('[App] Review completed:', result);
+                        setShowReviewMode(false);
+                        setReviewData(null);
+                        setCurrentView('reviews');
+
+                        if (result.mastered) {
+                            showToast('🎉 أحسنت! تم حذف السؤال من الأخطاء', 'success');
+                        } else if (result.success) {
+                            showToast('✅ إجابة صحيحة! استمر في المراجعة', 'success');
+                        } else {
+                            showToast('💪 حاول مرة أخرى في المرة القادمة', 'info');
+                        }
+                    }}
+                    onExit={() => {
+                        setShowReviewMode(false);
+                        setReviewData(null);
+                        setCurrentView('reviews');
+                    }}
+                    isDark={isDarkMode}
+                    isMuted={isMuted}
+                    setIsMuted={toggleMute}
+                    setIsDark={toggleDarkMode}
+                />
             );
         }
 
@@ -433,7 +471,7 @@ function App() {
                     <TopNav
                         isDarkMode={isDarkMode}
                         isMuted={isMuted}
-                        isGuest={isGuest}
+
                         userName={userData?.name}
                         userAvatar={userData?.avatar}
                         onDarkModeToggle={toggleDarkMode}
@@ -447,13 +485,12 @@ function App() {
                     {currentView === 'home' && (
                         <HomeView
                             isDarkMode={isDarkMode}
-                            isGuest={isGuest}
                             userData={userData}
                             userStats={userStats}
                             showTutorial={showTutorial}
                             seenTooltips={seenTooltips}
                             onTutorialDismiss={() => setShowTutorial(false)}
-                            onContinueJourney={handleLevelClick}
+                            onContinueJourney={handleContinueJourney}
                             onMonsterClick={() => {
                                 if (handleFeatureClick('monster')) setShowBattleArena(true);
                             }}
@@ -472,7 +509,6 @@ function App() {
                     {currentView === 'chapters' && (
                         <ChaptersView
                             isDarkMode={isDarkMode}
-                            isGuest={isGuest}
                             onBack={() => setCurrentView('home')}
                             onChapterClick={handleChapterClick}
                             onShowLogin={handleShowLogin}
@@ -491,7 +527,6 @@ function App() {
                         currentView === 'levels' && (
                             <LevelsView
                                 isDarkMode={isDarkMode}
-                                isGuest={isGuest}
                                 chapterNum={selectedChapter}
                                 onBack={() => setCurrentView('chapters')}
                                 onLevelClick={handleLevelClick}
@@ -506,7 +541,6 @@ function App() {
                         currentView === 'reviews' && (
                             <ReviewsView
                                 isDarkMode={isDarkMode}
-                                isGuest={isGuest}
                                 onBack={() => setCurrentView('home')}
                                 onShowLogin={handleShowLogin}
                                 onFlameClick={() => setCurrentView('reviews')}
@@ -518,41 +552,39 @@ function App() {
                         )
                     }
 
-                    {
-                        !isGuest && (
-                            <>
-                                {/* Fingerprint / Feedback Button */}
-                                <div className="fixed bottom-28 left-5 z-50">
-                                    <div className="relative">
-                                        <TactileButton
-                                            onClick={() => {
-                                                if (handleFeatureClick('fingerprint')) setFeedbackOpen(true);
-                                            }}
-                                            className="w-12 h-12 rounded-full shadow-lg relative"
-                                            colorClass={isDarkMode ? 'bg-[#2A2640]' : 'bg-white'}
-                                            borderClass={isDarkMode ? 'border-[#3E3859]' : 'border-teal-200'}
-                                        >
-                                            {!seenTooltips.fingerprint && (
-                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
-                                            )}
-                                            <Fingerprint className="w-6 h-6 text-teal-500" />
-                                        </TactileButton>
-                                        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-teal-600 bg-white/80 px-2 rounded-full">بصمتك</span>
-                                    </div>
-                                </div>
+                    {/* Fingerprint / Feedback Button */}
+                    <div className="fixed bottom-28 left-5 z-50">
+                        <div className="relative">
+                            <TactileButton
+                                onClick={() => {
+                                    if (handleFeatureClick('fingerprint')) setFeedbackOpen(true);
+                                }}
+                                className="w-12 h-12 rounded-full shadow-lg relative"
+                                colorClass={isDarkMode ? 'bg-[#2A2640]' : 'bg-white'}
+                                borderClass={isDarkMode ? 'border-[#3E3859]' : 'border-teal-200'}
+                            >
+                                {!seenTooltips.fingerprint && (
+                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
+                                )}
+                                <Fingerprint className="w-6 h-6 text-teal-500" />
+                            </TactileButton>
+                            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-teal-600 bg-white/80 px-2 rounded-full">بصمتك</span>
+                        </div>
+                    </div>
 
-                                <BottomDock
-                                    isDarkMode={isDarkMode}
-                                    onTaskClick={() => handleFeatureClick('daily')}
-                                    onMistakeClick={() => handleFeatureClick('mistakes')}
-                                    tasksDone={userStats.dailyTasksDone}
-                                    tasksTotal={userStats.dailyTasksTotal}
-                                    mistakesCount={userStats.mistakesToReview}
-                                    userId={authUser?.id}
-                                />
-                            </>
-                        )
-                    }
+                    <BottomDock
+                        isDarkMode={isDarkMode}
+                        onTaskClick={() => handleFeatureClick('daily')}
+                        onMistakeClick={() => handleFeatureClick('mistakes')}
+                        onReviewStart={() => {
+                            if (handleFeatureClick('reviews')) {
+                                setCurrentView('reviews');
+                                showToast('افتح قسم المراجعات للبدء! 📦', 'info');
+                            }
+                        }}
+                        mistakesCount={userStats.mistakesToReview}
+                        userId={authUser?.id}
+                    />
                 </div >
 
                 {/* Feedback Selection Modal (بصمتك) */}

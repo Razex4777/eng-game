@@ -10,7 +10,9 @@ const QuestionCard = forwardRef(({
     position,
     frozen = false,
     shaking = false,
-    isDark = false
+    isDark = false,
+    currentIndex = null,
+    totalQuestions = null
 }, ref) => {
     if (!question) return null;
 
@@ -68,6 +70,13 @@ const QuestionCard = forwardRef(({
             <p className={`text-xl font-black leading-snug ${getTextColor()}`}>
                 {question.text || question.q}
             </p>
+
+            {/* Question Counter */}
+            {currentIndex !== null && totalQuestions !== null && (
+                <p className={`text-sm mt-2 ${frozen ? 'text-white/70' : isGolden ? 'text-amber-800/70' : isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    السؤال {currentIndex} من {totalQuestions}
+                </p>
+            )}
 
             {/* Difficulty indicator (optional) */}
             {question.difficulty && (
