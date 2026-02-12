@@ -289,6 +289,15 @@
   - Added 'insane' speed mode (🤯) for hardcore players.
   - `useGameLogic` now uses SPEED_MODES from service for consistency.
 
+# 2026-02-12 18:15
+- **Feedback Popup Validation Fix**:
+  - Added state management for feedback textarea value
+  - Implemented validation to prevent sending empty messages
+  - Disabled send button when textarea is empty
+  - Changed button text to "اكتب شيئاً أولاً" when empty
+  - Added visual feedback with disabled state styling
+  - Clear textarea after successful submission
+
 # 2026-02-12 18:00
 - **Comprehensive Dark Mode Audit & Fixes**:
   - Fixed PauseMenuModal dropdown buttons to properly respect dark/light mode

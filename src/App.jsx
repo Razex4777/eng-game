@@ -28,6 +28,7 @@ function App() {
     const [gameMode, setGameMode] = useState(null); // 'finite' or 'infinite'
     const [showTutorial, setShowTutorial] = useState(false);
     const [feedbackOpen, setFeedbackOpen] = useState(false);
+    const [feedbackText, setFeedbackText] = useState('');
     const [monsterSheetOpen, setMonsterSheetOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [showReviewMode, setShowReviewMode] = useState(false);
@@ -705,19 +706,27 @@ function App() {
                                     <p className={`text-sm opacity-60 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>شنو اقتراحك حتى نطورها؟</p>
                                 </div>
                                 <textarea
+                                    value={feedbackText}
+                                    onChange={(e) => setFeedbackText(e.target.value)}
                                     className={`w-full h-32 p-4 rounded-xl border-2 mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all ${isDarkMode ? 'bg-black/20 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-800'}`}
                                     placeholder="اكتب فكرتك الجهنمية هنا..."
                                 ></textarea>
                                 <TactileButton
                                     onClick={() => {
-                                        setFeedbackOpen(false);
-                                        showToast('شكراً يا بطل! فكرتك وصلت 💡', 'info', Send);
+                                        if (feedbackText.trim()) {
+                                            setFeedbackOpen(false);
+                                            setFeedbackText(''); // Clear the text
+                                            showToast('شكراً يا بطل! فكرتك وصلت 💡', 'info', Send);
+                                        }
                                     }}
+                                    disabled={!feedbackText.trim()}
                                     className="w-full py-3 rounded-xl gap-2"
-                                    colorClass="bg-teal-500"
-                                    borderClass="border-teal-700"
+                                    colorClass={!feedbackText.trim() ? 'bg-slate-400' : 'bg-teal-500'}
+                                    borderClass={!feedbackText.trim() ? 'border-slate-600' : 'border-teal-700'}
                                 >
-                                    <span className="font-bold text-white">إرسال الفكرة</span>
+                                    <span className={`font-bold ${!feedbackText.trim() ? 'text-slate-300' : 'text-white'}`}>
+                                        {feedbackText.trim() ? 'إرسال الفكرة' : 'اكتب شيئاً أولاً'}
+                                    </span>
                                     <Send className="w-4 h-4 text-white" />
                                 </TactileButton>
                             </div>
