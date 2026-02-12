@@ -601,6 +601,7 @@ function App() {
                     toggleMute={toggleMute}
                     toggleDarkMode={toggleDarkMode}
                     showToast={showToast}
+                    userId={authUser?.id}
                 />
             );
         }

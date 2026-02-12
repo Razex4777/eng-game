@@ -16,8 +16,16 @@ const MonsterChallengeLoader = ({
     onExit,
     toggleMute,
     toggleDarkMode,
-    showToast
+    showToast,
+    userId: propUserId = null
 }) => {
+    // Determine game mode based on gameConfig type
+    // - 'chapters', 'halfyear', 'demo' = finite (3 hearts)
+    // - 'fullyear' = infinite (10 hearts for comprehensive)
+    // - 'monster' = infinite (10 hearts)
+    const gameType = gameConfig?.type || gameConfig?.gameMode;
+    const isInfinite = gameType === 'fullyear' || gameType === 'monster' || gameConfig?.gameMode === 'infinite';
+    const initialMode = isInfinite ? 'infinite' : 'finite';
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -140,14 +148,14 @@ const MonsterChallengeLoader = ({
         <GameContainer
             key={`monster-${gameConfig.subject}-${gameConfig.type}-${gameConfig.part}`}
             initialQuestions={questions}
-            initialMode="infinite"
+            initialMode={initialMode}
             isDark={isDarkMode}
             isMuted={isMuted}
             onExit={onExit}
             setIsMuted={toggleMute}
             setIsDark={toggleDarkMode}
             gameConfig={gameConfig}
-            userId={userId}
+            userId={propUserId || userId}
         />
     );
 };
