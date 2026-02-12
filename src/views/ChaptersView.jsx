@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Lock, Loader2, Flame, Target } from 'lucide-react';
 import TactileButton from '../components/ui/TactileButton';
 import StatsHUD from '../components/ui/StatsHUD';
 import { getChaptersStructure, getUserChapterProgress, calculateChapterProgress, isChapterUnlocked } from '../services/chaptersService';
@@ -74,8 +74,8 @@ const ChaptersView = ({
             <StatsHUD
                 isDarkMode={isDarkMode}
                 compact={true}
-                onFlameClick={onFlameClick}
-                onQuestionsClick={onQuestionsClick}
+                onFlameClick={() => onFlameClick?.('العب 7 أيام متواصلة بدون تسطيح حتى تحصل شعلة 🔥', 'fire', Flame)}
+                onQuestionsClick={() => onQuestionsClick?.('المجموع الكلّي لاسئلة المنهج 🎯', 'info', Target)}
                 days={days}
                 questions={questions}
                 xp={xp}

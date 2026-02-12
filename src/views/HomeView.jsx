@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, FileText, Lock, Play, Swords } from 'lucide-react';
+import { List, FileText, Lock, Play, Swords, Flame, Target } from 'lucide-react';
 import { TactileButton, StatsHUD } from '../components/ui';
 
 /**
@@ -80,8 +80,8 @@ const HomeView = ({
                         questions={userStats?.totalQuestions ?? 0}
                         xp={userStats?.totalXP ?? 0}
                         subject={userData?.preferred_subject}
-                        onFlameClick={onFlameClick}
-                        onQuestionsClick={onQuestionsClick}
+                        onFlameClick={() => onFlameClick?.('العب 7 أيام متواصلة بدون تسطيح حتى تحصل شعلة 🔥', 'fire', Flame)}
+                        onQuestionsClick={() => onQuestionsClick?.('المجموع الكلّي لاسئلة المنهج 🎯', 'info', Target)}
                     />
 
                     {/* Monster Challenge Card */}

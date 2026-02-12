@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Lock, Zap, Infinity as InfinityIcon, ChevronLeft, CheckCircle2, Play, Loader2 } from 'lucide-react';
+import { ArrowLeft, Lock, Zap, Infinity as InfinityIcon, ChevronLeft, CheckCircle2, Play, Loader2, Flame, Target } from 'lucide-react';
 import TactileButton from '../components/ui/TactileButton';
 import StatsHUD from '../components/ui/StatsHUD';
 import { getReviewsStructure, getUserChapterProgress } from '../services/chaptersService';
@@ -173,8 +173,8 @@ const ReviewsView = ({
             <StatsHUD
                 isDarkMode={isDarkMode}
                 compact={true}
-                onFlameClick={onFlameClick}
-                onQuestionsClick={onQuestionsClick}
+                onFlameClick={() => onFlameClick?.('العب 7 أيام متواصلة بدون تسطيح حتى تحصل شعلة 🔥', 'fire', Flame)}
+                onQuestionsClick={() => onQuestionsClick?.('المجموع الكلّي لاسئلة المنهج 🎯', 'info', Target)}
             />
 
             <div className="flex items-center gap-4 mb-6">

@@ -35,7 +35,7 @@ const StatsHUD = ({
                 <div className={`w-px h-6 ${dividerColor}`}></div>
                 <div onClick={() => onQuestionsClick?.()} className="flex items-center gap-3 cursor-pointer active:scale-90 transition-transform"><Target className="w-6 h-6 text-blue-400" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{questions}</span></div>
                 <div className={`w-px h-6 ${dividerColor}`}></div>
-                <div className="flex items-center gap-3"><Star className="w-6 h-6 text-yellow-400 fill-yellow-400" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{xp}</span></div>
+                <div onClick={() => onQuestionsClick?.()} className="flex items-center gap-3 cursor-pointer active:scale-90 transition-transform"><Star className="w-6 h-6 text-yellow-400 fill-yellow-400" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{xp}</span></div>
             </div>
         );
     }
@@ -52,7 +52,7 @@ const StatsHUD = ({
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">سؤال</span>
             </div>
             <div className={`w-0.5 h-8 ${dividerColorHalf} rounded-full`}></div>
-            <div className="flex-1 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform">
+            <div onClick={(e) => { e.stopPropagation(); onQuestionsClick?.(); }} className="flex-1 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform">
                 <div className="flex items-center gap-1 mb-0.5"><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{xp}</span><Star className="w-4 h-4 text-yellow-400 fill-yellow-400" /></div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">XP</span>
             </div>

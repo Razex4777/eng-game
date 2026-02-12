@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Fingerprint, Send, X } from 'lucide-react';
+import { Fingerprint, Send, X, Flame, Target } from 'lucide-react';
 
 // Components
 import { SoftBackground, ToastNotification, TactileButton, TooltipOverlay } from './components/ui';
@@ -606,8 +606,8 @@ function App() {
                             }}
                             onChaptersClick={() => setCurrentView('chapters')}
                             onReviewsClick={() => setCurrentView('reviews')}
-                            onFlameClick={() => setCurrentView('reviews')}
-                            onQuestionsClick={() => setCurrentView('chapters')}
+                            onFlameClick={(message, type, icon) => showToast(message, type, icon)}
+                            onQuestionsClick={(message, type, icon) => showToast(message, type, icon)}
                         />
                     )}
 
@@ -617,8 +617,8 @@ function App() {
                             onBack={() => setCurrentView('home')}
                             onChapterClick={handleChapterClick}
                             onShowLogin={handleShowLogin}
-                            onFlameClick={() => setCurrentView('reviews')}
-                            onQuestionsClick={() => setCurrentView('chapters')}
+                            onFlameClick={(message, type, icon) => showToast(message, type, icon)}
+                            onQuestionsClick={(message, type, icon) => showToast(message, type, icon)}
                             days={userStats.streakDays}
                             questions={userStats.totalQuestions}
                             xp={userStats.totalXP}
@@ -648,8 +648,8 @@ function App() {
                                 isDarkMode={isDarkMode}
                                 onBack={() => setCurrentView('home')}
                                 onShowLogin={handleShowLogin}
-                                onFlameClick={() => setCurrentView('reviews')}
-                                onQuestionsClick={() => setCurrentView('chapters')}
+                                onFlameClick={(message, type, icon) => showToast(message, type, icon)}
+                                onQuestionsClick={(message, type, icon) => showToast(message, type, icon)}
                                 onReviewClick={handleReviewClick}
                                 userId={authUser?.id}
                                 subject={currentSubject}

@@ -289,6 +289,35 @@
   - Added 'insane' speed mode (🤯) for hardcore players.
   - `useGameLogic` now uses SPEED_MODES from service for consistency.
 
+# 2026-02-12 18:45
+- **StatsHUD XP Click Handler Added**:
+  - Added click handlers to XP stats in both compact and full modes
+  - XP clicks now show the same notification as questions: "المجموع الكلّي لاسئلة المنهج 🎯"
+  - All three stats (flame/days, questions, XP) now show explanatory notifications
+  - Enhanced user experience with consistent feedback across all stats
+
+# 2026-02-12 18:40
+- **StatsHUD Navigation Fix**:
+  - Fixed StatsHUD click handlers to show toast notifications instead of navigating to other views
+  - Updated App.jsx to pass showToast function instead of navigation functions
+  - Flame click now shows: "العب 7 أيام متواصلة بدون تسطيح حتى تحصل شعلة 🔥"
+  - Questions click now shows: "المجموع الكلّي لاسئلة المنهج 🎯"
+  - Restored original behavior from code.txt implementation
+
+# 2026-02-12 18:35
+- **StatsHUD Icon Import Fix**:
+  - Added missing Flame and Target icon imports to HomeView, ChaptersView, ReviewsView, and App.jsx
+  - Fixed "ReferenceError: Flame is not defined" runtime errors
+  - StatsHUD click handlers now work properly with toast notifications
+
+# 2026-02-12 18:30
+- **StatsHUD Click Handler Fix**:
+  - Fixed flame and questions stats to show toast notifications on click
+  - Updated HomeView, ChaptersView, and ReviewsView to pass proper toast functions
+  - Flame click now shows: "العب 7 أيام متواصلة بدون تسطيح حتى تحصل شعلة 🔥"
+  - Questions click now shows: "المجموع الكلّي لاسئلة المنهج 🎯"
+  - Restored original behavior from code.txt implementation
+
 # 2026-02-12 18:15
 - **Feedback Popup Validation Fix**:
   - Added state management for feedback textarea value
