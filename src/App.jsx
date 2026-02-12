@@ -562,23 +562,25 @@ function App() {
                             isDarkMode={isDarkMode}
                             userData={userData}
                             userStats={userStats}
-                            showTutorial={showTutorial}
-                            seenTooltips={seenTooltips}
-                            onTutorialDismiss={() => setShowTutorial(false)}
                             onContinueJourney={handleContinueJourney}
                             onMonsterClick={() => {
                                 if (userData?.isGuest) { handleShowLogin(); return; }
-                                if (handleFeatureClick('monster')) setShowBattleArena(true);
+                                // Show tooltip first if not seen
+                                if (!seenTooltips.monster) {
+                                    setActiveTooltip(TOOLTIP_DEFINITIONS.monster);
+                                    setSeenTooltips(prev => {
+                                        const updated = { ...prev, monster: true };
+                                        localStorage.setItem('seenTooltips', JSON.stringify(updated));
+                                        return updated;
+                                    });
+                                    return;
+                                }
+                                setShowBattleArena(true);
                             }}
-                            onChaptersClick={() => {
-                                if (handleFeatureClick('chapters')) setCurrentView('chapters');
-                            }}
-                            onReviewsClick={() => {
-                                if (handleFeatureClick('reviews')) setCurrentView('reviews');
-                            }}
+                            onChaptersClick={() => setCurrentView('chapters')}
+                            onReviewsClick={() => setCurrentView('reviews')}
                             onFlameClick={() => setCurrentView('reviews')}
                             onQuestionsClick={() => setCurrentView('chapters')}
-                            showToast={showToast}
                         />
                     )}
 
@@ -721,7 +723,14 @@ function App() {
                     <TooltipOverlay
                         title={activeTooltip.title}
                         text={activeTooltip.text}
-                        onClose={() => setActiveTooltip(null)}
+                        isDarkMode={isDarkMode}
+                        onClose={() => {
+                            setActiveTooltip(null);
+                            // If this was the monster tooltip, open BattleArena after closing
+                            if (activeTooltip === TOOLTIP_DEFINITIONS.monster) {
+                                setShowBattleArena(true);
+                            }
+                        }}
                     />
                 )}
             </div >

@@ -853,7 +853,9 @@ const ReviewsView = ({ isDarkMode, onBack, isGuest, onShowLogin, onFlameClick, o
 
 // --- Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ ---
 export default function App() {
-
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isGuest, setIsGuest] = useState(false); 
   const [userName, setUserName] = useState(''); 
   const [currentView, setCurrentView] = useState('home');
   const [selectedChapterForLevels, setSelectedChapterForLevels] = useState(1);
@@ -1209,7 +1211,16 @@ export default function App() {
                     <div className={`relative w-full max-w-sm p-6 rounded-[2rem] border-2 shadow-2xl animate-pop-in ${isDarkMode ? 'bg-[#2A2640] border-[#3E3859]' : 'bg-white border-white'}`}>
                         <button onClick={() => setFeedbackOpen(false)} className="absolute top-4 left-4 p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"><X className="w-5 h-5 text-slate-400" /></button>
                         <div className="flex flex-col items-center text-center mb-6 mt-2">
-
+                            <div className="w-16 h-16 bg-teal-50 dark:bg-teal-900/30 rounded-2xl flex items-center justify-center mb-4 rotate-3"><Fingerprint className="w-8 h-8 text-teal-500" /></div>
+                            <h3 className={`text-xl font-black mb-1 ${themeText}`}>Ø§Ù„Ù„Ø¹Ø¨Ø© ØªÙƒØ¨Ø± Ø¨Ø£ÙÙƒØ§Ø±ÙƒÙ… ðŸ’¡</h3>
+                            <p className={`text-sm opacity-60 ${themeText}`}>Ø´Ù†Ùˆ Ø§Ù‚ØªØ±Ø§Ø­Ùƒ Ø­ØªÙ‰ Ù†Ø·ÙˆØ±Ù‡Ø§ØŸ</p>
+                        </div>
+                        <textarea className={`w-full h-32 p-4 rounded-xl border-2 mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all ${isDarkMode ? 'bg-black/20 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-800'}`} placeholder="Ø§ÙƒØªØ¨ ÙÙƒØ±ØªÙƒ Ø§Ù„Ø¬Ù‡Ù†Ù…ÙŠØ© Ù‡Ù†Ø§..."></textarea>
+                        <TactileButton onClick={() => { triggerHaptic(); setFeedbackOpen(false); showToast('Ø´ÙƒØ±Ø§Ù‹ ÙŠØ§ Ø¨Ø·Ù„! ÙÙƒØ±ØªÙƒ ÙˆØµÙ„Øª ðŸ’¡', 'info', Send); }} className="w-full py-3 rounded-xl gap-2" colorClass="bg-teal-500" borderClass="border-teal-700"><span className="font-bold text-white">Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„ÙÙƒØ±Ø©</span><Send className="w-4 h-4 text-white" /></TactileButton>
+                    </div>
+                </div>
+            )}
+          </>
       )}
     </div>
   );

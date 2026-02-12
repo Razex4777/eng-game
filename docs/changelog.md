@@ -1,5 +1,15 @@
 # Changelog
 
+# 2026-02-12 12:30
+- **✨ UI Simplification (Matching code.txt Reference)**:
+  - **`views/HomeView.jsx`**: Removed TutorialHand, seenTooltips, showTutorial props; inline MonsterCard; cleaner navigation grid
+  - **`views/ChaptersView.jsx`**: Reduced from 179 to ~130 lines; simpler progress bar without glow effects
+  - **`views/LevelsView.jsx`**: Removed CheckCircle2, Gamepad2 imports; simplified level grid with just number + stars
+  - **`views/ReviewsView.jsx`**: Removed wrong answers bag section; cleaner expand/collapse for review types
+  - **`components/layout/BottomDock.jsx`**: Reduced from 240 to ~140 lines; simplified daily task widget
+  - **`views/BattleArenaModal.jsx`**: Removed complex theme tokens object; simpler inline theme classes matching code.txt style
+  - **`App.jsx`**: Updated HomeView props to remove tutorial-related props (seenTooltips, showTutorial, onTooltipClose)
+
 # 2026-02-12 11:57
 - **🐛 Login Redirect Fix (New Google Accounts)**:
   - **`views/LoginView.jsx`**: Fixed critical bug where new Google sign-in users were stuck on step 0 (Google/Guest buttons) instead of advancing to registration steps (name → age/gender → governorate)
