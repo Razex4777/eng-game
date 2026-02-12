@@ -7,15 +7,21 @@ import { getTodayActivity } from '../../services/userProgressService';
 /**
  * BottomDock (Simplified)
  * Clean daily task widget matching code.txt reference
+ * Hidden for guest users
  */
 const BottomDock = ({
     isDarkMode,
+    isGuest = false,
     onTaskClick,
     onMistakeClick,
     onReviewStart,
     mistakesCount = 0,
     userId = null
 }) => {
+    // Hide BottomDock for guest users
+    if (isGuest) {
+        return null;
+    }
     const DAILY_GOAL = 2;
     const [dailyStages, setDailyStages] = useState(0);
     const [dailyLoading, setDailyLoading] = useState(true);

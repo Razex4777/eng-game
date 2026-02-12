@@ -1,5 +1,13 @@
 # Changelog
 
+# 2026-02-12 14:30
+- **🎮 Guest Mode UI - Simplified View**:
+  - **`views/HomeView.jsx`**: Guest users now see ONLY the Continue Journey banner
+    - Shows: "جرب مجاناً 🎮", "ابدأ رحلتك التعليمية", "0%", "0 أيام"
+    - Hidden for guests: StatsHUD, Monster Challenge card, Quick Navigation grid
+  - **`components/layout/BottomDock.jsx`**: Completely hidden for guest users
+  - **`App.jsx`**: Passed `isGuest` prop to BottomDock
+
 # 2026-02-12 13:45
 - **🐛 Guest Mode UI Fix**:
   - **`App.jsx`**: Fixed guest login showing registered user content instead of guest-specific UI

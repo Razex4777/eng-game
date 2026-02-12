@@ -677,6 +677,7 @@ function App() {
 
                     <BottomDock
                         isDarkMode={isDarkMode}
+                        isGuest={userData?.isGuest}
                         onTaskClick={() => handleFeatureClick('daily')}
                         onMistakeClick={() => handleFeatureClick('mistakes')}
                         onReviewStart={() => {
