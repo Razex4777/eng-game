@@ -1,5 +1,15 @@
 # Changelog
 
+# 2026-02-12 13:45
+- **🐛 Guest Mode UI Fix**:
+  - **`App.jsx`**: Fixed guest login showing registered user content instead of guest-specific UI
+    - **Root cause 1**: `userStats` was not being reset for guests, showing previous user's progress
+    - **Root cause 2**: Auth state listener could overwrite guest `userData` if Supabase session existed
+    - **Fix 1**: Added `setUserStats()` call in `handleGuestLogin` to reset all stats to 0/null for guests
+    - **Fix 2**: Added `setAuthUser(null)` in `handleGuestLogin` to clear any existing Supabase auth state
+    - **Fix 3**: Added `isGuestMode()` check at start of `onAuthStateChange` callback to skip processing if in guest mode
+  - **Result**: Guest users now correctly see "جرب مجاناً 🎮" instead of "تابع رحلتك 🚀" and "ابدأ رحلتك التعليمية" instead of previous user's progress
+
 # 2026-02-12 12:30
 - **✨ UI Simplification (Matching code.txt Reference)**:
   - **`views/HomeView.jsx`**: Removed TutorialHand, seenTooltips, showTutorial props; inline MonsterCard; cleaner navigation grid

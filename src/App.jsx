@@ -133,6 +133,12 @@ function App() {
                 console.log('Auth event:', event, session?.user?.id);
             }
 
+            // Don't process auth events if in guest mode
+            if (isGuestMode()) {
+                setAuthLoading(false);
+                return;
+            }
+
             if (event === 'SIGNED_IN' && session?.user) {
                 // User signed in
                 setAuthUser(session.user);
@@ -215,12 +221,31 @@ function App() {
     // Guest Login Handler
     const handleGuestLogin = () => {
         const guest = enterGuestMode();
+
+        // Clear any existing Supabase auth state
+        setAuthUser(null);
+
+        // Set guest user data
         setUserData({
             id: guest.guestId,
             name: guest.name,
             isGuest: true,
             preferred_subject: 'english'
         });
+
+        // Reset user stats for guest (no previous progress)
+        setUserStats({
+            streakDays: 0,
+            totalQuestions: 0,
+            totalXP: 0,
+            dailyTasksDone: 0,
+            dailyTasksTotal: 5,
+            mistakesToReview: 0,
+            subjectProgress: {},
+            overallProgress: 0,
+            lastPlayedPart: null
+        });
+
         setIsLoggedIn(true);
         setCurrentView('home');
         showToast('أهلاً بك يا ضيف! 👋', 'success');
