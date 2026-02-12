@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, FileText } from 'lucide-react';
+import { List, FileText, Lock } from 'lucide-react';
 import { TactileButton, StatsHUD } from '../components/ui';
 import TutorialHand from '../components/ui/TutorialHand';
 import MonsterCard from './MonsterCard';
@@ -109,8 +109,9 @@ const HomeView = ({
                     isDarkMode={isDarkMode}
                     onClick={onMonsterClick}
                     playerName={userData?.name}
+                    isGuest={isGuest}
                 />
-                {!seenTooltips.monster && (
+                {!isGuest && !seenTooltips.monster && (
                     <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce pointer-events-none"></div>
                 )}
             </div>
@@ -119,37 +120,47 @@ const HomeView = ({
             <div className="grid grid-cols-2 gap-4 mt-4">
                 <TactileButton
                     onClick={onChaptersClick}
-                    className="aspect-square rounded-[2rem] flex flex-col items-center justify-center gap-4 group relative"
+                    className={`aspect-square rounded-[2rem] flex flex-col items-center justify-center gap-4 group relative ${isGuest ? 'opacity-80 grayscale-[0.5]' : ''}`}
                     colorClass={isDarkMode ? 'bg-emerald-600' : 'bg-[#6EE7B7]'}
                     borderClass={isDarkMode ? 'border-emerald-800' : 'border-[#059669]'}
                 >
-                    {!seenTooltips.chapters && (
+                    {!isGuest && !seenTooltips.chapters && (
                         <div className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
                     )}
                     <div className="w-16 h-16 rounded-3xl flex items-center justify-center transform group-active:scale-90 transition-transform bg-white/20 border-2 border-white/20">
-                        <List className="w-8 h-8 text-white drop-shadow-sm" strokeWidth={3} />
+                        {isGuest
+                            ? <Lock className="w-8 h-8 text-white/70 drop-shadow-sm" strokeWidth={3} />
+                            : <List className="w-8 h-8 text-white drop-shadow-sm" strokeWidth={3} />
+                        }
                     </div>
                     <div className="text-center">
                         <span className="block text-xl font-black text-white drop-shadow-md">الفصول</span>
-                        <span className="text-[10px] font-bold text-emerald-900 bg-white/20 px-2 py-0.5 rounded-lg mt-1 inline-block">المنهج الكامل</span>
+                        <span className="text-[10px] font-bold text-emerald-900 bg-white/20 px-2 py-0.5 rounded-lg mt-1 inline-block">
+                            {isGuest ? 'سجّل للفتح' : 'المنهج الكامل'}
+                        </span>
                     </div>
                 </TactileButton>
 
                 <TactileButton
                     onClick={onReviewsClick}
-                    className="aspect-square rounded-[2rem] flex flex-col items-center justify-center gap-4 group relative"
+                    className={`aspect-square rounded-[2rem] flex flex-col items-center justify-center gap-4 group relative ${isGuest ? 'opacity-80 grayscale-[0.5]' : ''}`}
                     colorClass={isDarkMode ? 'bg-orange-600' : 'bg-[#FDBA74]'}
                     borderClass={isDarkMode ? 'border-orange-800' : 'border-[#EA580C]'}
                 >
-                    {!seenTooltips.reviews && (
+                    {!isGuest && !seenTooltips.reviews && (
                         <div className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full z-20 animate-bounce"></div>
                     )}
                     <div className="w-16 h-16 rounded-3xl flex items-center justify-center transform group-active:scale-90 transition-transform bg-white/20 border-2 border-white/20">
-                        <FileText className="w-8 h-8 text-white drop-shadow-sm" strokeWidth={3} />
+                        {isGuest
+                            ? <Lock className="w-8 h-8 text-white/70 drop-shadow-sm" strokeWidth={3} />
+                            : <FileText className="w-8 h-8 text-white drop-shadow-sm" strokeWidth={3} />
+                        }
                     </div>
                     <div className="text-center">
                         <span className="block text-xl font-black text-white drop-shadow-md">مراجعات</span>
-                        <span className="text-[10px] font-bold text-orange-900 bg-white/20 px-2 py-0.5 rounded-lg mt-1 inline-block">مركزة & شاملة</span>
+                        <span className="text-[10px] font-bold text-orange-900 bg-white/20 px-2 py-0.5 rounded-lg mt-1 inline-block">
+                            {isGuest ? 'سجّل للفتح' : 'مركزة & شاملة'}
+                        </span>
                     </div>
                 </TactileButton>
             </div>

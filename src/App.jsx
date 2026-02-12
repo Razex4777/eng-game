@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Fingerprint, Send, X } from 'lucide-react';
 
 // Components
-import { SoftBackground, ToastNotification, TactileButton } from './components/ui';
+import { SoftBackground, ToastNotification, TactileButton, TooltipOverlay } from './components/ui';
 import { BottomDock, TopNav } from './components/layout';
 import { SettingsModal } from './components/settings';
 import { MonsterChallengeLoader, WrongAnswersReviewMode } from './components/game';
@@ -32,14 +32,25 @@ function App() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [showReviewMode, setShowReviewMode] = useState(false);
     const [reviewData, setReviewData] = useState(null);
-    const [seenTooltips, setSeenTooltips] = useState({
-        monster: false,
-        chapters: false,
-        reviews: false,
-        fingerprint: false,
-        daily: false,
-        mistakes: false
+    const [seenTooltips, setSeenTooltips] = useState(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('seenTooltips'));
+            return saved || { monster: false, chapters: false, reviews: false, fingerprint: false, daily: false, mistakes: false };
+        } catch {
+            return { monster: false, chapters: false, reviews: false, fingerprint: false, daily: false, mistakes: false };
+        }
     });
+    const [activeTooltip, setActiveTooltip] = useState(null); // { feature, title, text }
+
+    // Tooltip definitions for each feature
+    const TOOLTIP_DEFINITIONS = {
+        monster: { title: 'تحدي الوحش ⚔️', text: 'تحدى الوحش في معركة لا نهائية! كل إجابة صحيحة تزيد سكورك. جرب تكسر رقمك القياسي!' },
+        chapters: { title: 'الفصول 📚', text: 'هنا تلاقي جميع فصول المنهج مرتبة. اختر الفصل وابدأ حل الأسئلة لتتقدم!' },
+        reviews: { title: 'المراجعات 📝', text: 'مراجعات مركزة وشاملة تساعدك تستعد للامتحانات. نصفية وسنوية!' },
+        fingerprint: { title: 'بصمتك 💡', text: 'عندك فكرة تطور اللعبة؟ اكتب اقتراحك هنا ووصل صوتك!' },
+        daily: { title: 'المهام اليومية 🎯', text: 'أكمل مهامك اليومية لتحافظ على سلسلة الأيام وتكسب XP إضافي!' },
+        mistakes: { title: 'حقيبة الأخطاء 📦', text: 'كل سؤال غلطت فيه ينحفظ هنا. راجعه حتى تتقنه تماماً!' }
+    };
 
     // Subject State — drives chapters/reviews/game subject filter
     const [currentSubject, setCurrentSubject] = useState('english');
@@ -390,10 +401,20 @@ function App() {
         setShowLoginModal(true);
     };
 
-    // Feature click handling
+    // Feature click handling — show tooltip on first click, allow nav on subsequent
     const handleFeatureClick = (feature) => {
-        setSeenTooltips(prev => ({ ...prev, [feature]: true }));
-        return true;
+        if (!seenTooltips[feature]) {
+            // First time: show tooltip, mark as seen, block navigation
+            const def = TOOLTIP_DEFINITIONS[feature];
+            if (def) {
+                setActiveTooltip({ feature, ...def });
+            }
+            const updated = { ...seenTooltips, [feature]: true };
+            setSeenTooltips(updated);
+            try { localStorage.setItem('seenTooltips', JSON.stringify(updated)); } catch { }
+            return false; // Block navigation
+        }
+        return true; // Allow navigation
     };
 
     // Logout
@@ -546,6 +567,7 @@ function App() {
                             onTutorialDismiss={() => setShowTutorial(false)}
                             onContinueJourney={handleContinueJourney}
                             onMonsterClick={() => {
+                                if (userData?.isGuest) { handleShowLogin(); return; }
                                 if (handleFeatureClick('monster')) setShowBattleArena(true);
                             }}
                             onChaptersClick={() => {
@@ -693,6 +715,15 @@ function App() {
                         />
                     )
                 }
+
+                {/* Tooltip Overlay — shows on first feature click */}
+                {activeTooltip && (
+                    <TooltipOverlay
+                        title={activeTooltip.title}
+                        text={activeTooltip.text}
+                        onClose={() => setActiveTooltip(null)}
+                    />
+                )}
             </div >
         );
     };

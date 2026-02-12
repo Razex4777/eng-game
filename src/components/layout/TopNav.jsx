@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, User, Moon, Maximize, LogOut } from 'lucide-react';
+import { ChevronLeft, User, Moon, Sun, Maximize, Minimize, LogOut } from 'lucide-react';
 
 /**
  * Subject options available in the app
@@ -28,6 +28,7 @@ const TopNav = ({
     onSubjectChange,
     onLogout
 }) => {
+    const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
     const [subjectOpen, setSubjectOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const subjectRef = useRef(null);
@@ -45,6 +46,13 @@ const TopNav = ({
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    // Track fullscreen state for proper icon display
+    useEffect(() => {
+        const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
     const activeSubject = SUBJECTS.find(s => s.id === currentSubject) || SUBJECTS[0];
@@ -150,26 +158,32 @@ const TopNav = ({
                     >
                         {/* Dark Mode Toggle */}
                         <button
-                            onClick={() => onDarkModeToggle?.()}
+                            onClick={() => { onDarkModeToggle?.(); setProfileOpen(false); }}
                             className={`
                                 w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-colors
                                 ${isDarkMode ? 'text-white hover:bg-slate-700/50' : 'text-slate-700 hover:bg-slate-50'}
                             `}
                         >
-                            <Moon className="w-5 h-5" />
-                            <span>الوضع الليلي</span>
+                            {isDarkMode
+                                ? <Sun className="w-5 h-5 text-amber-500" />
+                                : <Moon className="w-5 h-5 text-indigo-500" />
+                            }
+                            <span>{isDarkMode ? 'الوضع النهاري' : 'الوضع الليلي'}</span>
                         </button>
 
                         {/* Fullscreen Toggle */}
                         <button
-                            onClick={() => onFullscreenToggle?.()}
+                            onClick={() => { onFullscreenToggle?.(); setProfileOpen(false); }}
                             className={`
                                 w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-colors
                                 ${isDarkMode ? 'text-white hover:bg-slate-700/50' : 'text-slate-700 hover:bg-slate-50'}
                             `}
                         >
-                            <Maximize className="w-5 h-5" />
-                            <span>ملء الشاشة</span>
+                            {isFullscreen
+                                ? <Minimize className="w-5 h-5 text-purple-500" />
+                                : <Maximize className="w-5 h-5 text-purple-500" />
+                            }
+                            <span>{isFullscreen ? 'تصغير الشاشة' : 'ملء الشاشة'}</span>
                         </button>
 
                         {/* Divider */}

@@ -1,5 +1,28 @@
 # Changelog
 
+# 2026-02-12 11:57
+- **🐛 Login Redirect Fix (New Google Accounts)**:
+  - **`views/LoginView.jsx`**: Fixed critical bug where new Google sign-in users were stuck on step 0 (Google/Guest buttons) instead of advancing to registration steps (name → age/gender → governorate)
+    - **Root cause**: `useState` initializer only runs once at mount. When `initialData` arrived later via `onAuthStateChange`, the step stayed stuck at 0
+    - **Fix**: Extracted `getStepFromData()` helper + added `useEffect` watching `initialData` changes that jumps to correct step and pre-fills form
+- **🎮 MonsterCard Guest State**:
+  - **`views/MonsterCard.jsx`**: Added `isGuest` prop — shows Lock icon, greyed-out card, score "0", subtitle "سجل لفتح التحدي", and pinging red dot for guest users
+
+# 2026-02-12 11:15
+- **⚔️ BattleArenaModal — Progression Logic & Dynamic Chapters**:
+  - **`views/BattleArenaModal.jsx`**: Complete rewrite with sequential progression enforcement
+    - **Dynamic chapters**: Fetches real parts from `{subject}_chapters` Supabase tables (24 for English, 12 for Biology) — no hardcoded numbers
+    - **Progression states**: Three card states derived from `monster_challenge_progress`:
+      - ✅ **Completed** (part < currentPart): Green star badge, replayable, VS share button visible
+      - ▶️ **Current** (part == currentPart): Blue highlighted card with "ابدأ" play button
+      - 🔒 **Locked** (part > currentPart): Greyed out, opacity 40%, lock icon, toast warning on click
+    - **Per-chapter high scores**: Queries `game_sessions` table by `user_id`, `subject`, `question_type='chapters'`, `part_number` — groups by part, takes highest score
+    - **Progress fetching**: Uses existing `getUserProgress()` from monsterChallengeService to read `users.monster_challenge_progress` JSONB
+    - **VS Share**: Share button appears only on completed chapters with scores — "تحدى صديقك!" bounce tooltip on first scored chapter
+    - **Theme tokens**: `isDarkMode` prop drives full light/dark token object (`t.modal`, `t.cardCompleted`, `t.cardLocked`, etc.) — no Tailwind `dark:` prefix needed
+    - **Scrollable grid**: `max-h-[55vh] overflow-y-auto` for subjects with many chapters
+    - **CTA**: "التحدي الشامل" starts fullyear mode, shows dynamic total XP from scored chapters
+
 # 2026-02-11 19:50
 - **🎯 Tutorial Hand Animation Fix (Banner Spotlight)**:
   - **`keyframes.css`**: Rewrote `@keyframes pulse-ring` — old version scaled element to 2x and faded to opacity 0 (making it invisible). New version uses `box-shadow` yellow glow pulse that keeps the element visible while creating an attention-grabbing pulsing ring

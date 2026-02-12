@@ -1,25 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Star, Check, MessageCircle, Send, LogIn, UserX } from 'lucide-react';
 import TactileButton from '../components/ui/TactileButton';
 
+// Determine the correct registration step from user data
+const getStepFromData = (data) => {
+    if (!data) return 0;
+    if (!data.name) return 1;
+    if (!data.age || !data.gender) return 2;
+    if (!data.governorate) return 3;
+    return 1; // Fallback — has everything but still on login → re-enter name
+};
+
 // LoginView
 const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, onGuestLogin, initialData }) => {
-    const [step, setStep] = useState(() => {
-        // If we have initialData (Partially logged in via Supabase), jump to appropriate step
-        if (initialData) {
-            if (!initialData.name) return 1;
-            if (!initialData.age || !initialData.gender) return 2;
-            if (!initialData.governorate) return 3;
-            return 1; // Fallback
-        }
-        return 0;
-    });
+    const [step, setStep] = useState(() => getStepFromData(initialData));
     const [formData, setFormData] = useState({
         name: initialData?.name || '',
         age: initialData?.age || '',
         gender: initialData?.gender || '',
         governorate: initialData?.governorate || ''
     });
+
+    // When initialData arrives AFTER mount (e.g. Google sign-in fires later),
+    // jump to the correct registration step and pre-fill the form
+    useEffect(() => {
+        if (initialData && step === 0) {
+            const targetStep = getStepFromData(initialData);
+            setStep(targetStep);
+            setFormData(prev => ({
+                name: initialData.name || prev.name,
+                age: initialData.age || prev.age,
+                gender: initialData.gender || prev.gender,
+                governorate: initialData.governorate || prev.governorate
+            }));
+        }
+    }, [initialData]);
     const governorates = ["بغداد", "البصرة", "نينوى", "أربيل", "النجف", "كربلاء", "كركوك", "الأنبار", "ديالى", "ذي قار", "بابل", "واسط", "ميسان", "القادسية", "المثنى", "صلاح الدين", "دهوك", "السليمانية"];
     const ages = Array.from({ length: 14 }, (_, i) => 15 + i);
 
