@@ -113,7 +113,7 @@ function App() {
                         dailyTasksTotal: stats.daily_tasks_total || 5,
                         mistakesToReview: stats.mistakes_to_review || 0,
                         subjectProgress: stats.subject_progress || {},
-                        overallProgress: overallProgress || 0,
+                        overallProgress: overallProgress || (lastPlayedPart ? 0 : 5), // 5% for new users demo
                         lastPlayedPart: lastPlayedPart
                     });
                 }

@@ -47,7 +47,7 @@ const HomeView = ({
                         <span className="text-xs font-bold text-indigo-100 opacity-80">
                             {userStats?.lastPlayedPart
                                 ? `الفصل ${userStats.lastPlayedPart.chapterNumber} - الدرس ${userStats.lastPlayedPart.part}`
-                                : 'ابدأ رحلتك التعليمية'}
+                                : 'الفصل 1 - الدرس 1'}
                         </span>
                     </div>
                     <div className="flex flex-col items-end gap-1">

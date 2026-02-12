@@ -24,18 +24,27 @@ const GameHUD = ({
 
                 {/* Left: Pause & Fullscreen Buttons */}
                 <div className="flex gap-2 shrink-0">
-                    <button
+                    <TactileButton
                         onClick={onPause}
-                        className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl shadow-md flex items-center justify-center border-b-4 border-slate-200 dark:border-slate-700 active:border-b-0 active:translate-y-1 transition-all"
+                        className="w-12 h-12 rounded-xl shadow-md flex items-center justify-center border-b-4 active:border-b-0 active:translate-y-1 transition-all"
+                        variant="primary"
+                        colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
+                        borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                     >
-                        <Pause className="w-6 h-6 text-slate-700 dark:text-slate-200 fill-current" />
-                    </button>
-                    <button
+                        <Pause className={`w-6 h-6 fill-current ${isDark ? 'text-slate-200' : 'text-slate-700'}`} />
+                    </TactileButton>
+                    <TactileButton
                         onClick={onToggleFullScreen}
-                        className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl shadow-md flex items-center justify-center border-b-4 border-slate-200 dark:border-slate-700 active:border-b-0 active:translate-y-1 transition-all"
+                        className="w-12 h-12 rounded-xl shadow-md flex items-center justify-center border-b-4 active:border-b-0 active:translate-y-1 transition-all"
+                        variant="primary"
+                        colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
+                        borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                     >
-                        {isFullscreen ? <Minimize className="w-6 h-6 text-slate-700 dark:text-slate-200" /> : <Maximize className="w-6 h-6 text-slate-700 dark:text-slate-200" />}
-                    </button>
+                        {isFullscreen ? 
+                            <Minimize className={`w-6 h-6 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} /> : 
+                            <Maximize className={`w-6 h-6 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} />
+                        }
+                    </TactileButton>
                 </div>
 
                 {/* Center: THE BOSS PROGRESS BAR (FLEXIBLE) */}

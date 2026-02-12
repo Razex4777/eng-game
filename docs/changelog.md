@@ -289,6 +289,13 @@
   - Added 'insane' speed mode (🤯) for hardcore players.
   - `useGameLogic` now uses SPEED_MODES from service for consistency.
 
+# 2026-02-12 18:50
+- **First-Time User Demo Experience Enhanced**:
+  - Updated Continue Journey banner to show "الفصل 1 - الدرس 1" for new users instead of generic text
+  - Added 5% initial progress for first-time users to indicate demo stage
+  - Improved onboarding experience with clear starting point
+  - Maintains proper tracking for returning users
+
 # 2026-02-12 18:45
 - **StatsHUD XP Click Handler Added**:
   - Added click handlers to XP stats in both compact and full modes
