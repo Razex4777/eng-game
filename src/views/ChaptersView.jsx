@@ -111,8 +111,8 @@ const ChaptersView = ({
                         >
                             <div className="flex items-center gap-4 w-full">
                                 <div className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-2xl font-black border-2 transform group-active:scale-90 transition-transform ${isLocked
-                                        ? (isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-500' : 'bg-slate-300 border-slate-400 text-slate-500')
-                                        : (isDarkMode ? 'bg-[#1E293B] border-slate-700 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-500')
+                                    ? (isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-500' : 'bg-slate-300 border-slate-400 text-slate-500')
+                                    : (isDarkMode ? 'bg-[#1E293B] border-slate-700 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-500')
                                     }`}>
                                     {isLocked ? <Lock className="w-6 h-6" /> : num}
                                 </div>
@@ -131,11 +131,11 @@ const ChaptersView = ({
                                                 <span className={`text-[10px] font-bold ${progress >= 90 && progress < 100 ? 'text-red-500' : progress === 100 ? 'text-emerald-500' : 'text-slate-400'}`}>
                                                     {progress === 100 ? '✅ مكتمل' : progress >= 90 ? '🔥 قريب!' : progress > 0 ? 'جاري' : 'ابدأ'}
                                                 </span>
-                                                <span className={`text-xs font-black ${progress === 100 ? 'text-emerald-500' : progress >= 90 ? 'text-red-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                                                <span className={`text-xs font-black ${progress === 100 ? 'text-emerald-500' : progress >= 90 ? 'text-red-500' : isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                                     {progress}%
                                                 </span>
                                             </div>
-                                            <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                            <div className={`h-2 w-full rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
                                                 <div
                                                     className={`h-full rounded-full transition-all duration-500 ${getProgressColor(progress)}`}
                                                     style={{ width: `${progress}%` }}

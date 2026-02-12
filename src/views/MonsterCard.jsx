@@ -10,7 +10,7 @@ const MonsterCard = ({ isDarkMode, onClick, playerName, isGuest }) => (
         className={`w-full mb-6 overflow-hidden p-0 group ${isGuest ? 'opacity-80 grayscale-[0.8]' : ''}`}
         colorClass={isDarkMode ? 'bg-[#7C3AED]' : 'bg-[#8B5CF6]'}
         borderClass={isDarkMode ? 'border-[#5B21B6]' : 'border-[#7C3AED]'}
-        shadowColor={isGuest ? '' : 'shadow-purple-200 dark:shadow-none'}
+        shadowColor={isGuest ? '' : (isDarkMode ? '' : 'shadow-purple-200')}
     >
         <div className="absolute inset-0 bg-white/5"></div>
         {!isGuest && <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>}

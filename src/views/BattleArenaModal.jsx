@@ -187,10 +187,10 @@ const BattleArenaModal = ({
                                                 handleStartChallenge(num);
                                             }}
                                             className={`w-full h-full flex-col !gap-0 !rounded-[20px] border-none transition-all ${isSelected
-                                                    ? `${primaryColor} text-white shadow-lg shadow-blue-500/30 translate-y-[-4px]`
-                                                    : hasScore
-                                                        ? (isDarkMode ? 'bg-[#334155] hover:bg-[#475569]' : 'bg-slate-100 hover:bg-slate-200')
-                                                        : (isDarkMode ? 'bg-[#1E293B]' : 'bg-slate-50')
+                                                ? `${primaryColor} text-white shadow-lg shadow-blue-500/30 translate-y-[-4px]`
+                                                : hasScore
+                                                    ? (isDarkMode ? 'bg-[#334155] hover:bg-[#475569]' : 'bg-slate-100 hover:bg-slate-200')
+                                                    : (isDarkMode ? 'bg-[#1E293B]' : 'bg-slate-50')
                                                 } ${isLocked ? 'opacity-40' : ''}`}
                                         >
                                             <div className="flex-1 flex flex-col items-center justify-center w-full">
@@ -198,7 +198,7 @@ const BattleArenaModal = ({
                                                 <span className={`text-3xl font-black leading-none mb-1 ${!isSelected && !hasScore && 'opacity-30'}`}>{num}</span>
                                                 <div className="mt-2 h-5 flex items-center justify-center">
                                                     {hasScore ? (
-                                                        <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${isSelected ? 'bg-white/20' : 'bg-black/5 dark:bg-white/10'}`}>
+                                                        <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${isSelected ? 'bg-white/20' : isDarkMode ? 'bg-white/10' : 'bg-black/5'}`}>
                                                             <Star className={`w-2.5 h-2.5 ${isSelected ? 'text-yellow-300 fill-current' : 'text-yellow-500 fill-current'}`} />
                                                             <span className={`text-[9px] font-black ${isSelected ? 'text-white' : (isDarkMode ? 'text-slate-300' : 'text-slate-600')}`}>
                                                                 {score > 999 ? (score / 1000).toFixed(1) + 'k' : score}

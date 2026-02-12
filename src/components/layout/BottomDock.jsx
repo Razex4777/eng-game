@@ -112,7 +112,7 @@ const BottomDock = ({
                     >
                         <Briefcase className="w-6 h-6 text-amber-800" />
                         {mistakesCount > 0 && (
-                            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full flex items-center justify-center text-white text-[10px] font-bold animate-bounce">
+                            <span className={`absolute -top-2 -right-2 w-6 h-6 bg-red-500 border-2 rounded-full flex items-center justify-center text-white text-[10px] font-bold animate-bounce ${isDarkMode ? 'border-slate-800' : 'border-white'}`}>
                                 {mistakesCount}
                             </span>
                         )}
