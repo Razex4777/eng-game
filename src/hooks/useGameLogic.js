@@ -27,7 +27,7 @@ import {
 const useGameLogic = (questions, options = {}) => {
     const {
         mode = 'finite', // 'finite' or 'infinite'
-        initialLives = mode === 'infinite' ? 3 : 3, // 3 hearts for both modes (trial = 3 hearts)
+        initialLives = mode === 'infinite' ? 10 : 3, // 10 hearts for monster/comprehensive, 3 for chapters/demo
         baseSpeed = 2000, // Base fall duration in ms
         freezeDuration = 5000,
         onGameEnd,
@@ -240,8 +240,8 @@ const useGameLogic = (questions, options = {}) => {
             return currentLives;
         });
 
-        // Monster Challenge mode: Enforce 3-error limit for trial
-        if (initialLives >= 3 && wrongAnswersRef.current.length >= 3) {
+        // Monster Challenge mode: Enforce 10-error limit
+        if (initialLives >= 10 && wrongAnswersRef.current.length >= 10) {
             setGameState('results');
             onGameEndRef.current?.({
                 score: scoreRef.current,

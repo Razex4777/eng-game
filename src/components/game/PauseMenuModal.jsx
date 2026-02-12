@@ -166,10 +166,10 @@ const PauseMenuModal = ({
                                                 {s.emoji}
                                             </div>
                                             <div className="text-right flex-1 pt-0.5">
-                                                <div className={`font-black text-base mb-0.5 ${currentSpeedMode === s.id ? 'text-slate-800 dark:text-white' : 'text-slate-600 dark:text-slate-300'}`}>
+                                                <div className={`font-black text-base mb-0.5 ${currentSpeedMode === s.id ? (isDark ? 'text-white' : 'text-slate-800') : (isDark ? 'text-slate-300' : 'text-slate-600')}`}>
                                                     {s.shortLabel}
                                                 </div>
-                                                <div className="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-tight">
+                                                <div className={`text-[10px] font-bold leading-tight ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                                                     {s.desc}
                                                 </div>
                                             </div>
@@ -187,8 +187,8 @@ const PauseMenuModal = ({
                         <TactileButton
                             onClick={handleMuteToggle}
                             className="flex-1 p-3 rounded-2xl gap-1"
-                            colorClass={!isMuted ? 'bg-indigo-50 dark:bg-indigo-900/30' : 'bg-slate-100 dark:bg-slate-800'}
-                            borderClass={!isMuted ? 'border-indigo-200 dark:border-indigo-800' : 'border-slate-200 dark:border-slate-700'}
+                            colorClass={!isMuted ? (isDark ? 'bg-indigo-900/30' : 'bg-indigo-50') : (isDark ? 'bg-slate-800' : 'bg-slate-100')}
+                            borderClass={!isMuted ? (isDark ? 'border-indigo-800' : 'border-indigo-200') : (isDark ? 'border-slate-700' : 'border-slate-200')}
                         >
                             {!isMuted ? <Volume2 className="w-5 h-5 text-indigo-500" /> : <VolumeX className="w-5 h-5 text-slate-400" />}
                         </TactileButton>
@@ -207,8 +207,8 @@ const PauseMenuModal = ({
                         <TactileButton
                             onClick={onExit}
                             className="flex-1 p-3 rounded-2xl gap-1"
-                            colorClass="bg-rose-50 dark:bg-rose-900/20"
-                            borderClass="border-rose-200 dark:border-rose-800"
+                            colorClass={isDark ? 'bg-rose-900/20' : 'bg-rose-50'}
+                            borderClass={isDark ? 'border-rose-800' : 'border-rose-200'}
                         >
                             <LogOut className="w-5 h-5 text-rose-500" />
                         </TactileButton>
