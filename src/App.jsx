@@ -133,8 +133,9 @@ function App() {
                 console.log('Auth event:', event, session?.user?.id);
             }
 
-            // Don't process auth events if in guest mode
-            if (isGuestMode()) {
+            // If in guest mode and no new session, skip processing (stay in guest mode)
+            // But if there's a new session (Google OAuth completed), process it
+            if (isGuestMode() && !session?.user) {
                 setAuthLoading(false);
                 return;
             }
