@@ -108,8 +108,8 @@ const PauseMenuModal = ({
 
                 {/* Header */}
                 <div className="text-center mb-6 shrink-0 pt-2">
-                    <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-1">استراحة محارب 🛑</h2>
-                    <p className="text-sm font-bold text-slate-400">خذ نفس وكمل الطريق</p>
+                    <h2 className={`text-3xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>استراحة محارب 🛑</h2>
+                    <p className={`text-sm font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>خذ نفس وكمل الطريق</p>
                 </div>
 
                 <div className="flex-1 min-h-0 space-y-3 overflow-y-auto px-1 pb-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(100,116,139,0.3) transparent' }}>
@@ -142,7 +142,7 @@ const PauseMenuModal = ({
                                         سرعة اللعبة
                                         {saving && <Loader2 className="w-3 h-3 animate-spin" />}
                                     </span>
-                                    <span className="font-black text-slate-800 dark:text-white">{selectedSpeedConfig.shortLabel}</span>
+                                    <span className={`font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{selectedSpeedConfig.shortLabel}</span>
                                 </div>
                             </div>
                             <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${speedOpen ? 'rotate-180' : ''}`} />
@@ -150,7 +150,7 @@ const PauseMenuModal = ({
 
                         {/* Speed Dropdown */}
                         {speedOpen && (
-                            <div className="mt-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-[3px] border-slate-200 dark:border-slate-700 shadow-inner overflow-hidden animate-dropdown-in">
+                            <div className={`mt-2 rounded-2xl border-[3px] shadow-inner overflow-hidden animate-dropdown-in ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                                 <div className="p-2 grid gap-2">
                                     {Object.values(SPEED_MODES).map((s) => (
                                         <button
