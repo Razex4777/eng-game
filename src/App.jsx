@@ -162,7 +162,7 @@ function App() {
                     session.user.user_metadata?.picture ||
                     null;
 
-                setUserData({
+                const newUserData = {
                     id: session.user.id,
                     auth_id: session.user.id, // For Supabase queries
                     name: name,
@@ -172,20 +172,28 @@ function App() {
                     gender: profile?.gender,
                     governorate: profile?.region, // DB 'region' maps to UI 'governorate'
                     preferred_subject: profile?.preferred_subject || 'english'
-                });
+                };
 
+                setUserData(newUserData);
                 setIsLoggedIn(true);
 
                 // If profile is new or missing details, stay on login to show registration steps
-                if (!profile?.age || !profile?.region) {
-                    setCurrentView('login');
-                    // We don't show toast yet, they need to finish registration
-                } else {
+                // But ONLY if this is a fresh sign-in (userData is null or incomplete)
+                const hasCompleteProfile = profile?.age && profile?.region;
+                const isReturningUser = userData?.id && userData?.age && userData?.governorate;
+                
+                if (hasCompleteProfile) {
+                    // Profile is complete - go to home
                     setCurrentView('home');
                     showToast(`أهلاً بك مجدداً ${name}! 👋`, 'success');
-
-                    // Trigger tutorial hand after entering home
                     setTimeout(() => setShowTutorial(true), 500);
+                } else if (isReturningUser) {
+                    // User has data in state but profile incomplete in DB - go to home anyway
+                    // (they can update later)
+                    setCurrentView('home');
+                } else {
+                    // New user - need to complete registration
+                    setCurrentView('login');
                 }
 
                 setShowLoginModal(false);
@@ -258,14 +266,23 @@ function App() {
 
     // Login Handler
     const handleLoginSuccess = async (data) => {
+        // Ensure we have the data we need
+        if (!data) {
+            console.error('[handleLoginSuccess] No data provided');
+            return;
+        }
+
         setIsLoggedIn(true);
 
+        // Update userData with new registration data
         const mergedData = { ...userData, ...data };
         setUserData(mergedData);
+
+        // Immediately navigate to home - don't wait for profile sync
         setCurrentView('home');
 
-        // If they are logged in via Supabase, sync their profile data
-        if (authUser) {
+        // If they are logged in via Supabase, sync their profile data in the background
+        if (authUser?.id) {
             try {
                 const { error } = await updateProfile(authUser.id, {
                     full_name: data.name || mergedData.name,
@@ -275,11 +292,18 @@ function App() {
                     is_demo_completed: true // Mark profile as complete
                 });
 
-                if (error) throw error;
-                console.log('Profile synced to Supabase successfully');
+                if (error) {
+                    console.error('Profile sync error:', error);
+                    // Don't block navigation on profile sync error - user is already logged in
+                } else {
+                    console.log('Profile synced to Supabase successfully');
+                }
             } catch (error) {
                 console.error('Failed to sync profile to Supabase:', error);
+                // Continue anyway - user should be able to use the app
             }
+        } else {
+            console.warn('[handleLoginSuccess] No authUser found - this might be a guest login');
         }
 
         localStorage.setItem('user_registered', 'true');

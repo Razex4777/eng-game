@@ -289,6 +289,21 @@
   - Added 'insane' speed mode (🤯) for hardcore players.
   - `useGameLogic` now uses SPEED_MODES from service for consistency.
 
+# 2026-02-12 19:10
+- **Login/Registration Redirect Fix**:
+  - Fixed issue where users were redirected back to login after completing registration
+  - Enhanced `handleLoginSuccess` to navigate to home immediately without waiting for profile sync
+  - Improved auth state change listener to handle edge cases properly
+  - Added better error handling to prevent blocking on profile sync failures
+  - Logic now properly checks: hasCompleteProfile → home, isReturningUser → home, new user → login
+
+# 2026-02-12 19:00
+- **Game Screen Button Dark Mode Fix**:
+  - Fixed pause and fullscreen buttons in GameHUD to properly respect light/dark mode
+  - Replaced raw button elements with TactileButton components
+  - Removed hardcoded dark: classes, using conditional isDark prop instead
+  - Ensured consistent styling with powerup buttons in the game UI
+
 # 2026-02-12 18:50
 - **First-Time User Demo Experience Enhanced**:
   - Updated Continue Journey banner to show "الفصل 1 - الدرس 1" for new users instead of generic text
