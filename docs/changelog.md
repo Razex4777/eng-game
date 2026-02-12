@@ -289,6 +289,21 @@
   - Added 'insane' speed mode (🤯) for hardcore players.
   - `useGameLogic` now uses SPEED_MODES from service for consistency.
 
+# 2026-02-12 18:00
+- **Comprehensive Dark Mode Audit & Fixes**:
+  - Fixed PauseMenuModal dropdown buttons to properly respect dark/light mode
+  - Updated speed selection dropdown styling to use conditional classes
+  - Ensured consistent dark mode handling across all UI components
+  - Verified all components use proper isDark/isDarkMode props consistently
+  - Fixed modal background and border colors
+
+# 2026-02-12 17:40
+- **Power-up Button Dark Mode Fix**:
+  - Fixed bomb and freeze power-up buttons in dark mode by replacing raw button elements with TactileButton components.
+  - Properly implemented dark mode styling using isDark prop for consistent background and border colors.
+  - Added variant="primary" to ensure proper styling inheritance in TactileButton component.
+  - Maintained haptic feedback and tactile interaction behavior.
+
 # 2026-02-01 14:40
 - **UI Layout Fixes**:
   - Moved powerup buttons (freeze/bomb) from `bottom-24` to `bottom-48` - now appear ABOVE answer options.

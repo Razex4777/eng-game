@@ -104,7 +104,7 @@ const PauseMenuModal = ({
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onResume}></div>
 
             {/* Modal Body */}
-            <div className="relative w-full max-w-sm bg-white dark:bg-[#1E293B] p-6 rounded-[2.5rem] border-4 border-slate-200 dark:border-slate-700 shadow-2xl animate-pop-in max-h-[90vh] flex flex-col">
+            <div className={`relative w-full max-w-sm ${isDark ? 'bg-[#1E293B]' : 'bg-white'} p-6 rounded-[2.5rem] border-4 ${isDark ? 'border-slate-700' : 'border-slate-200'} shadow-2xl animate-pop-in max-h-[90vh] flex flex-col`}>
 
                 {/* Header */}
                 <div className="text-center mb-6 shrink-0 pt-2">
@@ -129,8 +129,9 @@ const PauseMenuModal = ({
                         <TactileButton
                             onClick={() => setSpeedOpen(!speedOpen)}
                             className="w-full p-4 rounded-2xl justify-between"
-                            colorClass="bg-slate-50 dark:bg-slate-800"
-                            borderClass="border-slate-200 dark:border-slate-700"
+                            variant="primary"
+                            colorClass={isDark ? 'bg-slate-800' : 'bg-slate-50'}
+                            borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                         >
                             <div className="flex items-center gap-3">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${selectedSpeedConfig.color}`}>
@@ -157,8 +158,8 @@ const PauseMenuModal = ({
                                             onClick={() => handleSpeedChange(s.id)}
                                             className={`w-full p-3 rounded-xl flex items-start gap-3 transition-all border
                                                 ${currentSpeedMode === s.id
-                                                    ? 'bg-white dark:bg-slate-700 border-yellow-400 shadow-md ring-2 ring-yellow-400/20'
-                                                    : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'}
+                                                    ? (isDark ? 'bg-slate-700 border-yellow-400 shadow-md ring-2 ring-yellow-400/20' : 'bg-white border-yellow-400 shadow-md ring-2 ring-yellow-400/20')
+                                                    : (isDark ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-slate-200 hover:bg-slate-50')}
                                             `}
                                         >
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 mt-1 ${s.color.split(' ')[0]} bg-opacity-20`}>

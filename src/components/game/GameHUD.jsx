@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pause, Maximize, Minimize, Heart } from 'lucide-react';
+import { Pause, Maximize, Minimize, Heart, Zap, Skull } from 'lucide-react';
+import TactileButton from '../ui/TactileButton';
 
 const GameHUD = ({
     score = 0,
@@ -82,34 +83,36 @@ const GameHUD = ({
             {onFreeze && onBomb && powerups && (
                 <div className="absolute bottom-48 left-1/2 -translate-x-1/2 flex gap-4 z-50">
                     {/* Freeze Button */}
-                    <button
+                    <TactileButton
                         onClick={onFreeze}
                         disabled={powerups.freeze <= 0 || frozen}
-                        className={`
-                            relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all bg-white dark:bg-slate-800 shadow-xl border-b-4 border-slate-200 dark:border-slate-700
-                            ${powerups.freeze > 0 && !frozen ? 'active:border-b-0 active:translate-y-1' : 'opacity-50 grayscale'}
-                        `}
+                        className="relative w-16 h-16 rounded-2xl flex items-center justify-center gap-0"
+                        variant="primary"
+                        colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
+                        borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
+                        activeScale={powerups.freeze > 0 && !frozen}
                     >
                         <span className="text-2xl filter drop-shadow-sm">❄️</span>
                         <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full text-white text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-800">
                             {powerups.freeze}
                         </div>
-                    </button>
+                    </TactileButton>
 
                     {/* Bomb Button */}
-                    <button
+                    <TactileButton
                         onClick={onBomb}
                         disabled={powerups.bomb <= 0}
-                        className={`
-                            relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all bg-white dark:bg-slate-800 shadow-xl border-b-4 border-slate-200 dark:border-slate-700
-                            ${powerups.bomb > 0 ? 'active:border-b-0 active:translate-y-1' : 'opacity-50 grayscale'}
-                        `}
+                        className="relative w-16 h-16 rounded-2xl flex items-center justify-center gap-0"
+                        variant="primary"
+                        colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
+                        borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
+                        activeScale={powerups.bomb > 0}
                     >
                         <span className="text-2xl filter drop-shadow-sm">💣</span>
                         <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-white text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-800">
                             {powerups.bomb}
                         </div>
-                    </button>
+                    </TactileButton>
                 </div>
             )}
         </>
