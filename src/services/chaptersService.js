@@ -390,6 +390,9 @@ export const getSubjectConfig = (subject) => {
  * @returns {boolean}
  */
 export const isChapterUnlocked = (subject, chapterNum, userProgress) => {
+    // Chapter 0 (Demo) is always unlocked
+    if (chapterNum === 0) return true;
+
     // Chapter 1 is always unlocked
     if (chapterNum === 1) return true;
 

@@ -16,7 +16,8 @@ const BottomDock = ({
     onMistakeClick,
     onReviewStart,
     mistakesCount = 0,
-    userId = null
+    userId = null,
+    refreshTrigger = 0 // New prop to trigger refresh
 }) => {
     // Hide BottomDock for guest users
     if (isGuest) {
@@ -45,7 +46,7 @@ const BottomDock = ({
             }
         };
         fetchDailyActivity();
-    }, [userId]);
+    }, [userId, refreshTrigger]); // Refresh when refreshTrigger changes
 
     const taskState = dailyStages === 0 ? 0 : (dailyStages < DAILY_GOAL ? 1 : 2);
 

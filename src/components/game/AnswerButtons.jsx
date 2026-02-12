@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { triggerHaptic } from '../../utils/haptics';
 
 /**
  * AnswerButtons Component
@@ -20,9 +21,10 @@ const AnswerButtons = forwardRef(({
 
         const baseClasses = `
       relative py-5 px-3 rounded-2xl font-black text-lg tracking-wide 
-      transition-all border-b-[6px] 
-      active:border-b-0 active:translate-y-[6px] active:scale-95 
-      duration-75 shadow-xl
+      transition-all duration-150 border-b-[6px]
+      active:border-b-0 active:translate-y-[4px]
+      hover:scale-[1.02] hover:-translate-y-[2px]
+      shadow-xl
     `;
 
         if (isFlying) {
@@ -50,7 +52,7 @@ const AnswerButtons = forwardRef(({
                 return (
                     <button
                         key={index}
-                        onClick={() => !isDisabled && onAnswer?.(option, index)}
+                        onClick={() => { if (!isDisabled) { triggerHaptic(); onAnswer?.(option, index); } }}
                         disabled={isDisabled}
                         className={getButtonClasses(option, index)}
                         data-option-index={index}

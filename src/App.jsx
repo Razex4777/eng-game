@@ -25,6 +25,7 @@ function App() {
     // Navigation State
     const [currentView, setCurrentView] = useState('login'); // login, home, chapters, levels, game
     const [selectedChapter, setSelectedChapter] = useState(null);
+    const [dockRefreshTrigger, setDockRefreshTrigger] = useState(0); // Trigger for BottomDock refresh
     const [gameMode, setGameMode] = useState(null); // 'finite' or 'infinite'
     const [showTutorial, setShowTutorial] = useState(false);
     const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -344,6 +345,22 @@ function App() {
 
     const handleChapterClick = (chapterNum, subject = 'english') => {
         setSelectedChapter(chapterNum);
+        
+        // Demo stage (chapter 0) - go directly to game with demo configuration
+        if (chapterNum === 0) {
+            setChapterGameConfig({
+                subject: subject,
+                type: 'chapters',
+                part: 1,
+                chapterNum: 0,
+                gameMode: 'finite'
+            });
+            setGameMode('finite');
+            setCurrentView('game');
+            showToast('حظاً موفقاً! 🎮', 'fire');
+            return;
+        }
+        
         setChapterGameConfig(prev => ({ ...prev, subject }));
         setCurrentView('levels');
     };
@@ -425,6 +442,8 @@ function App() {
     const handleGameExit = async () => {
         setCurrentView('home');
         setGameMode(null);
+        // Trigger refresh of BottomDock daily tasks
+        setDockRefreshTrigger(prev => prev + 1);
 
         // Refresh user stats after game
         if (authUser?.id) {
@@ -714,6 +733,7 @@ function App() {
                         }}
                         mistakesCount={userStats.mistakesToReview}
                         userId={authUser?.id}
+                        refreshTrigger={dockRefreshTrigger}
                     />
                 </div >
 
@@ -807,6 +827,7 @@ function App() {
                 isVisible={toast.visible}
                 type={toast.type}
                 icon={toast.icon}
+                isDarkMode={isDarkMode}
                 onClose={hideToast}
             />
 

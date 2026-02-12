@@ -207,6 +207,31 @@ const ReviewsView = ({
                     { bg: 'bg-gradient-to-r from-blue-500 to-indigo-600', border: 'border-indigo-700' },
                     InfinityIcon
                 )}
+
+                {/* حقيبة الأخطاء - Wrong Answers Review */}
+                <div className="mt-4">
+                    <TactileButton
+                        onClick={() => onReviewClick?.({ type: 'wrongAnswers', subject })}
+                        className="w-full p-4 flex items-center justify-between rounded-[20px] relative overflow-hidden"
+                        colorClass="bg-gradient-to-r from-rose-500 to-pink-600"
+                        borderClass="border-rose-700"
+                    >
+                        <div className="flex items-center gap-3 z-10">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 border border-white/30 text-white">
+                                <Zap className="w-6 h-6" />
+                            </div>
+                            <div className="text-right text-white">
+                                <span className="block text-lg font-black">حقيبة الأخطاء</span>
+                                <span className="text-xs opacity-80 font-bold">
+                                    راجع أسئلتك التي أخطأت فيها
+                                </span>
+                            </div>
+                        </div>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 text-white">
+                            <Play className="w-4 h-4" />
+                        </div>
+                    </TactileButton>
+                </div>
             </div>
         </div>
     );

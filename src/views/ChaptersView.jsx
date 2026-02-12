@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Lock, Loader2, Flame, Target } from 'lucide-react';
+import { ArrowLeft, Lock, Loader2, Flame, Target, Play } from 'lucide-react';
 import TactileButton from '../components/ui/TactileButton';
 import StatsHUD from '../components/ui/StatsHUD';
 import { getChaptersStructure, getUserChapterProgress, calculateChapterProgress, isChapterUnlocked } from '../services/chaptersService';
@@ -94,6 +94,32 @@ const ChaptersView = ({
             </div>
 
             <div className="space-y-3">
+                {/* Demo Stage Button - always visible and accessible */}
+                <TactileButton
+                    onClick={() => handleChapterClick(0)}
+                    className="w-full p-4 flex items-center justify-between rounded-[24px] group"
+                    colorClass="bg-gradient-to-r from-indigo-500 to-purple-600"
+                    borderClass="border-indigo-700"
+                >
+                    <div className="flex items-center gap-4 w-full">
+                        <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-2xl font-black border-2 bg-white/20 border-white/30 text-white">
+                            🎮
+                        </div>
+                        <div className="flex-1">
+                            <span className="block text-lg font-black mb-1 text-white">
+                                المرحلة التجريبية
+                            </span>
+                            <span className="text-xs font-medium text-indigo-100">
+                                جرب اللعبة مجاناً
+                            </span>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <Play className="w-5 h-5 text-white" />
+                    </div>
+                </TactileButton>
+
+                {/* Chapter Buttons */}
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => {
                     const isLocked = isChapterLocked(num);
                     const progress = getChapterProgressPercent(num);

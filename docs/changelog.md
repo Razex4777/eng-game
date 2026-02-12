@@ -289,6 +289,16 @@
   - Added 'insane' speed mode (🤯) for hardcore players.
   - `useGameLogic` now uses SPEED_MODES from service for consistency.
 
+# 2026-02-12 19:30
+- **PDF Issues Fixes - Multiple Improvements**:
+  - **Toast Notification Theme**: Fixed toast notifications to respect dark/light mode
+  - **Game Button Animations**: Enhanced answer buttons with haptic feedback and better animations
+  - **Heart Count Fix**: Changed game to use 3 hearts instead of 10 for trial/demo stage
+  - **Power-up Spacing**: Increased spacing between bomb/freeze icons and answer buttons
+  - **Reviews Interface**: Added "حقيبة الأخطاء" (Wrong Answers) button to Reviews view
+  - **Demo Stage**: Added "المرحلة التجريبية" (Demo Stage) button to chapter map
+  - **Daily Task Refresh**: Fixed daily task button to refresh after completing games
+
 # 2026-02-12 19:10
 - **Login/Registration Redirect Fix**:
   - Fixed issue where users were redirected back to login after completing registration
