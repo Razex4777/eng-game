@@ -1,11 +1,17 @@
 import React from 'react';
-import { List, FileText, Star } from 'lucide-react';
-import { TactileButton, StatsHUD, StreakDisplay, CompletionProgress } from '../components/ui';
+import { List, FileText } from 'lucide-react';
+import { TactileButton, StatsHUD } from '../components/ui';
+import TutorialHand from '../components/ui/TutorialHand';
 import MonsterCard from './MonsterCard';
 
 /**
  * HomeView Component
- * Main home screen with navigation cards and stats
+ * Layout order (matching reference):
+ * 1. Welcome header (هلا بالبطل)
+ * 2. StatsHUD bar (أيام | سؤال | XP)
+ * 3. Continue Journey banner
+ * 4. Monster Challenge card
+ * 5. Quick nav grid (Chapters + Reviews)
  */
 const HomeView = ({
     isDarkMode,
@@ -22,27 +28,31 @@ const HomeView = ({
     onQuestionsClick,
     showToast
 }) => {
+    const isGuest = userData?.isGuest;
+
     return (
         <div className="animate-fade-in-up">
-            {/* Logo */}
-            <div className="relative mb-8 text-center">
-                <h1 className="text-5xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient" style={{
-                    backgroundSize: '200% auto',
-                    animation: 'gradient 3s linear infinite'
-                }}>
-                    ختمتها
+            {/* ─── Welcome Header ─── */}
+            <div className="text-center py-6 mb-2">
+                <h1 className={`text-4xl font-black mb-2 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                    هلا بالبطل
                 </h1>
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-pink-600 blur-xl opacity-30 -z-10"></div>
+                <p className={`text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {isGuest
+                        ? 'نسخة التجربه (ضيف)'
+                        : `أهلاً ${userData?.name || 'البطل'} 👋`
+                    }
+                </p>
             </div>
 
-            {/* Continue Journey / Try Free Card */}
+            {/* ─── Continue Journey / Try Free Banner ─── */}
             <div className="relative mb-6">
+                {/* Side-pointing animated tutorial hand */}
                 {showTutorial && (
-                    <div className="absolute -top-12 left-0 right-0 flex justify-center animate-bounce z-50 pointer-events-none">
-                        <div className="bg-yellow-400 text-yellow-900 text-xs font-black px-4 py-2 rounded-xl shadow-lg border-2 border-yellow-100">
-                            ابدأ رحلتك من هنا 👇
-                        </div>
-                    </div>
+                    <TutorialHand
+                        text={isGuest ? 'جرب مجاناً هنا' : 'ابدأ رحلتك من هنا'}
+                        direction="left"
+                    />
                 )}
                 <TactileButton
                     onClick={() => {
@@ -56,7 +66,7 @@ const HomeView = ({
                     <div className="w-full flex items-center justify-between z-20 relative">
                         <div className="flex flex-col items-start gap-1">
                             <span className="text-2xl font-black text-white drop-shadow-md">
-                                تابع رحلتك 🚀
+                                {isGuest ? 'جرب التحدي مجاناً 🎮' : 'تابع رحلتك 🚀'}
                             </span>
                             <span className="text-sm font-bold text-indigo-100 opacity-90">
                                 {userStats?.lastPlayedPart
@@ -75,35 +85,25 @@ const HomeView = ({
                         <div className="h-full bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.9)]" style={{ width: `${userStats?.overallProgress || 0}%` }}></div>
                     </div>
                 </TactileButton>
+
+                {/* Dark spotlight overlay behind banner */}
+                {showTutorial && (
+                    <div className="fixed inset-0 bg-black/40 z-30 pointer-events-none transition-opacity duration-500"></div>
+                )}
             </div>
 
-            {/* Stats HUD */}
+            {/* ─── Stats HUD (below banner) ─── */}
             <StatsHUD
                 isDarkMode={isDarkMode}
-                days={userStats.streakDays}
-                questions={userStats.totalQuestions}
-                xp={userStats.totalXP}
+                days={userStats?.streakDays ?? 0}
+                questions={userStats?.totalQuestions ?? 0}
+                xp={userStats?.totalXP ?? 0}
                 subject={userData?.preferred_subject}
                 onFlameClick={onFlameClick}
                 onQuestionsClick={onQuestionsClick}
             />
 
-            {/* 7-Day Streak Display */}
-            <StreakDisplay
-                userId={userData?.id || userData?.auth_id}
-                isDark={isDarkMode}
-                className="mb-4"
-            />
-
-            {/* Completion Progress */}
-            <CompletionProgress
-                totalQuestionsAnswered={userStats.totalQuestions}
-                subject={userData?.preferred_subject}
-                isDark={isDarkMode}
-                className="mb-4"
-            />
-
-            {/* Monster Challenge Card */}
+            {/* ─── Monster Challenge Card ─── */}
             <div className="relative">
                 <MonsterCard
                     isDarkMode={isDarkMode}
@@ -115,7 +115,7 @@ const HomeView = ({
                 )}
             </div>
 
-            {/* Quick Navigation Grid */}
+            {/* ─── Quick Navigation Grid ─── */}
             <div className="grid grid-cols-2 gap-4 mt-4">
                 <TactileButton
                     onClick={onChaptersClick}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Star, Check, MessageCircle, Send, LogIn } from 'lucide-react';
+import { CheckCircle2, Star, Check, MessageCircle, Send, LogIn, UserX } from 'lucide-react';
 import TactileButton from '../components/ui/TactileButton';
 
 // LoginView
-const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, initialData }) => {
+const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, onGuestLogin, initialData }) => {
     const [step, setStep] = useState(() => {
         // If we have initialData (Partially logged in via Supabase), jump to appropriate step
         if (initialData) {
@@ -103,6 +103,15 @@ const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, initialData }) 
                                 <span className="font-bold text-slate-700">دخول سريع عبر Google</span>
                             </TactileButton>
 
+                            <TactileButton
+                                onClick={onGuestLogin}
+                                className="w-full p-4 rounded-2xl flex items-center justify-center gap-3"
+                                colorClass={isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}
+                                borderClass={isDarkMode ? 'border-slate-600' : 'border-slate-300'}
+                            >
+                                <UserX className={`w-5 h-5 ${isDarkMode ? 'text-slate-300' : 'text-slate-500'}`} />
+                                <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>التسجيل كضيف</span>
+                            </TactileButton>
                         </div>
 
                         {/* استرجاع أزرار المجتمع والدعم */}

@@ -1,6 +1,48 @@
 # Changelog
 
-# 2026-02-11 19:30
+# 2026-02-11 19:50
+- **🎯 Tutorial Hand Animation Fix (Banner Spotlight)**:
+  - **`keyframes.css`**: Rewrote `@keyframes pulse-ring` — old version scaled element to 2x and faded to opacity 0 (making it invisible). New version uses `box-shadow` yellow glow pulse that keeps the element visible while creating an attention-grabbing pulsing ring
+  - **`keyframes.css`**: Added missing `@keyframes bounce` (translateY -25% ↔ 0) for the TutorialHand's cursor icon
+  - **`animations.css`**: Updated `.animate-pulse-ring` timing from `1s ease-out` to `2s cubic-bezier(0.4, 0, 0.6, 1)` matching reference design
+  - **`animations.css`**: Added missing `.animate-bounce` class (`animation: bounce 1s infinite`)
+  - **`App.jsx`**: Added `setTimeout(() => setShowTutorial(true), 500)` in 3 login flows:
+    - `handleGuestLogin` — guest users
+    - `handleLoginSuccess` — new registered users
+    - Supabase auth `SIGNED_IN` event — returning Google-authenticated users
+  - **Root cause**: `showTutorial` was initialized as `false` and never set to `true`, so TutorialHand/spotlight never appeared
+
+# 2026-02-11 19:19
+- **🎨 TopNav Complete Redesign (Reference Design Match)**:
+  - **`TopNav.jsx`**: Completely rewritten to match reference design
+    - Left side: Subject selector dropdown (English / الأحياء) with chevron, badge, and smooth dropdown
+    - Right side: Profile icon button with settings dropdown (Night mode, Fullscreen, Logout)
+    - Removed old 3-icon buttons (theme, audio, settings) and user info bar
+    - Added outside-click handlers for dropdown dismissal
+  - **`HomeView.jsx`**: Updated welcome header
+    - Centered "هلا بالبطل" large bold heading
+    - Subtitle: "نسخة التجربه (ضيف)" for guests / personalized for logged-in users
+    - Banner text: "جرب التحدي مجاناً 🎮" for guests / "تابع رحلتك 🚀" for users
+    - Removed old gradient "ختمتها" logo text
+  - **`App.jsx`**: Integrated new TopNav props
+    - Added `currentSubject` state + `handleSubjectChange` handler
+    - Added `handleFullscreenToggle` using Fullscreen API
+    - Removed old `isMuted`, `onMuteToggle`, `onSettingsClick`, `userAvatar` TopNav props
+    - Subject now flows from TopNav dropdown → ChaptersView, LevelsView, ReviewsView
+
+# 2026-02-11 18:45
+- **🔧 Atomic Daily Task Increment**:
+  - Created `increment_daily_task` Supabase RPC (Postgres function) — atomic UPSERT + increment in one transaction
+  - **`services/userProgressService.js`**: Replaced 3-query race-prone pattern (upsert → select → update) with single `rpc('increment_daily_task')` call
+- **🔁 Guest Login Restored**:
+  - **`services/guestService.js`** (NEW): Guest session management — ID generation via `crypto.randomUUID()`, localStorage persistence, Supabase `guest_sessions` tracking, cleanup on sign-out
+  - **`LoginView.jsx`**: Added "التسجيل كضيف" button below Google sign-in (step 0 card)
+  - **`App.jsx`**: Added `handleGuestLogin` handler, imports `guestService`, passes `onGuestLogin` prop to `LoginView`
+- **🐛 Bug Fixes**:
+  - **`App.jsx`**: Wrapped `handleContinueJourney` → `getLastPlayedPart` in `try/catch` with fallback to chapter 1 part 1
+  - **`components/ui/StatsHUD.jsx`**: Compact mode click handlers now use `() => onFlameClick?.()` / `onQuestionsClick?.()` instead of direct prop references
+  - **`views/HomeView.jsx`**: Added `?.` and `?? 0` null safety to `userStats.streakDays`, `.totalQuestions`, `.totalXP` props
+  - **`docs/project_structure.md`**: Removed stray blank line in services section, added `guestService.js` entry
 - **🐛 Bug Fixes & Robustness Pass (17 fixes across 13 files)**:
   - **`hooks/index.js`**: Fixed `useDarkMode` — wrapped `localStorage` reads in `try/catch` for private browsing safety; Fixed `useToast` — timer now uses `useRef` to prevent stale closures and race conditions, with cleanup on unmount
   - **`lib/auth.js`**: Wrapped `onAuthStateChange` in `try/catch` to prevent crash if Supabase client isn't initialized

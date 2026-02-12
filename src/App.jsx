@@ -15,6 +15,7 @@ import { useDarkMode, useToast, useAudioMute } from './hooks';
 import { signInWithGoogle, signOut, onAuthStateChange, getOrCreateProfile, updateProfile } from './lib/auth';
 import { getWrongAnswersCount } from './services/wrongAnswersService';
 import { getUserDashboardStats, initializeUserStats, getLastPlayedPart, getOverallProgress } from './services/userProgressService';
+import { enterGuestMode, clearGuestData, isGuestMode } from './services/guestService';
 
 /**
  * Main App Component
@@ -39,6 +40,9 @@ function App() {
         daily: false,
         mistakes: false
     });
+
+    // Subject State — drives chapters/reviews/game subject filter
+    const [currentSubject, setCurrentSubject] = useState('english');
 
     // User State
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -160,6 +164,9 @@ function App() {
                 } else {
                     setCurrentView('home');
                     showToast(`أهلاً بك مجدداً ${name}! 👋`, 'success');
+
+                    // Trigger tutorial hand after entering home
+                    setTimeout(() => setShowTutorial(true), 500);
                 }
 
                 setShowLoginModal(false);
@@ -194,6 +201,23 @@ function App() {
         }
     };
 
+    // Guest Login Handler
+    const handleGuestLogin = () => {
+        const guest = enterGuestMode();
+        setUserData({
+            id: guest.guestId,
+            name: guest.name,
+            isGuest: true,
+            preferred_subject: 'english'
+        });
+        setIsLoggedIn(true);
+        setCurrentView('home');
+        showToast('أهلاً بك يا ضيف! 👋', 'success');
+
+        // Trigger tutorial hand after entering home
+        setTimeout(() => setShowTutorial(true), 500);
+    };
+
     // Login Handler
     const handleLoginSuccess = async (data) => {
         setIsLoggedIn(true);
@@ -223,6 +247,9 @@ function App() {
         localStorage.setItem('user_registered', 'true');
         localStorage.setItem('user_name', data.name || mergedData.name);
         showToast(`تم حفظ معلوماتك بنجاح! 🎉`, 'success');
+
+        // Trigger tutorial hand after entering home
+        setTimeout(() => setShowTutorial(true), 500);
     };
 
     // Navigation Handlers
@@ -231,6 +258,22 @@ function App() {
         if (view === 'home') {
             setSelectedChapter(null);
             setGameMode(null);
+        }
+    };
+
+    // Subject change from TopNav dropdown
+    const handleSubjectChange = (subject) => {
+        setCurrentSubject(subject);
+        // Also update user preference
+        setUserData(prev => prev ? { ...prev, preferred_subject: subject } : prev);
+    };
+
+    // Fullscreen toggle
+    const handleFullscreenToggle = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.().catch(() => { });
+        } else {
+            document.exitFullscreen?.().catch(() => { });
         }
     };
 
@@ -258,19 +301,28 @@ function App() {
     };
 
     const handleContinueJourney = async () => {
-        // Load last played or first incomplete part
-        const { data: lastPart } = await getLastPlayedPart(authUser?.id, userData?.preferred_subject || 'english');
+        try {
+            const { data: lastPart } = await getLastPlayedPart(authUser?.id, userData?.preferred_subject || 'english');
 
-        if (lastPart) {
-            handleLevelClick({
-                id: lastPart.part,
-                partNumber: lastPart.part,
-                chapterNum: lastPart.chapterNumber || 1,
-                subject: lastPart.subject,
-                type: lastPart.type
-            });
-        } else {
-            // Fallback to first part if no data
+            if (lastPart) {
+                handleLevelClick({
+                    id: lastPart.part,
+                    partNumber: lastPart.part,
+                    chapterNum: lastPart.chapterNumber || 1,
+                    subject: lastPart.subject,
+                    type: lastPart.type
+                });
+            } else {
+                handleLevelClick({
+                    id: 1,
+                    partNumber: 1,
+                    chapterNum: 1,
+                    subject: userData?.preferred_subject || 'english',
+                    type: 'chapters'
+                });
+            }
+        } catch (error) {
+            console.error('[App] Error continuing journey:', error);
             handleLevelClick({
                 id: 1,
                 partNumber: 1,
@@ -394,6 +446,7 @@ function App() {
                             setShowLoginModal(false);
                         }}
                         onGoogleSignIn={handleGoogleSignIn}
+                        onGuestLogin={handleGuestLogin}
                         initialData={userData}
                     />
                     {showLoginModal && (
@@ -466,20 +519,21 @@ function App() {
             <div className="min-h-screen w-full relative" dir="rtl">
                 <SoftBackground isDarkMode={isDarkMode} />
 
-                <div className="w-full max-w-lg mx-auto px-4 py-6 pb-32 relative z-10">
-                    {/* Top Navigation */}
+                {/* Top Navigation — full viewport width, pinned to edges */}
+                <div className="w-full px-4 sm:px-6 lg:px-8 pt-4 relative z-20">
                     <TopNav
                         isDarkMode={isDarkMode}
-                        isMuted={isMuted}
-
+                        currentSubject={currentSubject}
                         userName={userData?.name}
-                        userAvatar={userData?.avatar}
+                        isGuest={userData?.isGuest}
                         onDarkModeToggle={toggleDarkMode}
-                        onMuteToggle={toggleMute}
-                        onSettingsClick={() => setSettingsOpen(true)}
-                        onLoginClick={handleShowLogin}
+                        onFullscreenToggle={handleFullscreenToggle}
+                        onSubjectChange={handleSubjectChange}
                         onLogout={handleLogout}
                     />
+                </div>
+
+                <div className="w-full max-w-lg mx-auto px-4 pb-32 relative z-10">
 
                     {/* Home View */}
                     {currentView === 'home' && (
@@ -518,7 +572,7 @@ function App() {
                             questions={userStats.totalQuestions}
                             xp={userStats.totalXP}
                             userId={authUser?.id}
-                            subject={chapterGameConfig?.subject || 'english'}
+                            subject={currentSubject}
                         />
                     )
                     }
@@ -532,7 +586,7 @@ function App() {
                                 onLevelClick={handleLevelClick}
                                 onShowLogin={handleShowLogin}
                                 userId={authUser?.id}
-                                subject={chapterGameConfig?.subject || 'english'}
+                                subject={currentSubject}
                             />
                         )
                     }
@@ -547,7 +601,7 @@ function App() {
                                 onQuestionsClick={() => setCurrentView('chapters')}
                                 onReviewClick={handleReviewClick}
                                 userId={authUser?.id}
-                                subject={chapterGameConfig?.subject || 'english'}
+                                subject={currentSubject}
                             />
                         )
                     }

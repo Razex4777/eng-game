@@ -1,109 +1,197 @@
-import React from 'react';
-import TactileButton from '../ui/TactileButton';
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronLeft, User, Moon, Maximize, LogOut } from 'lucide-react';
 
-// Premium 3D icons
-import themeIcon from '../../assets/icons/theme_icon.png';
-import audioIcon from '../../assets/icons/audio_icon.png';
-import settingsIcon from '../../assets/icons/settings_icon.png';
+/**
+ * Subject options available in the app
+ */
+const SUBJECTS = [
+    { id: 'english', label: 'English', badge: 'EN' },
+    { id: 'biology', label: 'الأحياء', icon: '⚗' }
+];
 
 /**
  * TopNav Component
- * Top navigation bar with settings and user controls
+ * Full-width top bar pinned to viewport edges:
+ * - Screen LEFT: Subject selector dropdown
+ * - Screen RIGHT: Profile icon with settings dropdown
+ * 
+ * Uses physical left/right positioning (not logical) so it works
+ * correctly regardless of RTL/LTR direction.
  */
 const TopNav = ({
     isDarkMode = false,
-    isMuted = false,
+    currentSubject = 'english',
     userName,
-    userAvatar,
+    isGuest = false,
     onDarkModeToggle,
-    onMuteToggle,
-    onSettingsClick,
+    onFullscreenToggle,
+    onSubjectChange,
     onLogout
 }) => {
+    const [subjectOpen, setSubjectOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const subjectRef = useRef(null);
+    const profileRef = useRef(null);
+
+    // Close dropdowns on outside click
+    useEffect(() => {
+        const handler = (e) => {
+            if (subjectRef.current && !subjectRef.current.contains(e.target)) {
+                setSubjectOpen(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const activeSubject = SUBJECTS.find(s => s.id === currentSubject) || SUBJECTS[0];
+
     return (
-        <div className="flex items-center justify-between w-full mb-4 px-1">
-            {/* Left side - User Info/Login */}
-            <div className="flex items-center gap-2">
-                <div className={`
-                    flex items-center gap-2 px-4 py-2 rounded-xl 
-                    ${isDarkMode ? 'bg-slate-800/50' : 'bg-white/80'}
-                `}>
-                    <div className={`
-                        w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden
-                        ${isDarkMode ? 'bg-purple-600' : 'bg-purple-500'}
-                    `}>
-                        {userAvatar ? (
-                            <img
-                                src={userAvatar}
-                                alt={userName}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                }}
-                            />
-                        ) : null}
-                        <div
-                            className="w-full h-full flex items-center justify-center"
-                            style={{ display: userAvatar ? 'none' : 'flex' }}
-                        >
-                            <span className="text-white font-black text-sm">
-                                {userName?.charAt(0)?.toUpperCase() || 'U'}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className={`text-sm font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                            أهلاً، {userName || 'البطل'}!
+        <div className="w-full mb-4 relative" style={{ minHeight: '52px' }}>
+            {/* ─── Screen LEFT: Subject Selector ─── */}
+            <div
+                ref={subjectRef}
+                className="absolute top-0"
+                style={{ left: 0 }}
+            >
+                <button
+                    onClick={() => { setSubjectOpen(!subjectOpen); setProfileOpen(false); }}
+                    className={`
+                        flex items-center gap-2.5 px-5 py-3 rounded-2xl font-bold text-base transition-all
+                        ${isDarkMode
+                            ? 'bg-slate-800/80 text-white border border-slate-700 hover:bg-slate-700/80'
+                            : 'bg-white text-slate-700 border border-slate-200 shadow-sm hover:shadow-md'}
+                        ${subjectOpen ? (isDarkMode ? 'ring-2 ring-purple-500' : 'ring-2 ring-purple-400') : ''}
+                    `}
+                >
+                    <ChevronLeft className={`w-4.5 h-4.5 transition-transform duration-200 ${subjectOpen ? '-rotate-90' : ''}`} />
+                    <span>{activeSubject.label}</span>
+                    {activeSubject.badge && (
+                        <span className={`
+                            text-[11px] font-black px-2 py-0.5 rounded-md
+                            ${isDarkMode ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}
+                        `}>
+                            {activeSubject.badge}
                         </span>
-                        <span className="text-[10px] font-bold text-slate-400">Premium ⭐</span>
+                    )}
+                    {activeSubject.icon && <span className="text-lg">{activeSubject.icon}</span>}
+                </button>
+
+                {/* Subject Dropdown */}
+                {subjectOpen && (
+                    <div className={`
+                        absolute top-full mt-2 w-56 rounded-2xl border-2 border-b-4 shadow-xl z-50
+                        overflow-hidden animate-fade-in-up
+                        ${isDarkMode ? 'bg-[#2A2640] border-[#3E3859]' : 'bg-white border-slate-200'}
+                    `}
+                        style={{ left: 0 }}
+                    >
+                        {SUBJECTS.map((subject) => (
+                            <button
+                                key={subject.id}
+                                onClick={() => {
+                                    onSubjectChange?.(subject.id);
+                                    setSubjectOpen(false);
+                                }}
+                                className={`
+                                    w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-colors
+                                    ${currentSubject === subject.id
+                                        ? (isDarkMode ? 'bg-purple-600/20 text-purple-400' : 'bg-purple-50 text-purple-700')
+                                        : (isDarkMode ? 'text-white hover:bg-slate-700/50' : 'text-slate-700 hover:bg-slate-50')
+                                    }
+                                `}
+                            >
+                                {subject.icon && <span className="text-lg">{subject.icon}</span>}
+                                <span>{subject.label}</span>
+                                {subject.badge && (
+                                    <span className={`
+                                        text-[10px] font-black px-1.5 py-0.5 rounded ml-auto
+                                        ${isDarkMode ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}
+                                    `}>
+                                        {subject.badge}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
                     </div>
-                </div>
+                )}
             </div>
 
-            {/* Right side - Controls with Premium 3D Icons */}
-            <div className="flex items-center gap-2">
-                {/* Dark Mode Toggle */}
-                <TactileButton
-                    onClick={onDarkModeToggle}
-                    className="w-10 h-10 rounded-xl p-1.5"
-                    colorClass={isDarkMode ? 'bg-slate-800' : 'bg-white'}
-                    borderClass={isDarkMode ? 'border-slate-700' : 'border-slate-200'}
+            {/* ─── Screen RIGHT: Profile Menu ─── */}
+            <div
+                ref={profileRef}
+                className="absolute top-0"
+                style={{ right: 0 }}
+            >
+                <button
+                    onClick={() => { setProfileOpen(!profileOpen); setSubjectOpen(false); }}
+                    className={`
+                        w-12 h-12 rounded-2xl flex items-center justify-center transition-all
+                        ${isDarkMode
+                            ? 'bg-slate-800/80 text-slate-300 border border-slate-700 hover:bg-slate-700/80'
+                            : 'bg-white text-slate-500 border border-slate-200 shadow-sm hover:shadow-md'}
+                        ${profileOpen ? (isDarkMode ? 'ring-2 ring-purple-500' : 'ring-2 ring-purple-400') : ''}
+                    `}
                 >
-                    <img
-                        src={themeIcon}
-                        alt="Theme"
-                        className={`w-full h-full object-contain transition-transform duration-300 ${isDarkMode ? 'rotate-180' : ''}`}
-                    />
-                </TactileButton>
+                    <User className="w-6 h-6" />
+                </button>
 
-                {/* Mute Toggle */}
-                <TactileButton
-                    onClick={onMuteToggle}
-                    className="w-10 h-10 rounded-xl p-1.5"
-                    colorClass={isDarkMode ? 'bg-slate-800' : 'bg-white'}
-                    borderClass={isDarkMode ? 'border-slate-700' : 'border-slate-200'}
-                >
-                    <img
-                        src={audioIcon}
-                        alt="Audio"
-                        className={`w-full h-full object-contain transition-opacity duration-300 ${isMuted ? 'opacity-40 grayscale' : ''}`}
-                    />
-                </TactileButton>
+                {/* Profile Dropdown */}
+                {profileOpen && (
+                    <div className={`
+                        absolute top-full mt-2 w-60 rounded-2xl border-2 border-b-4 shadow-xl z-50
+                        overflow-hidden animate-fade-in-up
+                        ${isDarkMode ? 'bg-[#2A2640] border-[#3E3859]' : 'bg-white border-slate-200'}
+                    `}
+                        style={{ right: 0 }}
+                    >
+                        {/* Dark Mode Toggle */}
+                        <button
+                            onClick={() => onDarkModeToggle?.()}
+                            className={`
+                                w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-colors
+                                ${isDarkMode ? 'text-white hover:bg-slate-700/50' : 'text-slate-700 hover:bg-slate-50'}
+                            `}
+                        >
+                            <Moon className="w-5 h-5" />
+                            <span>الوضع الليلي</span>
+                        </button>
 
-                {/* Settings */}
-                <TactileButton
-                    onClick={onSettingsClick}
-                    className="w-10 h-10 rounded-xl p-1.5"
-                    colorClass={isDarkMode ? 'bg-slate-800' : 'bg-white'}
-                    borderClass={isDarkMode ? 'border-slate-700' : 'border-slate-200'}
-                >
-                    <img
-                        src={settingsIcon}
-                        alt="Settings"
-                        className="w-full h-full object-contain hover:rotate-45 transition-transform duration-300"
-                    />
-                </TactileButton>
+                        {/* Fullscreen Toggle */}
+                        <button
+                            onClick={() => onFullscreenToggle?.()}
+                            className={`
+                                w-full flex items-center gap-3 px-5 py-4 text-sm font-bold transition-colors
+                                ${isDarkMode ? 'text-white hover:bg-slate-700/50' : 'text-slate-700 hover:bg-slate-50'}
+                            `}
+                        >
+                            <Maximize className="w-5 h-5" />
+                            <span>ملء الشاشة</span>
+                        </button>
+
+                        {/* Divider */}
+                        <div className={`mx-4 ${isDarkMode ? 'border-t border-slate-700' : 'border-t border-slate-100'}`} />
+
+                        {/* Logout */}
+                        <button
+                            onClick={() => {
+                                onLogout?.();
+                                setProfileOpen(false);
+                            }}
+                            className={`
+                                w-full flex items-center gap-3 px-5 py-4 text-sm font-bold
+                                text-red-500 transition-colors
+                                ${isDarkMode ? 'hover:bg-red-900/20' : 'hover:bg-red-50'}
+                            `}
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span>تسجيل الخروج</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -361,34 +361,11 @@ export const getTodayActivity = async (userId) => {
 export const completeDailyTask = async (userId) => {
     if (!userId) return { error: 'No user ID' };
 
-    const today = new Date().toISOString().split('T')[0];
-
     const { data, error } = await supabase
-        .from('user_daily_activity')
-        .upsert({
-            user_id: userId,
-            activity_date: today
-        }, {
-            onConflict: 'user_id,activity_date'
-        });
+        .rpc('increment_daily_task', { p_user_id: userId });
 
-    if (!error) {
-        // Fetch current count and increment
-        const { data: current } = await supabase
-            .from('user_daily_activity')
-            .select('daily_tasks_completed')
-            .eq('user_id', userId)
-            .eq('activity_date', today)
-            .single();
-
-        await supabase
-            .from('user_daily_activity')
-            .update({
-                daily_tasks_completed: (current?.daily_tasks_completed || 0) + 1,
-                updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId)
-            .eq('activity_date', today);
+    if (error) {
+        console.error('[userProgressService] Error completing daily task:', error);
     }
 
     return { data, error };

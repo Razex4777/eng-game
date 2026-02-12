@@ -65,7 +65,7 @@ eng-game-main/
 │   │   ├── 📄 analyticsService.js       # Analytics: most wrong questions, time/speed metrics
 │   │   ├── 📄 chaptersService.js        # Chapters & Reviews structure, questions, progress
 │   │   ├── 📄 gameSettingsService.js    # Game settings CRUD with Supabase
-
+│   │   ├── 📄 guestService.js           # Guest session management (localStorage + Supabase)
 │   │   ├── 📄 messagesService.js        # Encouragement messages from Supabase
 │   │   ├── 📄 monsterChallengeService.js # Monster Challenge Supabase queries
 │   │   ├── 📄 userProgressService.js    # User stats, streaks, achievements, game sessions

@@ -27,9 +27,9 @@ const StatsHUD = ({
     if (compact) {
         return (
             <div className={`w-full mb-6 p-3 px-5 rounded-2xl border-2 flex items-center justify-between shadow-sm animate-fade-in-up ${isDarkMode ? 'bg-[#2A2640] border-[#3E3859]' : 'bg-white border-[#E2E8F0]'}`}>
-                <div onClick={onFlameClick} className="flex items-center gap-3 cursor-pointer active:scale-90 transition-transform"><Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{days}</span></div>
+                <div onClick={() => onFlameClick?.()} className="flex items-center gap-3 cursor-pointer active:scale-90 transition-transform"><Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{days}</span></div>
                 <div className="w-px h-6 bg-slate-200 dark:bg-slate-700"></div>
-                <div onClick={onQuestionsClick} className="flex items-center gap-3 cursor-pointer active:scale-90 transition-transform"><Target className="w-6 h-6 text-blue-400" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{questions}</span></div>
+                <div onClick={() => onQuestionsClick?.()} className="flex items-center gap-3 cursor-pointer active:scale-90 transition-transform"><Target className="w-6 h-6 text-blue-400" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{questions}</span></div>
                 <div className="w-px h-6 bg-slate-200 dark:bg-slate-700"></div>
                 <div className="flex items-center gap-3"><Star className="w-6 h-6 text-yellow-400 fill-yellow-400" /><span className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>{xp}</span></div>
             </div>

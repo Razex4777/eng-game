@@ -19,6 +19,10 @@
     animation: bounce-in 0.5s ease-out forwards;
 }
 
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
 /* Float Animations */
 .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -57,7 +61,7 @@
 
 /* Pulse & Glow Animations */
 .animate-pulse-ring {
-    animation: pulse-ring 1s ease-out infinite;
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-glow-pulse {
