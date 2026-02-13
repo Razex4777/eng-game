@@ -143,9 +143,15 @@ const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, onGuestLogin, i
 
                             <button
                                 type="button"
-                                onClick={() => {
-                                    console.log('[LoginView] Guest button clicked');
-                                    if (onGuestLogin) onGuestLogin();
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    alert('Guest button tapped!');
+                                    if (onGuestLogin) {
+                                        onGuestLogin();
+                                    } else {
+                                        console.log('onGuestLogin is undefined!');
+                                    }
                                 }}
                                 className="w-full p-4 rounded-2xl flex items-center justify-center gap-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 active:scale-[0.98] transition-transform"
                             >
