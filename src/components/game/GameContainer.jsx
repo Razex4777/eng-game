@@ -202,29 +202,44 @@ const GameContainer = ({
             <SoftBackground isDarkMode={isDark} />
 
             {/* Game Card Wrapper - White card containing all game elements */}
-            {/* In monster mode, card starts lower to not cover HUD */}
-            <div className={`absolute ${isMonsterMode ? 'top-24' : 'inset-4'} rounded-3xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`} style={isMonsterMode ? { bottom: '1rem', left: '1rem', right: '1rem' } : {}}>
+            {/* Card starts at top with small padding */}
+            <div className={`absolute inset-x-4 top-4 rounded-3xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`} style={isMonsterMode ? { bottom: '1rem' } : {}}>
                 
-                {/* Top Bar: Fullscreen (left), Hearts+Score (right) - Only in monster mode */}
-                {isMonsterMode && (
-                <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-4 z-20">
-                    {/* Fullscreen Button - Top Left inside card */}
-                    <button
-                        onClick={() => {
-                            if (document.fullscreenElement) {
-                                document.exitFullscreen();
-                            } else {
-                                document.documentElement.requestFullscreen();
-                            }
-                        }}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
-                    >
-                        {isFullscreen ? 
-                            <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>
-                            : 
-                            <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-                        }
-                    </button>
+                {/* Top Bar: Pause (left), Fullscreen (center-left), Hearts+Score (right) - Always show */}
+                <div className="absolute top-0 left-0 right-0 h-14 flex items-center justify-between px-4 z-20">
+                    {/* Left side: Pause + Fullscreen buttons */}
+                    <div className="flex items-center gap-2">
+                        {/* Pause Button - Always visible inside card */}
+                        <button
+                            onClick={pauseGame}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                        >
+                            <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="currentColor" viewBox="0 0 24 24">
+                                <rect x="6" y="4" width="4" height="16" rx="1" />
+                                <rect x="14" y="4" width="4" height="16" rx="1" />
+                            </svg>
+                        </button>
+
+                        {/* Fullscreen Button - Only in monster mode */}
+                        {isMonsterMode && (
+                            <button
+                                onClick={() => {
+                                    if (document.fullscreenElement) {
+                                        document.exitFullscreen();
+                                    } else {
+                                        document.documentElement.requestFullscreen();
+                                    }
+                                }}
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                            >
+                                {isFullscreen ? 
+                                    <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>
+                                    : 
+                                    <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                                }
+                            </button>
+                        )}
+                    </div>
 
                     {/* Hearts + Score - Top Right inside card */}
                     <div className="flex items-center gap-3">
@@ -240,10 +255,9 @@ const GameContainer = ({
                         </div>
                     </div>
                 </div>
-                )}
 
                 {/* Falling Question Area */}
-                <div className={`relative h-full w-full pointer-events-none ${isMonsterMode ? 'pt-4 pb-40' : 'pt-4 pb-40'}`}>
+                <div className="relative h-full w-full pointer-events-none pt-14 pb-40">
                     {currentQuestion && (
                         <QuestionCard
                             ref={questionRef}
@@ -271,29 +285,6 @@ const GameContainer = ({
                     )}
                 </div>
             </div>
-
-            {/* HUD - Only pause button outside card */}
-            <GameHUD
-                score={score}
-                lives={lives}
-                progress={progress}
-                showProgress={!isMonsterMode}
-                minimal={isMonsterMode} // Use minimal mode in monster - elements are inside card
-                onPause={pauseGame}
-                onToggleFullScreen={() => {
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        document.documentElement.requestFullscreen();
-                    }
-                }}
-                isFullscreen={isFullscreen}
-                isDark={isDark}
-                powerups={powerups}
-                onFreeze={useFreeze}
-                onBomb={useBomb}
-                frozen={frozen}
-            />
 
             {/* Feedback Overlay */}
             <FeedbackOverlay
