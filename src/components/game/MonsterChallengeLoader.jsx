@@ -44,7 +44,11 @@ const MonsterChallengeLoader = ({
         getUser();
     }, []);
 
+    // Load questions - only run once when gameConfig is stable
     useEffect(() => {
+        // Skip if already loaded with same config
+        if (questions.length > 0) return;
+
         const loadQuestions = async () => {
             setLoading(true);
             setError(null);
@@ -91,7 +95,7 @@ const MonsterChallengeLoader = ({
         };
 
         loadQuestions();
-    }, [gameConfig, showToast]);
+    }, [gameConfig]); // Removed showToast from deps to prevent re-renders
 
     // Loading state
     if (loading) {
@@ -146,7 +150,8 @@ const MonsterChallengeLoader = ({
 
     return (
         <GameContainer
-            key={`monster-${gameConfig.subject}-${gameConfig.type}-${gameConfig.part}`}
+            // Use a stable key - only change when actual game config changes
+            key={`game-${gameConfig.subject}-${gameConfig.type}-${gameConfig.part || 1}`}
             initialQuestions={questions}
             initialMode={initialMode}
             isDark={isDarkMode}

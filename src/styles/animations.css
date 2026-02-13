@@ -165,3 +165,24 @@
 .paused {
     animation-play-state: paused !important;
 }
+
+/* Power-up Button Animation - jump upward when clicked */
+.powerup-btn:active .animate-powerup,
+.powerup-btn.active .animate-powerup {
+    animation: powerup-jump 0.4s ease-out;
+}
+
+@keyframes powerup-jump {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+    30% {
+        transform: translateY(-20px) scale(1.3);
+    }
+    60% {
+        transform: translateY(-10px) scale(0.9);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}

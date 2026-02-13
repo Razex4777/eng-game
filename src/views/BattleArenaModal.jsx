@@ -194,8 +194,8 @@ const BattleArenaModal = ({
                                                 } ${isLocked ? 'opacity-40' : ''}`}
                                         >
                                             <div className="flex-1 flex flex-col items-center justify-center w-full">
-                                                <span className={`text-[10px] font-bold mb-0.5 ${!isSelected && !hasScore ? 'opacity-30' : 'opacity-80'}`}>الفصل</span>
-                                                <span className={`text-3xl font-black leading-none mb-1 ${!isSelected && !hasScore && 'opacity-30'}`}>{num}</span>
+                                                <span className={`text-[10px] font-bold mb-0.5 ${!isSelected && !hasScore ? 'opacity-30' : 'opacity-80'} ${textSecondary}`}>الفصل</span>
+                                                <span className={`text-3xl font-black leading-none mb-1 ${!isSelected && !hasScore && 'opacity-30'} ${textPrimary}`}>{num}</span>
                                                 <div className="mt-2 h-5 flex items-center justify-center">
                                                     {hasScore ? (
                                                         <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full ${isSelected ? 'bg-white/20' : isDarkMode ? 'bg-white/10' : 'bg-black/5'}`}>
@@ -257,7 +257,7 @@ const BattleArenaModal = ({
                                             </div>
                                             <div className="flex items-center gap-1.5 text-white/90">
                                                 <Star className="w-3.5 h-3.5 text-yellow-300 fill-current" />
-                                                <span className="text-xs font-bold">Max XP: <span className="text-white font-black">12,500</span></span>
+                                                <span className="text-xs font-bold text-white">Max XP: <span className="text-white font-black">12,500</span></span>
                                             </div>
                                         </div>
                                     </div>

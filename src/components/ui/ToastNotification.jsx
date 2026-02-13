@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ToastNotification = ({ message, icon: Icon, isVisible, type = 'info', isDarkMode = false }) => {
+    const [tiltClass, setTiltClass] = useState('');
+
+    // Set tilt direction when visibility changes (for fire/love types)
+    useEffect(() => {
+        if (isVisible && (type === 'fire' || type === 'love')) {
+            setTiltClass(Math.random() > 0.5 ? 'rotate-2' : '-rotate-2');
+        } else {
+            setTiltClass('');
+        }
+    }, [isVisible, type]);
+    
     return (
         <div
             className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-[150] transition-all duration-500 w-[90%] max-w-sm
@@ -8,7 +19,7 @@ const ToastNotification = ({ message, icon: Icon, isVisible, type = 'info', isDa
       `}
             style={{ transitionTimingFunction: 'cubic-bezier(0.68, -0.55, 0.27, 1.55)' }}
         >
-            <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border-b-4 backdrop-blur-md justify-center text-center relative overflow-hidden
+            <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border-b-4 backdrop-blur-md justify-center text-center relative overflow-hidden ${tiltClass}
         ${type === 'fire' ? 'bg-orange-500 border-orange-700 text-white' :
                 type === 'love' ? 'bg-rose-500 border-rose-700 text-white' :
                     type === 'info' ? 'bg-blue-600 border-blue-800 text-white' :
