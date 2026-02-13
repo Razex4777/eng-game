@@ -75,15 +75,15 @@ const ResultsScreen = ({
                 />
             )}
 
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-pop-in">
-                <div className={`w-full max-w-sm p-6 rounded-[2rem] shadow-2xl border-2 ${cardBg}`}>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-3 md:p-4 animate-pop-in">
+                <div className={`w-full max-w-md md:max-w-sm p-4 md:p-6 rounded-2xl md:rounded-[2rem] shadow-2xl border-2 ${cardBg}`}>
                     {/* Header */}
-                    <div className="text-center mb-6">
-                        <span className="text-6xl block mb-2 animate-bounce-in">
+                    <div className="text-center mb-4 md:mb-6">
+                        <span className="text-5xl md:text-6xl block mb-1 md:mb-2 animate-bounce-in">
                             {getResultEmoji()}
                         </span>
                         <h2
-                            className={`text-3xl font-black ${textColor}`}
+                            className={`text-2xl md:text-3xl font-black ${textColor}`}
                             style={{ fontFamily: "'Cairo', sans-serif" }}
                         >
                             النتيجة النهائية
@@ -91,36 +91,36 @@ const ResultsScreen = ({
                     </div>
 
                     {/* Total Score */}
-                    <div className="bg-slate-200 dark:bg-slate-700 p-6 rounded-2xl mb-6 text-center shadow-inner">
+                    <div className="bg-slate-200 dark:bg-slate-700 p-4 md:p-6 rounded-xl md:rounded-2xl mb-4 md:mb-6 text-center shadow-inner">
                         <span className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">
                             Total Score
                         </span>
-                        <div className={`text-6xl font-black mt-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                        <div className={`text-5xl md:text-6xl font-black mt-1 md:mt-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                             {score.toLocaleString()}
                         </div>
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-xl text-center border-2 border-green-200 dark:border-green-800">
+                    <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6">
+                        <div className="bg-green-100 dark:bg-green-900/30 p-2 md:p-3 rounded-lg md:rounded-xl text-center border-2 border-green-200 dark:border-green-800">
                             <span
-                                className="block text-xs font-bold text-green-700 dark:text-green-400 mb-1"
+                                className="block text-xs font-bold text-green-700 dark:text-green-400 mb-0.5 md:mb-1"
                                 style={{ fontFamily: "'Cairo', sans-serif" }}
                             >
                                 إجابات صحيحة
                             </span>
-                            <span className="text-3xl font-black text-green-600 dark:text-green-400">
+                            <span className="text-2xl md:text-3xl font-black text-green-600 dark:text-green-400">
                                 {correctAnswers.length}
                             </span>
                         </div>
-                        <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-xl text-center border-2 border-red-200 dark:border-red-800">
+                        <div className="bg-red-100 dark:bg-red-900/30 p-2 md:p-3 rounded-lg md:rounded-xl text-center border-2 border-red-200 dark:border-red-800">
                             <span
-                                className="block text-xs font-bold text-red-700 dark:text-red-400 mb-1"
+                                className="block text-xs font-bold text-red-700 dark:text-red-400 mb-0.5 md:mb-1"
                                 style={{ fontFamily: "'Cairo', sans-serif" }}
                             >
                                 إجابات خاطئة
                             </span>
-                            <span className="text-3xl font-black text-red-600 dark:text-red-400">
+                            <span className="text-2xl md:text-3xl font-black text-red-600 dark:text-red-400">
                                 {wrongAnswers.length}
                             </span>
                         </div>
@@ -128,9 +128,9 @@ const ResultsScreen = ({
 
                     {/* Error Review with Explanation */}
                     {wrongAnswers.length > 0 && (
-                        <div className="mb-4 max-h-40 overflow-y-auto bg-white dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                        <div className="mb-3 md:mb-4 max-h-48 md:max-h-40 overflow-y-auto bg-white dark:bg-slate-900 rounded-lg md:rounded-xl p-2 md:p-3 border border-slate-200 dark:border-slate-700">
                             <h3
-                                className="font-bold text-red-500 mb-2 text-base text-right"
+                                className="font-bold text-red-500 mb-1 md:mb-2 text-sm md:text-base text-right"
                                 style={{ fontFamily: "'Cairo', sans-serif" }}
                             >
                                 الأخطاء ({wrongAnswers.length})
@@ -142,20 +142,20 @@ const ResultsScreen = ({
                                 return (
                                     <div
                                         key={i}
-                                        className="text-right text-sm border-b border-slate-100 dark:border-slate-800 last:border-0 py-3"
+                                        className="text-right text-xs md:text-sm border-b border-slate-100 dark:border-slate-800 last:border-0 py-2 md:py-3"
                                     >
-                                        <p className={`font-black mb-1 text-base ${textColor}`}>
+                                        <p className={`font-black mb-1 text-sm md:text-base ${textColor} break-words`}>
                                             {item.question?.text || item.question?.q}
                                         </p>
-                                        <div className="flex justify-end gap-2 mb-1 flex-wrap">
+                                        <div className="flex justify-end gap-1 md:gap-2 mb-1 flex-wrap">
                                             {item.userAnswer && item.userAnswer !== correctAnswer && (
-                                                <span className="text-red-500 font-bold line-through opacity-70">
+                                                <span className="text-red-500 font-bold line-through opacity-70 text-xs md:text-sm">
                                                     {item.userAnswer}
                                                 </span>
                                             )}
                                         </div>
                                         <p
-                                            className="text-slate-600 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-800 p-2 rounded font-bold text-xs"
+                                            className="text-slate-600 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-800 p-1.5 md:p-2 rounded font-bold text-xs"
                                             style={{ fontFamily: "'Cairo', sans-serif" }}
                                         >
                                             💡 الجواب الصحيح: {correctAnswer || 'غير متوفر'}
@@ -172,12 +172,12 @@ const ResultsScreen = ({
                             onClick={onContinue}
                             variant="success"
                             size="lg"
-                            className="w-full mb-3 animate-pulse-ring"
+                            className="w-full mb-2 md:mb-3 animate-pulse-ring"
                             colorClass="bg-gradient-to-br from-emerald-500 to-green-600"
                             borderClass="border-emerald-700"
                         >
                             <span
-                                className="font-black text-xl"
+                                className="font-black text-lg md:text-xl"
                                 style={{ fontFamily: "'Cairo', sans-serif" }}
                             >
                                 المتابعة للدرس التالي 🚀
@@ -189,10 +189,10 @@ const ResultsScreen = ({
                         onClick={onPlayAgain}
                         variant="success"
                         size="lg"
-                        className="w-full mb-3"
+                        className="w-full mb-2 md:mb-3"
                     >
                         <span
-                            className="font-black text-xl"
+                            className="font-black text-lg md:text-xl"
                             style={{ fontFamily: "'Cairo', sans-serif" }}
                         >
                             لعب مرة أخرى
@@ -206,7 +206,7 @@ const ResultsScreen = ({
                         className="w-full"
                     >
                         <span
-                            className="font-bold"
+                            className="font-bold text-sm md:text-base"
                             style={{ fontFamily: "'Cairo', sans-serif" }}
                         >
                             القائمة الرئيسية

@@ -20,11 +20,11 @@ const AnswerButtons = forwardRef(({
         const isFlying = flyingButtonIndex === index;
 
         const baseClasses = `
-      relative py-5 px-3 rounded-2xl font-black text-lg tracking-wide 
-      transition-all duration-150 border-b-[6px]
-      active:border-b-0 active:translate-y-[4px]
-      hover:scale-[1.02] hover:-translate-y-[2px]
-      shadow-xl
+      relative py-3 md:py-5 px-2 md:px-3 rounded-xl md:rounded-2xl font-black text-base md:text-lg tracking-wide 
+      transition-all duration-150 border-b-[4px] md:border-b-[6px]
+      active:border-b-0 active:translate-y-[2px] md:active:translate-y-[4px]
+      hover:scale-[1.02] hover:-translate-y-[1px] md:hover:-translate-y-[2px]
+      shadow-lg md:shadow-xl
     `;
 
         if (isFlying) {
@@ -43,7 +43,7 @@ const AnswerButtons = forwardRef(({
 
     return (
         <div
-            className="grid grid-cols-2 gap-3 max-w-md mx-auto px-4 pb-8"
+            className="grid grid-cols-2 gap-2 md:gap-3 px-2 md:px-4 pb-4 md:pb-8"
             ref={ref}
         >
             {options.map((option, index) => {

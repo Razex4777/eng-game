@@ -39,12 +39,12 @@ const QuestionCard = forwardRef(({
             ref={ref}
             className={`
         absolute left-1/2 -translate-x-1/2 
-        w-[90%] max-w-sm 
-        p-6 rounded-3xl text-center 
+        w-[92%] md:w-[90%] max-w-md 
+        p-4 md:p-6 rounded-2xl md:rounded-3xl text-center 
         transition-transform 
         ${shaking ? 'animate-shake' : ''} 
         ${getCardBackground()}
-        border-b-[8px] border-x-2 border-t-2
+        border-b-[6px] md:border-b-[8px] border-x-2 border-t-2
       `}
             style={{
                 top: typeof position === 'number' ? `${position}px` : position,
@@ -53,21 +53,21 @@ const QuestionCard = forwardRef(({
             }}
         >
             {/* Badges */}
-            <div className="absolute -top-4 left-0 right-0 flex justify-center gap-2">
+            <div className="absolute -top-3 md:-top-4 left-0 right-0 flex justify-center gap-1 md:gap-2">
                 {isGolden && (
-                    <span className="bg-yellow-100 text-yellow-800 text-xs font-black px-3 py-1 rounded-full shadow-sm border border-yellow-300 animate-pulse">
+                    <span className="bg-yellow-100 text-yellow-800 text-[10px] md:text-xs font-black px-2 md:px-3 py-0.5 md:py-1 rounded-full shadow-sm border border-yellow-300 animate-pulse">
                         ⭐ GOLDEN
                     </span>
                 )}
                 {frozen && (
-                    <span className="bg-cyan-100 text-cyan-800 text-xs font-black px-3 py-1 rounded-full shadow-sm border border-cyan-300 animate-pulse">
+                    <span className="bg-cyan-100 text-cyan-800 text-[10px] md:text-xs font-black px-2 md:px-3 py-0.5 md:py-1 rounded-full shadow-sm border border-cyan-300 animate-pulse">
                         ❄️ FROZEN
                     </span>
                 )}
             </div>
 
             {/* Question Text */}
-            <p className={`text-xl font-black leading-snug ${getTextColor()}`}>
+            <p className={`text-lg md:text-xl font-black leading-relaxed ${getTextColor()} break-words`}>
                 {question.text || question.q}
             </p>
 

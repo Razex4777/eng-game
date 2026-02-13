@@ -22,31 +22,31 @@ const GameHUD = ({
     return (
         <>
             {/* HEADER (HUD) */}
-            <div className="flex items-center justify-between px-4 pt-4 pb-2 relative z-50 h-24">
+            <div className="flex items-center justify-between px-2 md:px-4 pt-3 md:pt-4 pb-1 md:pb-2 relative z-50 h-20 md:h-24">
 
                 {/* Left: Pause & Fullscreen Buttons */}
-                <div className="flex gap-2 shrink-0">
+                <div className="flex gap-1 md:gap-2 shrink-0">
                     <TactileButton
                         onClick={onPause}
-                        className="w-12 h-12 rounded-xl shadow-md flex items-center justify-center border-b-4 active:border-b-0 active:translate-y-1 transition-all"
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl shadow-md flex items-center justify-center border-b-4 active:border-b-0 active:translate-y-1 transition-all"
                         variant="primary"
                         colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
                         borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                     >
-                        <Pause className={`w-6 h-6 fill-current ${isDark ? 'text-slate-200' : 'text-slate-700'}`} />
+                        <Pause className={`w-5 h-5 md:w-6 md:h-6 fill-current ${isDark ? 'text-slate-200' : 'text-slate-700'}`} />
                     </TactileButton>
                     {/* Fullscreen Button - show in non-minimal mode */}
                     {!minimal && onToggleFullScreen && (
                         <TactileButton
                             onClick={onToggleFullScreen}
-                            className="w-12 h-12 rounded-xl shadow-md flex items-center justify-center border-b-4 active:border-b-0 active:translate-y-1 transition-all"
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl shadow-md flex items-center justify-center border-b-4 active:border-b-0 active:translate-y-1 transition-all"
                             variant="primary"
                             colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
                             borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                         >
                             {isFullscreen ? 
-                                <Minimize className={`w-6 h-6 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} /> : 
-                                <Maximize className={`w-6 h-6 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} />
+                                <Minimize className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} /> : 
+                                <Maximize className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} />
                             }
                         </TactileButton>
                     )}
@@ -55,7 +55,7 @@ const GameHUD = ({
                 {/* Center: THE BOSS PROGRESS BAR (FLEXIBLE) */}
                 {/* Only show progress if showProgress is true and progress is passed */}
                 {showProgress && progress !== null && progress !== undefined && (
-                    <div className="flex-1 mx-3 h-6 relative">
+                    <div className="flex-1 mx-2 md:mx-3 h-5 md:h-6 relative">
                         {/* Background adjusted to be softer/more harmonious */}
                         <div className={`w-full h-full border-2 border-slate-400/50 rounded-full relative overflow-hidden shadow-inner ${isDark ? 'bg-slate-700/50' : 'bg-slate-300/50'}`}>
                             {/* Fill */}
@@ -80,15 +80,15 @@ const GameHUD = ({
 
                 {/* Right: Score + Lives - hide when in minimal mode (inside card) */}
                 {!minimal && (
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                        <div className={`flex items-center gap-2 px-3 py-1 rounded-xl border-2 ${isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-200'} shadow-sm`}>
-                            <span className="text-yellow-500 text-xs font-black">XP</span>
-                            <span className={`text-xl font-black ${text}`}>{(score ?? 0).toLocaleString()}</span>
+                    <div className="flex flex-col items-end gap-0.5 md:gap-1 shrink-0">
+                        <div className={`flex items-center gap-1 md:gap-2 px-2 md:px-3 py-0.5 md:py-1 rounded-lg md:rounded-xl border-2 ${isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-200'} shadow-sm`}>
+                            <span className="text-yellow-500 text-[10px] md:text-xs font-black">XP</span>
+                            <span className={`text-lg md:text-xl font-black ${text}`}>{(score ?? 0).toLocaleString()}</span>
                         </div>
                         {/* Lives */}
-                        <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border-2 ${isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-200'} shadow-sm`}>
-                            <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
-                            <span className={`text-lg font-black ${text}`}>{lives}</span>
+                        <div className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-0.5 md:py-1 rounded-lg md:rounded-xl border-2 ${isDark ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-200'} shadow-sm`}>
+                            <Heart className="w-4 h-4 md:w-5 md:h-5 text-rose-500 fill-rose-500" />
+                            <span className={`text-base md:text-lg font-black ${text}`}>{lives}</span>
                         </div>
                     </div>
                 )}
@@ -97,19 +97,19 @@ const GameHUD = ({
 
             {/* POWERUPS - positioned above answer buttons - hide in minimal mode */}
             {!minimal && onFreeze && onBomb && powerups && (
-                <div className="absolute bottom-56 left-1/2 -translate-x-1/2 flex gap-4 z-50">
+                <div className="absolute bottom-36 md:bottom-56 left-1/2 -translate-x-1/2 flex gap-3 md:gap-4 z-50">
                     {/* Freeze Button */}
                     <TactileButton
                         onClick={onFreeze}
                         disabled={powerups.freeze <= 0 || frozen}
-                        className="relative w-16 h-16 rounded-2xl flex items-center justify-center gap-0 powerup-btn"
+                        className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center gap-0 powerup-btn"
                         variant="primary"
                         colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
                         borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                         activeScale={false}
                     >
-                        <span className="text-2xl filter drop-shadow-sm animate-powerup">❄️</span>
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full text-white text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-800">
+                        <span className="text-xl md:text-2xl filter drop-shadow-sm animate-powerup">❄️</span>
+                        <div className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 bg-blue-500 rounded-full text-white text-[10px] md:text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-800">
                             {powerups.freeze}
                         </div>
                     </TactileButton>
@@ -118,14 +118,14 @@ const GameHUD = ({
                     <TactileButton
                         onClick={onBomb}
                         disabled={powerups.bomb <= 0}
-                        className="relative w-16 h-16 rounded-2xl flex items-center justify-center gap-0 powerup-btn"
+                        className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center gap-0 powerup-btn"
                         variant="primary"
                         colorClass={isDark ? 'bg-slate-800' : 'bg-white'}
                         borderClass={isDark ? 'border-slate-700' : 'border-slate-200'}
                         activeScale={false}
                     >
-                        <span className="text-2xl filter drop-shadow-sm animate-powerup">💣</span>
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-white text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-800">
+                        <span className="text-xl md:text-2xl filter drop-shadow-sm animate-powerup">💣</span>
+                        <div className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 bg-red-500 rounded-full text-white text-[10px] md:text-xs font-black flex items-center justify-center border-2 border-white dark:border-slate-800">
                             {powerups.bomb}
                         </div>
                     </TactileButton>

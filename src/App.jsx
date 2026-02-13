@@ -543,7 +543,7 @@ function App() {
                     {showLoginModal && (
                         <button
                             onClick={() => setShowLoginModal(false)}
-                            className="absolute top-4 right-4 text-3xl text-slate-400 hover:text-slate-600"
+                            className="absolute top-4 right-4 z-[110] w-10 h-10 flex items-center justify-center text-2xl text-slate-400 hover:text-slate-600 bg-white/80 dark:bg-slate-800/80 rounded-full"
                         >
                             ✕
                         </button>

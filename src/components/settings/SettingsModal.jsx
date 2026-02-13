@@ -245,7 +245,7 @@ const SettingsModal = ({
                 </div>
 
                 {/* Form Content */}
-                <div className="p-6 pt-2 max-h-[60vh] overflow-y-auto">
+                <div className="p-4 md:p-6 pt-2 max-h-[65vh] md:max-h-[60vh] overflow-y-auto">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
                             <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
@@ -254,35 +254,35 @@ const SettingsModal = ({
                         <div className="space-y-4">
                             {/* Full Name */}
                             <div>
-                                <label className={`block text-sm font-bold mb-2 ${textColor}`}>
+                                <label className={`block text-xs md:text-sm font-bold mb-1 md:mb-2 ${textColor}`}>
                                     الاسم الكامل
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.full_name}
                                     onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                                    className={`w-full px-4 py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all`}
+                                    className={`w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm md:text-base`}
                                     placeholder="أدخل اسمك"
                                 />
                             </div>
 
                             {/* Age & Gender Row */}
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2 md:gap-3">
                                 {/* Age Dropdown */}
                                 <div className="relative">
-                                    <label className={`block text-sm font-bold mb-2 ${textColor}`}>
+                                    <label className={`block text-xs md:text-sm font-bold mb-1 md:mb-2 ${textColor}`}>
                                         العمر
                                     </label>
                                     <button
                                         type="button"
                                         onClick={() => setActiveDropdown(activeDropdown === 'age' ? null : 'age')}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold flex items-center justify-between`}
+                                        className={`w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold flex items-center justify-between`}
                                     >
-                                        <span>{formData.age || 'اختر'}</span>
+                                        <span className="text-sm md:text-base">{formData.age || 'اختر'}</span>
                                         <ChevronDown className="w-4 h-4" />
                                     </button>
                                     {activeDropdown === 'age' && (
-                                        <div className={`absolute top-full left-0 right-0 mt-1 ${dropdownBg} border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 max-h-40 overflow-y-auto`}>
+                                        <div className={`absolute top-full left-0 right-0 mt-1 ${dropdownBg} border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 max-h-48 md:max-h-40 overflow-y-auto`}>
                                             {AGE_OPTIONS.map(age => (
                                                 <button
                                                     key={age}
@@ -302,15 +302,15 @@ const SettingsModal = ({
 
                                 {/* Gender Dropdown */}
                                 <div className="relative">
-                                    <label className={`block text-sm font-bold mb-2 ${textColor}`}>
+                                    <label className={`block text-xs md:text-sm font-bold mb-1 md:mb-2 ${textColor}`}>
                                         الجنس
                                     </label>
                                     <button
                                         type="button"
                                         onClick={() => setActiveDropdown(activeDropdown === 'gender' ? null : 'gender')}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold flex items-center justify-between`}
+                                        className={`w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold flex items-center justify-between`}
                                     >
-                                        <span>{formData.gender === 'male' ? 'ذكر' : formData.gender === 'female' ? 'أنثى' : 'اختر'}</span>
+                                        <span className="text-sm md:text-base">{formData.gender === 'male' ? 'ذكر' : formData.gender === 'female' ? 'أنثى' : 'اختر'}</span>
                                         <ChevronDown className="w-4 h-4" />
                                     </button>
                                     {activeDropdown === 'gender' && (
@@ -335,19 +335,19 @@ const SettingsModal = ({
 
                             {/* Region Dropdown */}
                             <div className="relative">
-                                <label className={`block text-sm font-bold mb-2 ${textColor}`}>
+                                <label className={`block text-xs md:text-sm font-bold mb-1 md:mb-2 ${textColor}`}>
                                     المحافظة
                                 </label>
                                 <button
                                     type="button"
                                     onClick={() => setActiveDropdown(activeDropdown === 'region' ? null : 'region')}
-                                    className={`w-full px-4 py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold flex items-center justify-between`}
+                                    className={`w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl border-2 ${inputBg} ${textColor} font-bold flex items-center justify-between`}
                                 >
-                                    <span>{formData.region || 'اختر المحافظة'}</span>
+                                    <span className="text-sm md:text-base">{formData.region || 'اختر المحافظة'}</span>
                                     <ChevronDown className="w-4 h-4" />
                                 </button>
                                 {activeDropdown === 'region' && (
-                                    <div className={`absolute top-full left-0 right-0 mt-1 ${dropdownBg} border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 max-h-40 overflow-y-auto`}>
+                                    <div className={`absolute top-full left-0 right-0 mt-1 ${dropdownBg} border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 max-h-48 md:max-h-40 overflow-y-auto`}>
                                         {GOVERNORATES.map(gov => (
                                             <button
                                                 key={gov}
@@ -367,29 +367,29 @@ const SettingsModal = ({
 
                             {/* Subject Selection */}
                             <div>
-                                <label className={`block text-sm font-bold mb-3 ${textColor}`}>
+                                <label className={`block text-xs md:text-sm font-bold mb-2 md:mb-3 ${textColor}`}>
                                     المادة المفضلة
                                 </label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-2 md:gap-3">
                                     {/* English */}
                                     <button
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, preferred_subject: 'english' }))}
-                                        className={`relative p-4 rounded-2xl border-3 transition-all ${formData.preferred_subject === 'english'
+                                        className={`relative p-3 md:p-4 rounded-xl md:rounded-2xl border-2 md:border-3 transition-all ${formData.preferred_subject === 'english'
                                             ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                                             : `border-slate-200 dark:border-slate-700 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`
                                             }`}
                                     >
                                         {formData.preferred_subject === 'english' && (
-                                            <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                                                <Check className="w-3 h-3 text-white" />
+                                            <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 w-4 md:w-5 h-4 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                <Check className="w-2.5 md:w-3 h-2.5 md:h-3 text-white" />
                                             </div>
                                         )}
-                                        <BookOpen className={`w-8 h-8 mx-auto mb-2 ${formData.preferred_subject === 'english' ? 'text-emerald-600' : 'text-slate-400'}`} />
-                                        <span className={`block font-black text-sm ${formData.preferred_subject === 'english' ? 'text-emerald-600' : textColor}`}>
+                                        <BookOpen className={`w-6 md:w-8 mx-auto mb-1 md:mb-2 ${formData.preferred_subject === 'english' ? 'text-emerald-600' : 'text-slate-400'}`} />
+                                        <span className={`block font-black text-xs md:text-sm ${formData.preferred_subject === 'english' ? 'text-emerald-600' : textColor}`}>
                                             English
                                         </span>
-                                        <span className={`block text-xs ${formData.preferred_subject === 'english' ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                        <span className={`block text-[10px] md:text-xs ${formData.preferred_subject === 'english' ? 'text-emerald-500' : 'text-slate-400'}`}>
                                             الانگليزي
                                         </span>
                                     </button>
@@ -398,14 +398,14 @@ const SettingsModal = ({
                                     <button
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, preferred_subject: 'biology' }))}
-                                        className={`relative p-4 rounded-2xl border-3 transition-all ${formData.preferred_subject === 'biology'
+                                        className={`relative p-3 md:p-4 rounded-xl md:rounded-2xl border-2 md:border-3 transition-all ${formData.preferred_subject === 'biology'
                                             ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                                             : `border-slate-200 dark:border-slate-700 ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`
                                             }`}
                                     >
                                         {formData.preferred_subject === 'biology' && (
-                                            <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
-                                                <Check className="w-3 h-3 text-white" />
+                                            <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 w-4 md:w-5 h-4 md:h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                                                <Check className="w-2.5 md:w-3 h-2.5 md:h-3 text-white" />
                                             </div>
                                         )}
                                         <Dna className={`w-8 h-8 mx-auto mb-2 ${formData.preferred_subject === 'biology' ? 'text-purple-600' : 'text-slate-400'}`} />

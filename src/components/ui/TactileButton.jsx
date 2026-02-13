@@ -49,6 +49,7 @@ export const TactileButton = ({
             type={type}
             disabled={disabled}
             onClick={(e) => { if (!disabled) { triggerHaptic(); if (onClick) onClick(e); } }}
+            onTouchEnd={(e) => { if (!disabled) { e.preventDefault(); triggerHaptic(); if (onClick) onClick(e); } }}
             style={style}
             className={`
         relative group transition-all duration-150 ease-out
@@ -62,6 +63,7 @@ export const TactileButton = ({
         ${finalShadow}
         ${sizeClasses}
         shadow-sm
+        touch-manipulation
       `}
         >
             {children}

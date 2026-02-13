@@ -141,15 +141,17 @@ const LoginView = ({ isDarkMode, onLoginSuccess, onGoogleSignIn, onGuestLogin, i
                                 <span className="font-bold text-slate-700">دخول سريع عبر Google</span>
                             </TactileButton>
 
-                            <TactileButton
-                                onClick={onGuestLogin}
-                                className="w-full p-4 rounded-2xl flex items-center justify-center gap-3"
-                                colorClass={isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}
-                                borderClass={isDarkMode ? 'border-slate-600' : 'border-slate-300'}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    console.log('[LoginView] Guest button clicked');
+                                    if (onGuestLogin) onGuestLogin();
+                                }}
+                                className="w-full p-4 rounded-2xl flex items-center justify-center gap-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 active:scale-[0.98] transition-transform"
                             >
                                 <UserX className={`w-5 h-5 ${isDarkMode ? 'text-slate-300' : 'text-slate-500'}`} />
                                 <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>التسجيل كضيف</span>
-                            </TactileButton>
+                            </button>
                         </div>
 
                         {/* استرجاع أزرار المجتمع والدعم */}

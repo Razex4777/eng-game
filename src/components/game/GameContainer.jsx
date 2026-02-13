@@ -201,20 +201,20 @@ const GameContainer = ({
         >
             <SoftBackground isDarkMode={isDark} />
 
-            {/* Game Card Wrapper - Using inset-4 for consistent padding */}
-            <div className={`absolute inset-4 rounded-3xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
+            {/* Game Card Wrapper - Using inset-2 md:inset-4 for consistent padding */}
+            <div className={`absolute inset-2 md:inset-4 rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200'}`}>
                 
                 {/* Top Bar: Pause (left), Fullscreen (center-left), Hearts+Score (right) - Only in monster mode */}
                 {isMonsterMode && (
-                <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-4 z-20">
+                <div className="absolute top-0 left-0 right-0 h-14 md:h-16 flex items-center justify-between px-2 md:px-4 z-20">
                     {/* Left side: Pause + Fullscreen buttons */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 md:gap-2">
                         {/* Pause Button - Only visible in monster mode */}
                         <button
                             onClick={pauseGame}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                            className={`w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
                         >
-                            <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-4 h-4 md:w-5 md:h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="currentColor" viewBox="0 0 24 24">
                                 <rect x="6" y="4" width="4" height="16" rx="1" />
                                 <rect x="14" y="4" width="4" height="16" rx="1" />
                             </svg>
@@ -229,34 +229,34 @@ const GameContainer = ({
                                     document.documentElement.requestFullscreen();
                                 }
                             }}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                            className={`w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-all active:scale-95 ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
                         >
                             {isFullscreen ? 
-                                <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>
+                                <svg className={`w-4 h-4 md:w-5 md:h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>
                                 : 
-                                <svg className={`w-5 h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                                <svg className={`w-4 h-4 md:w-5 md:h-5 ${isDark ? 'text-slate-200' : 'text-slate-700'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                             }
                         </button>
                     </div>
 
                     {/* Hearts + Score - Top Right inside card */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         {/* Lives */}
-                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
-                            <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
-                            <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{lives}</span>
+                        <div className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
+                            <Heart className="w-4 h-4 md:w-5 md:h-5 text-rose-500 fill-rose-500" />
+                            <span className={`text-base md:text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{lives}</span>
                         </div>
                         {/* Score */}
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
-                            <span className="text-yellow-500 text-xs font-black">XP</span>
-                            <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{(score ?? 0).toLocaleString()}</span>
+                        <div className={`flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl border-2 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
+                            <span className="text-[10px] md:text-xs text-yellow-500 font-black">XP</span>
+                            <span className={`text-base md:text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{(score ?? 0).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
                 )}
 
                 {/* Falling Question Area */}
-                <div className="relative h-full w-full pointer-events-none pt-16 pb-40">
+                <div className="relative h-full w-full pointer-events-none pt-14 md:pt-16 pb-32 md:pb-40">
                     {currentQuestion && (
                         <QuestionCard
                             ref={questionRef}
@@ -272,7 +272,7 @@ const GameContainer = ({
                 </div>
 
                 {/* Answer Controls - Inside card at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 z-50 pb-4">
+                <div className="absolute bottom-0 left-0 right-0 z-50 pb-2 md:pb-4">
                     {currentQuestion && (
                         <AnswerButtons
                             options={currentQuestion.options}
@@ -329,9 +329,9 @@ const GameContainer = ({
 
             {/* Combo Indicator - Bottom Right */}
             {combo > 0 && (
-                <div className="fixed bottom-32 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full shadow-xl border-2 border-white dark:border-slate-800 animate-pulse">
-                    <span className="text-3xl">🔥</span>
-                    <span className="text-2xl font-black text-white">{combo}</span>
+                <div className="fixed bottom-28 md:bottom-32 right-4 md:right-6 z-50 flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full shadow-xl border-2 border-white dark:border-slate-800 animate-pulse">
+                    <span className="text-2xl md:text-3xl">🔥</span>
+                    <span className="text-xl md:text-2xl font-black text-white">{combo}</span>
                 </div>
             )}
 
